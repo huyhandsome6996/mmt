@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp Học Mạng Máy Tính - Thầy Giáo AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #f5f5f4; color: #292524; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .nav-active { background-color: #e7e5e4; color: #0369a1; font-weight: bold; border-left: 4px solid #0369a1; }
+        .hidden-section { display: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .device-box { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 2rem; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 10; }
+        .packet { width: 15px; height: 15px; background-color: #ef4444; border-radius: 50%; position: absolute; display: none; z-index: 5;}
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Deep Blue and Emerald Green accents -->
+    <!-- Application Structure Plan: The SPA uses a "Classroom Dashboard" architecture. It is divided into a sidebar for navigation (representing lesson topics) and a main content area for interactive learning. This structure is chosen because it allows the user to break down complex networking concepts into digestible chunks, progressing linearly or jumping to specific questions. Each section uses analogies (6th-grade level) combined with technical breakdowns (University level) and interactive tools (Calculators/Simulators) to ensure deep comprehension. -->
+    <!-- Visualization & Content Choices: 
+         1. Network Devices -> Goal: Inform & Compare -> Viz: Interactive HTML/CSS simulation of Hub/Switch packet flow + Chart.js for bandwidth efficiency -> Justification: Visualizing data paths makes abstract concepts concrete. Chart.js shows the "cost" of Hub broadcasts vs Switch directed traffic.
+         2. MAC vs IP -> Goal: Inform -> Viz: Text analogies + Interactive mock "Command Prompt" -> Justification: Best way to teach CLI commands is to simulate them safely.
+         3. IP Calculation -> Goal: Analyze & Change -> Viz: Interactive Subnet Calculator -> Justification: IP math is complex; a step-by-step calculator demystifies the bitwise operations and base-2 math required by the syllabus. 
+         Library: Chart.js for data visualization, Vanilla JS for interactivity and IP math. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="w-full md:w-64 bg-white shadow-lg z-20 md:fixed md:h-screen overflow-y-auto">
+        <div class="p-6 border-b border-stone-200">
+            <div class="text-4xl mb-2">👨‍🏫</div>
+            <h1 class="text-2xl font-bold text-sky-800">Lớp Học Mạng</h1>
+            <p class="text-sm text-stone-500 mt-1">Giảng viên: Chuyên gia AI</p>
+        </div>
+        <ul class="py-4" id="nav-menu">
+            <li><button data-target="intro" class="w-full text-left px-6 py-3 nav-active transition-colors">👋 Lời Mở Đầu</button></li>
+            <li><button data-target="devices" class="w-full text-left px-6 py-3 hover:bg-stone-100 transition-colors">1. Hub, Switch & Router</button></li>
+            <li><button data-target="mac-ip" class="w-full text-left px-6 py-3 hover:bg-stone-100 transition-colors">2. Địa chỉ MAC và IP</button></li>
+            <li><button data-target="ip-calc" class="w-full text-left px-6 py-3 hover:bg-stone-100 transition-colors">3 & 4. Tính toán Subnet</button></li>
+        </ul>
+    </nav>
+
+    <main class="flex-1 md:ml-64 p-6 md:p-12 overflow-x-hidden">
+        
+        <section id="intro" class="content-section fade-in max-w-4xl mx-auto">
+            <p class="text-sky-600 font-bold mb-2 uppercase tracking-wide">Chào mừng em đến lớp!</p>
+            <h2 class="text-3xl md:text-5xl font-extrabold mb-6 text-stone-800">Học Mạng Máy Tính: Dễ Như Ăn Kẹo 🍬</h2>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 text-lg leading-relaxed space-y-4">
+                <p>Chào em! Thầy đây. Hôm nay chúng ta sẽ cùng nhau "phá đảo" 4 câu hỏi bài tập mạng máy tính nhé.</p>
+                <p>Thầy biết những khái niệm như <strong>IP, Subnet Mask, MAC, Router</strong> nghe rất khô khan. Vì vậy, thầy sẽ đóng hai vai: Một chuyên gia đại học để đưa cho em những công thức chuẩn xác nhất, và một người anh dạy cho cậu em học lớp 6 bằng những ví dụ thực tế, gần gũi nhất ở đời thường.</p>
+                <p>Em hãy bấm vào các menu bên trái để bắt đầu từng phần nhé. Chỗ nào có nút bấm, hãy cứ mạnh dạn click vào để xem phép thuật xảy ra!</p>
+                <button onclick="document.querySelector('[data-target=\'devices\']').click()" class="mt-4 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl transition-transform transform hover:scale-105">
+                    Vào Bài 1 Thôi! 🚀
+                </button>
+            </div>
+        </section>
+
+        <section id="devices" class="content-section hidden-section fade-in max-w-5xl mx-auto">
+            <p class="text-sky-600 font-bold mb-2 uppercase tracking-wide">Chủ đề 1</p>
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-6">Phân biệt Hub, Switch và Router</h2>
+            <p class="text-lg mb-8">Ba thiết bị này trông bề ngoài rất giống nhau (đều là cái hộp có nhiều lỗ cắm dây mạng), nhưng bên trong chúng "suy nghĩ" hoàn toàn khác biệt. Cùng thầy phân tích nhé!</p>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-stone-400">
+                    <div class="text-4xl mb-4 text-center">📢</div>
+                    <h3 class="text-2xl font-bold mb-2 text-center text-stone-700">Hub</h3>
+                    <p class="italic text-stone-500 mb-4 text-center">"Anh chàng ngốc nghếch ồn ào"</p>
+                    <ul class="space-y-2 text-stone-700 list-disc pl-5">
+                        <li><strong>Kiểu lớp 6:</strong> Tưởng tượng lớp có 30 bạn. A muốn mượn tẩy của B. Thay vì đi tới chỗ B, A đứng lên bàn hét lớn: "AI LÀ B, CHO MƯỢN CỤC TẨY!". Cả 29 bạn đều nghe thấy, ai không phải B thì lờ đi. Rất ồn ào!</li>
+                        <li><strong>Đại học:</strong> Hub hoạt động ở Lớp 1 (Physical) của mô hình OSI. Nó nhận tín hiệu điện từ 1 cổng và khuếch đại (broadcast) ra <strong>tất cả</strong> các cổng còn lại. Gây lãng phí băng thông và dễ đụng độ dữ liệu (Collision).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-emerald-500">
+                    <div class="text-4xl mb-4 text-center">📬</div>
+                    <h3 class="text-2xl font-bold mb-2 text-center text-emerald-700">Switch</h3>
+                    <p class="italic text-stone-500 mb-4 text-center">"Lớp trưởng thông minh"</p>
+                    <ul class="space-y-2 text-stone-700 list-disc pl-5">
+                        <li><strong>Kiểu lớp 6:</strong> Giống bạn Lớp trưởng có "Sơ đồ lớp học". A viết giấy nhắn đưa Lớp trưởng. Lớp trưởng nhìn tên, đi thẳng xuống bàn B đưa giấy. Lớp học hoàn toàn yên tĩnh!</li>
+                        <li><strong>Đại học:</strong> Hoạt động ở Lớp 2 (Data Link). Switch có bảng MAC Table để nhớ cổng nào cắm máy tính nào. Dữ liệu chỉ được gửi chính xác đến cổng đích (Unicast). Hiệu suất cao, an toàn.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-sky-500">
+                    <div class="text-4xl mb-4 text-center">🛂</div>
+                    <h3 class="text-2xl font-bold mb-2 text-center text-sky-700">Router</h3>
+                    <p class="italic text-stone-500 mb-4 text-center">"Bác bảo vệ cổng trường"</p>
+                    <ul class="space-y-2 text-stone-700 list-disc pl-5">
+                        <li><strong>Kiểu lớp 6:</strong> Lớp trưởng (Switch) chỉ biết học sinh trong lớp mình. Nếu A muốn gửi thư cho bạn C ở <strong>trường khác</strong>, phải đưa ra cổng trường cho Bác bảo vệ (Router). Bác biết đường xe buýt để gửi sang trường kia.</li>
+                        <li><strong>Đại học:</strong> Hoạt động ở Lớp 3 (Network). Dùng địa chỉ IP để định tuyến (Routing). Chức năng chính là kết nối các mạng LAN <strong>khác lớp mạng</strong> lại với nhau (ví dụ: nối mạng ở nhà em ra Internet).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-sm mb-8">
+                <h3 class="text-xl font-bold mb-4">Biểu đồ: Lượng dữ liệu dư thừa trên mạng (Ví dụ mô phỏng 5 máy tính)</h3>
+                <p class="mb-4 text-stone-600">Khi máy 1 gửi tin cho máy 5, Hub sẽ gửi rác sang máy 2,3,4. Switch gửi thẳng. Cùng xem độ lãng phí:</p>
+                <div class="chart-container">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="mac-ip" class="content-section hidden-section fade-in max-w-4xl mx-auto">
+            <p class="text-sky-600 font-bold mb-2 uppercase tracking-wide">Chủ đề 2</p>
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-6">Địa chỉ MAC và Địa chỉ IP</h2>
+            <p class="text-lg mb-8 text-stone-700">Mọi thiết bị muốn vào mạng đều cần 2 loại địa chỉ này. Hãy xem sự khác biệt sống còn của chúng.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white p-6 rounded-xl border border-stone-200">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="text-3xl">🪪</span>
+                        <h3 class="text-2xl font-bold text-stone-800">Địa chỉ MAC</h3>
+                    </div>
+                    <p class="text-stone-600 font-bold mb-2">(Media Access Control)</p>
+                    <p class="mb-4 leading-relaxed"><strong>Kiểu lớp 6:</strong> Giống như <strong>Số CMND / Số khung xe máy</strong> của em. Bố mẹ đẻ ra đi làm giấy khai sinh là có, và nó đi theo em suốt đời, không bao giờ thay đổi dù em đi Mỹ hay đi Nhật.</p>
+                    <p class="leading-relaxed"><strong>Đại học:</strong> Là địa chỉ vật lý, gồm 48 bit (vd: <code>00:1B:44:11:3A:B7</code>). Nó được nhà sản xuất ghi cứng (burn) vào Card mạng (NIC). Switch dùng MAC để chuyển dữ liệu trong mạng nội bộ (LAN).</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-stone-200">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="text-3xl">🏠</span>
+                        <h3 class="text-2xl font-bold text-sky-800">Địa chỉ IP</h3>
+                    </div>
+                    <p class="text-stone-600 font-bold mb-2">(Internet Protocol)</p>
+                    <p class="mb-4 leading-relaxed"><strong>Kiểu lớp 6:</strong> Giống như <strong>Địa chỉ nhà trọ / Biển số xe theo tỉnh</strong>. Hôm nay em trọ ở Hà Nội thì địa chỉ khác, mai em chuyển vào Quy Nhơn thì địa chỉ khác. Nó thay đổi theo mạng mà em đang cắm dây vào.</p>
+                    <p class="leading-relaxed"><strong>Đại học:</strong> Là địa chỉ logic. IPv4 gồm 32 bit (vd: <code>192.168.1.5</code>). Nó do bộ định tuyến (Router/DHCP) cấp phát. Router dùng IP để tìm đường đi cho dữ liệu trên diện rộng (Internet).</p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-4">Thực hành: Cách kiểm tra IP và MAC trên máy tính</h3>
+            <p class="mb-4">Em đang dùng Windows đúng không? Thầy tạo sẵn một màn hình mô phỏng bên dưới. Hãy bấm nút <strong>"Chạy Lệnh"</strong> để xem cách làm thực tế nhé!</p>
+            
+            <div class="bg-black rounded-lg p-4 font-mono text-green-400 text-sm md:text-base shadow-xl overflow-hidden relative">
+                <div class="flex gap-2 mb-4 border-b border-stone-800 pb-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="text-stone-400 text-xs ml-2">C:\Windows\System32\cmd.exe</span>
+                </div>
+                <div id="cmd-screen" class="min-h-[200px]">
+                    <p class="text-stone-300">Microsoft Windows [Version 10.0.19045]</p>
+                    <p class="text-stone-300 mb-4">(c) Microsoft Corporation. All rights reserved.</p>
+                    <div class="flex items-center">
+                        <span class="mr-2">C:\Users\SinhVien></span>
+                        <span id="cmd-input" class="typing-text"></span><span class="animate-pulse bg-green-400 w-2 h-5 inline-block ml-1 align-middle"></span>
+                    </div>
+                    <div id="cmd-output" class="hidden mt-4 space-y-1">
+                        <p>Windows IP Configuration</p>
+                        <br>
+                        <p>Ethernet adapter Ethernet:</p>
+                        <br>
+                        <p>&nbsp;&nbsp;&nbsp;Connection-specific DNS Suffix  . : localdomain</p>
+                        <p>&nbsp;&nbsp;&nbsp;Description . . . . . . . . . . . : Realtek PCIe GbE Family Controller</p>
+                        <p class="text-yellow-300 font-bold">&nbsp;&nbsp;&nbsp;Physical Address. . . . . . . . . : 04-D4-C4-1A-2B-3C  <-- ĐÂY LÀ ĐỊA CHỈ MAC</p>
+                        <p>&nbsp;&nbsp;&nbsp;DHCP Enabled. . . . . . . . . . . : Yes</p>
+                        <p class="text-sky-300 font-bold">&nbsp;&nbsp;&nbsp;IPv4 Address. . . . . . . . . . . : 192.168.1.15(Preferred) <-- ĐÂY LÀ ĐỊA CHỈ IP</p>
+                        <p>&nbsp;&nbsp;&nbsp;Subnet Mask . . . . . . . . . . . : 255.255.255.0</p>
+                        <p>&nbsp;&nbsp;&nbsp;Default Gateway . . . . . . . . . : 192.168.1.1</p>
+                    </div>
+                </div>
+            </div>
+            <button id="run-cmd-btn" class="mt-4 bg-stone-800 hover:bg-stone-900 text-white px-6 py-2 rounded font-mono">C:\> Chạy lệnh ipconfig /all</button>
+            <p class="mt-4 text-stone-600 italic">Hướng dẫn thật: Trên máy của em, nhấn phím <strong>Windows + R</strong>, gõ <strong>cmd</strong> rồi Enter. Sau đó gõ <strong>ipconfig /all</strong> rồi Enter sẽ thấy thông tin như trên.</p>
+        </section>
+
+        <section id="ip-calc" class="content-section hidden-section fade-in max-w-5xl mx-auto">
+            <p class="text-sky-600 font-bold mb-2 uppercase tracking-wide">Chủ đề 3 & 4</p>
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-6">Máy Tính Subnet Thông Minh</h2>
+            <p class="text-lg mb-4">Để tính số IP khả dụng và địa chỉ Subnet, bản chất là chơi trò chơi cắt bánh với 32 bit nhị phân. Máy tính này sẽ giải quyết 2 ví dụ của em: <code>184.67.0.0/16</code> và <code>187.34.67.10/20</code>. Hãy thử bấm vào các ví dụ!</p>
+
+            <div class="flex flex-wrap gap-4 mb-8">
+                <button onclick="fillAndCalculate('184.67.0.0', '16')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-full font-bold transition">Ví dụ: 184.67.0.0/16</button>
+                <button onclick="fillAndCalculate('187.34.67.10', '20')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-4 py-2 rounded-full font-bold transition">Ví dụ: 187.34.67.10/20</button>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Địa chỉ IP:</label>
+                        <input type="text" id="ip-input" placeholder="Ví dụ: 192.168.1.1" class="w-full p-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono text-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Prefix (Subnet Mask):</label>
+                        <div class="flex items-center">
+                            <span class="text-2xl text-stone-500 mr-2">/</span>
+                            <input type="number" id="cidr-input" placeholder="16" min="1" max="32" class="w-full p-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono text-lg">
+                        </div>
+                    </div>
+                </div>
+                <button onclick="runCalculation()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md text-lg">Tính Toán & Giảng Giải 🧠</button>
+
+                <div id="calc-error" class="hidden mt-4 p-4 bg-red-100 text-red-700 rounded-lg font-bold">Vui lòng nhập IP và Prefix hợp lệ!</div>
+
+                <div id="calc-result" class="hidden mt-8 space-y-6">
+                    <div class="p-6 bg-stone-50 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold mb-4 text-stone-800 border-b pb-2">1. Phân tích Subnet Mask</h3>
+                        <p class="mb-2">Prefix <strong>/<span id="res-cidr"></span></strong> nghĩa là có <span id="res-cidr-bold" class="font-bold text-sky-600"></span> bit số 1 và <span id="res-host-bits" class="font-bold text-emerald-600"></span> bit số 0 trong tổng 32 bit.</p>
+                        <div class="font-mono text-sm md:text-base bg-stone-200 p-3 rounded text-stone-800 break-all mb-2" id="res-mask-bin"></div>
+                        <p>Đổi ra hệ thập phân (Subnet Mask): <strong class="text-lg text-sky-700" id="res-mask-dec"></strong></p>
+                    </div>
+
+                    <div class="p-6 bg-stone-50 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold mb-4 text-stone-800 border-b pb-2">2. Tính Địa chỉ Mạng (Network Address)</h3>
+                        <p class="mb-2"><strong>Kiểu lớp 6:</strong> Network giống như Tên con đường. IP của em là Số nhà nằm trên con đường đó. Phải biết tên đường mới biết khu vực.</p>
+                        <p class="mb-4"><strong>Đại học:</strong> Thực hiện phép toán AND (Nhân logic) giữa Địa chỉ IP dạng nhị phân và Subnet Mask dạng nhị phân.</p>
+                        <div class="font-mono text-sm bg-stone-800 p-4 rounded text-green-400 overflow-x-auto whitespace-pre">
+IP:   <span id="res-ip-bin"></span>
+Mask: <span id="res-mask-bin-2"></span>
+--------------------------------------- AND
+Net:  <span id="res-net-bin"></span>
+                        </div>
+                        <p class="mt-4 text-lg">=> Địa chỉ mạng (Net/Subnet ID): <strong class="text-xl text-emerald-600 bg-emerald-100 px-2 rounded" id="res-net-dec"></strong></p>
+                    </div>
+
+                    <div class="p-6 bg-stone-50 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold mb-4 text-stone-800 border-b pb-2">3. Tính Số IP Khả Dụng (Usable IPs)</h3>
+                        <p class="mb-2">Số bit dành cho máy (Host) là: 32 - <span id="res-cidr-2"></span> = <strong><span id="res-host-bits-2"></span> bit</strong>.</p>
+                        <p class="mb-4">Công thức số IP khả dụng: <strong>2<sup><span id="res-host-bits-3"></span></sup> - 2</strong></p>
+                        <p class="text-sm text-stone-600 italic mb-4">* Tại sao trừ 2? Vì ta phải bỏ địa chỉ đầu tiên (dùng làm Tên Mạng/Network Address) và địa chỉ cuối cùng (dùng làm Loa Phường/Broadcast Address).</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                            <div class="p-4 bg-white border border-stone-200 rounded shadow-sm">
+                                <div class="text-sm text-stone-500 uppercase">Tổng số IP</div>
+                                <div class="text-2xl font-bold" id="res-total-ips"></div>
+                            </div>
+                            <div class="p-4 bg-sky-50 border border-sky-200 rounded shadow-sm">
+                                <div class="text-sm text-sky-600 uppercase font-bold">Số IP Khả Dụng</div>
+                                <div class="text-3xl font-extrabold text-sky-700" id="res-usable-ips"></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-stone-100 rounded border border-stone-300">
+                            <p><strong>Dải IP khả dụng (Host Range):</strong></p>
+                            <p class="font-mono text-lg text-stone-700 mt-2"><span id="res-range-start"></span> &rarr; <span id="res-range-end"></span></p>
+                            <p class="mt-2 text-sm text-stone-500">Địa chỉ Broadcast (Loa phường): <span id="res-broadcast" class="font-mono font-bold"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Navigation Logic
+        const navButtons = document.querySelectorAll('#nav-menu button');
+        const sections = document.querySelectorAll('.content-section');
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                navButtons.forEach(b => {
+                    b.classList.remove('nav-active');
+                    b.classList.add('hover:bg-stone-100');
+                });
+                btn.classList.add('nav-active');
+                btn.classList.remove('hover:bg-stone-100');
+
+                const targetId = btn.getAttribute('data-target');
+                sections.forEach(sec => {
+                    sec.classList.add('hidden-section');
+                });
+                document.getElementById(targetId).classList.remove('hidden-section');
+            });
+        });
+
+        // Chart.js Logic for Devices Section
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Hub (Khuếch đại mù)', 'Switch (Gửi đích danh)', 'Router (Lọc & Định tuyến)'],
+                datasets: [{
+                    label: 'Số gói tin (Packets) sinh ra khi A gửi cho B (Mạng 5 máy)',
+                    data: [4, 1, 1],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(14, 165, 233, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(239, 68, 68)',
+                        'rgb(16, 185, 129)',
+                        'rgb(14, 165, 233)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Số gói tin lưu chuyển' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if(context.dataIndex === 0) return 'Tạo ra 4 bản sao rác';
+                                return 'Chỉ tạo 1 bản duy nhất tới đích';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // CMD Animation Logic
+        const runCmdBtn = document.getElementById('run-cmd-btn');
+        const cmdInput = document.getElementById('cmd-input');
+        const cmdOutput = document.getElementById('cmd-output');
+        const commandText = "ipconfig /all";
+        
+        runCmdBtn.addEventListener('click', () => {
+            runCmdBtn.disabled = true;
+            cmdInput.textContent = "";
+            cmdOutput.classList.add('hidden');
+            let i = 0;
+            
+            function typeWriter() {
+                if (i < commandText.length) {
+                    cmdInput.textContent += commandText.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                } else {
+                    setTimeout(() => {
+                        cmdOutput.classList.remove('hidden');
+                        runCmdBtn.disabled = false;
+                    }, 500);
+                }
+            }
+            typeWriter();
+        });
+
+        // IP Calculator Logic
+        function fillAndCalculate(ip, cidr) {
+            document.getElementById('ip-input').value = ip;
+            document.getElementById('cidr-input').value = cidr;
+            runCalculation();
+            
+            const btnObj = document.querySelectorAll('#nav-menu button')[3];
+            btnObj.click();
+        }
+
+        function runCalculation() {
+            const ipStr = document.getElementById('ip-input').value.trim();
+            const cidrStr = document.getElementById('cidr-input').value.trim();
+            const errorDiv = document.getElementById('calc-error');
+            const resultDiv = document.getElementById('calc-result');
+
+            if (!isValidIP(ipStr) || !cidrStr || isNaN(cidrStr) || cidrStr < 0 || cidrStr > 32) {
+                errorDiv.classList.remove('hidden');
+                resultDiv.classList.add('hidden');
+                return;
+            }
+
+            errorDiv.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+
+            const cidr = parseInt(cidrStr);
+            const hostBits = 32 - cidr;
+
+            const ipParts = ipStr.split('.').map(Number);
+            const ipBinStrArr = ipParts.map(p => p.toString(2).padStart(8, '0'));
+            const ipBinStr = ipBinStrArr.join('.');
+
+            let maskBinRaw = "".padStart(cidr, '1').padEnd(32, '0');
+            const maskBinStrArr = [];
+            for(let i=0; i<4; i++) {
+                maskBinStrArr.push(maskBinRaw.substring(i*8, (i+1)*8));
+            }
+            const maskBinStr = maskBinStrArr.join('.');
+            const maskDecArr = maskBinStrArr.map(b => parseInt(b, 2));
+            const maskDecStr = maskDecArr.join('.');
+
+            const netBinStrArr = [];
+            for(let i=0; i<4; i++) {
+                let andStr = "";
+                for(let j=0; j<8; j++) {
+                    andStr += (ipBinStrArr[i][j] === '1' && maskBinStrArr[i][j] === '1') ? '1' : '0';
+                }
+                netBinStrArr.push(andStr);
+            }
+            const netBinStr = netBinStrArr.join('.');
+            const netDecArr = netBinStrArr.map(b => parseInt(b, 2));
+            const netDecStr = netDecArr.join('.');
+
+            const totalIps = Math.pow(2, hostBits);
+            const usableIps = (totalIps > 2) ? totalIps - 2 : 0;
+
+            const broadcastBinStrArr = [];
+            for(let i=0; i<4; i++) {
+                let orStr = "";
+                for(let j=0; j<8; j++) {
+                    orStr += (netBinStrArr[i][j] === '1' || maskBinStrArr[i][j] === '0') ? '1' : '0';
+                }
+                broadcastBinStrArr.push(orStr);
+            }
+            const broadcastDecArr = broadcastBinStrArr.map(b => parseInt(b, 2));
+            const broadcastDecStr = broadcastDecArr.join('.');
+
+            let firstIpArr = [...netDecArr];
+            firstIpArr[3] += 1;
+            let lastIpArr = [...broadcastDecArr];
+            lastIpArr[3] -= 1;
+
+            if(totalIps <= 2) {
+                firstIpArr = ["Không có"];
+                lastIpArr = ["Không có"];
+            }
+
+            document.getElementById('res-cidr').textContent = cidr;
+            document.getElementById('res-cidr-bold').textContent = cidr;
+            document.getElementById('res-host-bits').textContent = hostBits;
+            
+            document.getElementById('res-mask-bin').innerHTML = maskBinStr.replace(/1/g, '<span class="text-sky-600 font-bold">1</span>').replace(/0/g, '<span class="text-emerald-600 font-bold">0</span>');
+            document.getElementById('res-mask-dec').textContent = maskDecStr;
+
+            document.getElementById('res-ip-bin').textContent = ipBinStr;
+            document.getElementById('res-mask-bin-2').textContent = maskBinStr;
+            document.getElementById('res-net-bin').textContent = netBinStr;
+            document.getElementById('res-net-dec').textContent = netDecStr;
+
+            document.getElementById('res-cidr-2').textContent = cidr;
+            document.getElementById('res-host-bits-2').textContent = hostBits;
+            document.getElementById('res-host-bits-3').textContent = hostBits;
+
+            document.getElementById('res-total-ips').textContent = totalIps.toLocaleString();
+            document.getElementById('res-usable-ips').textContent = usableIps.toLocaleString();
+
+            document.getElementById('res-range-start').textContent = totalIps > 2 ? firstIpArr.join('.') : 'N/A';
+            document.getElementById('res-range-end').textContent = totalIps > 2 ? lastIpArr.join('.') : 'N/A';
+            document.getElementById('res-broadcast').textContent = broadcastDecStr;
+        }
+
+        function isValidIP(ip) {
+            const parts = ip.split('.');
+            if (parts.length !== 4) return false;
+            for (let part of parts) {
+                if (part === "" || isNaN(part)) return false;
+                const num = parseInt(part);
+                if (num < 0 || num > 255) return false;
+                if (num.toString() !== part) return false; 
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
