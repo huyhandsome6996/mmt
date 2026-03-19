@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Giống Mario Cơ Bản</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50; /* Màu nền tối bên ngoài game */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: #87CEEB; /* Màu bầu trời xanh ngắt giống Mario */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+        #instructions {
+            position: absolute;
+            top: 20px;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="instructions">
+        <h2>Trò chơi đi cảnh cơ bản</h2>
+        <p>Sử dụng <b>Mũi tên Trái/Phải</b> hoặc <b>A/D</b> để di chuyển. Nhấn <b>Mũi tên Lên</b>, <b>W</b> hoặc <b>Space</b> để nhảy.</p>
+        <p>Đi đến cột màu vàng để chiến thắng!</p>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Trạng thái các phím bấm
+        const keys = {
+            right: false,
+            left: false,
+            up: false
+        };
+
+        // Lắng nghe sự kiện nhấn phím
+        window.addEventListener('keydown', function(e) {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') keys.up = true;
+        });
+
+        // Lắng nghe sự kiện nhả phím
+        window.addEventListener('keyup', function(e) {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') keys.up = false;
+        });
+
+        // Nhân vật chính (Mario của chúng ta)
+        const player = {
+            x: 50,
+            y: 200,
+            width: 30,
+            height: 40,
+            speed: 5,
+            velX: 0,
+            velY: 0,
+            jumpPower: -12, // Lực nhảy (số âm vì trục Y hướng xuống)
+            grounded: false, // Kiểm tra xem có đang đứng trên mặt đất không
+            color: 'red',
+            facingRight: true // Thêm hướng nhìn để Mario quay mặt trái/phải
+        };
+
+        // Bảng màu và dữ liệu điểm ảnh (Pixel Art) cho Mario 8-bit
+        const spriteColors = {
+            'R': '#ff0000', // Đỏ (Mũ, Áo)
+            'D': '#8b4513', // Nâu (Tóc, Giày)
+            'B': '#ffcc99', // Màu da
+            'O': '#2980b9', // Xanh dương (Quần yếm)
+            'Y': '#f1c40f', // Vàng (Cúc áo)
+            ' ': null       // Trong suốt
+        };
+
+        const marioSprite = [
+            "   RRRRR    ",
+            "  RRRRRRRRR ",
+            "  DDDBBD    ",
+            " DBDDBBDBBB ",
+            " DBBDBBDBBB ",
+            " DDBBBBDDDD ",
+            "   BBBBBBB  ",
+            "  RROOOR    ",
+            " RRROOORRR  ",
+            "RRRROOOORRRR",
+            "BBRYOOOOYRB ",
+            "BBBOOOOOOBB ",
+            "BBOOOOOOOOBB",
+            "  OO    OO  ",
+            " DDD    DDD ",
+            "DDDD    DDDD"
+        ];
+
+        // Trọng lực và lực cản
+        const gravity = 0.6;
+        const friction = 0.8;
+
+        // Các nền tảng và mặt đất (Platforms)
+        const platforms = [
+            { x: 0, y: 350, width: 800, height: 50, color: '#2ecc71' }, // Mặt đất chính
+            { x: 200, y: 280, width: 100, height: 20, color: '#e67e22' }, // Bậc nhảy 1
+            { x: 400, y: 220, width: 100, height: 20, color: '#e67e22' }, // Bậc nhảy 2
+            { x: 600, y: 150, width: 100, height: 20, color: '#e67e22' }  // Bậc nhảy 3
+        ];
+
+        // Đích đến (Cột cờ)
+        const goal = {
+            x: 650, y: 50, width: 20, height: 100, color: '#f1c40f'
+        };
+
+        let isGameOver = false;
+
+        // Hàm cập nhật logic game (Vật lý, Di chuyển)
+        function update() {
+            if (isGameOver) return;
+
+            // Xử lý di chuyển trái phải
+            if (keys.up && player.grounded) {
+                player.velY = player.jumpPower;
+                player.grounded = false;
+            }
+            if (keys.right) {
+                if (player.velX < player.speed) player.velX++;
+                player.facingRight = true;
+            }
+            if (keys.left) {
+                if (player.velX > -player.speed) player.velX--;
+                player.facingRight = false;
+            }
+
+            // Áp dụng lực cản và trọng lực
+            player.velX *= friction;
+            player.velY += gravity;
+
+            // Cập nhật vị trí
+            player.x += player.velX;
+            player.y += player.velY;
+
+            // Giới hạn màn hình (không cho đi ra khỏi viền trái/phải)
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Xử lý va chạm với các nền tảng
+            player.grounded = false;
+            for (let i = 0; i < platforms.length; i++) {
+                let p = platforms[i];
+                
+                // Kiểm tra va chạm hộp (AABB collision)
+                if (player.x < p.x + p.width &&
+                    player.x + player.width > p.x &&
+                    player.y < p.y + p.height &&
+                    player.y + player.height > p.y) {
+                    
+                    // Xử lý đứng trên nền tảng (rơi từ trên xuống)
+                    if (player.velY > 0 && player.y + player.height - player.velY <= p.y) {
+                        player.grounded = true;
+                        player.velY = 0;
+                        player.y = p.y - player.height;
+                    }
+                    // Bị đụng đầu từ dưới lên (nếu cần mở rộng sau này)
+                    else if (player.velY < 0 && player.y - player.velY >= p.y + p.height) {
+                        player.velY = 0;
+                        player.y = p.y + p.height;
+                    }
+                }
+            }
+
+            // Kiểm tra chiến thắng (Va chạm với đích đến)
+            if (player.x < goal.x + goal.width &&
+                player.x + player.width > goal.x &&
+                player.y < goal.y + goal.height &&
+                player.y + player.height > goal.y) {
+                isGameOver = true;
+                setTimeout(() => alert("Chúc mừng! Bạn đã hoàn thành cấp độ!"), 100);
+            }
+        }
+
+        // Hàm vẽ mọi thứ lên màn hình
+        function draw() {
+            // Xóa khung hình cũ
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Vẽ đích đến (Cột cờ)
+            ctx.fillStyle = '#bdc3c7'; // Cột màu bạc
+            ctx.fillRect(goal.x + 8, goal.y, 4, goal.height); 
+            ctx.fillStyle = '#27ae60'; // Lá cờ xanh
+            ctx.beginPath();
+            ctx.moveTo(goal.x + 12, goal.y + 10);
+            ctx.lineTo(goal.x + 40, goal.y + 25);
+            ctx.lineTo(goal.x + 12, goal.y + 40);
+            ctx.fill();
+            ctx.fillStyle = '#f1c40f'; // Đỉnh cột
+            ctx.beginPath();
+            ctx.arc(goal.x + 10, goal.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Vẽ các nền tảng (Gạch và Cỏ)
+            for (let i = 0; i < platforms.length; i++) {
+                let p = platforms[i];
+                if (p.y === 350) {
+                    // Cỏ và mặt đất chính
+                    ctx.fillStyle = '#8B4513'; // Màu đất
+                    ctx.fillRect(p.x, p.y, p.width, p.height);
+                    ctx.fillStyle = '#2ecc71'; // Cỏ xanh phía trên
+                    ctx.fillRect(p.x, p.y, p.width, 10);
+                } else {
+                    // Các khối gạch nổi
+                    ctx.fillStyle = '#c0392b'; // Màu gạch đỏ
+                    ctx.fillRect(p.x, p.y, p.width, p.height);
+                    ctx.strokeStyle = '#000'; // Viền đen
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x, p.y, p.width, p.height);
+                }
+            }
+
+            // Vẽ nhân vật (Mario bằng Pixel Art)
+            const pixelSizeX = player.width / 12;
+            const pixelSizeY = player.height / 16;
+            
+            ctx.save();
+            // Lật ngược hình ảnh Mario nếu đang quay mặt sang trái
+            if (!player.facingRight) {
+                ctx.translate(player.x + player.width, player.y);
+                ctx.scale(-1, 1);
+            } else {
+                ctx.translate(player.x, player.y);
+            }
+
+            // Quét mảng dữ liệu để vẽ từng điểm ảnh (pixel)
+            for (let row = 0; row < 16; row++) {
+                for (let col = 0; col < 12; col++) {
+                    let colorCode = marioSprite[row][col];
+                    if (spriteColors[colorCode]) {
+                        ctx.fillStyle = spriteColors[colorCode];
+                        ctx.fillRect(col * pixelSizeX, row * pixelSizeY, Math.ceil(pixelSizeX), Math.ceil(pixelSizeY));
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
+        // Vòng lặp chính của game
+        function gameLoop() {
+            update();
+            draw();
+            // Tiếp tục gọi hàm gameLoop vào khung hình tiếp theo (thường 60fps)
+            if (!isGameOver) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Bắt đầu game
+        gameLoop();
+    </script>
+</body>
+</html>
