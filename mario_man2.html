@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Giống Mario Cơ Bản</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: #87CEEB; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+        #ui-bar {
+            width: 800px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .text-yellow { color: #f1c40f; }
+        #instructions {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-bar">
+        <div>MÀN: <span id="levelDisplay" class="text-yellow">1</span></div>
+        <div>ĐIỂM: <span id="scoreDisplay" class="text-yellow">0</span></div>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <div id="instructions">
+        <p>Sử dụng <b>Mũi tên Trái/Phải</b> hoặc <b>A/D</b> để di chuyển. Nhấn <b>Mũi tên Lên</b>, <b>W</b> hoặc <b>Space</b> để nhảy.</p>
+        <p>Thu thập đồng tiền, nhảy lên đầu nấm nâu để tiêu diệt, cẩn thận đừng rơi xuống vực!</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Trạng thái các phím bấm
+        const keys = { right: false, left: false, up: false };
+
+        window.addEventListener('keydown', e => {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') keys.up = true;
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') keys.up = false;
+        });
+
+        // Nhân vật chính
+        const player = {
+            x: 50, y: 200, width: 30, height: 40,
+            speed: 5, velX: 0, velY: 0, jumpPower: -12, 
+            grounded: false, facingRight: true 
+        };
+
+        let score = 0;
+
+        // Bảng màu và Pixel Art
+        const colors = {
+            'R': '#ff0000', 'D': '#8b4513', 'B': '#ffcc99', 'O': '#2980b9', 'Y': '#f1c40f', 
+            'W': '#ffffff', 'K': '#000000', 'C': '#d2b48c', ' ': null
+        };
+
+        const marioSprite = [
+            "   RRRRR    ", "  RRRRRRRRR ", "  DDDBBD    ", " DBDDBBDBBB ",
+            " DBBDBBDBBB ", " DDBBBBDDDD ", "   BBBBBBB  ", "  RROOOR    ",
+            " RRROOORRR  ", "RRRROOOORRRR", "BBRYOOOOYRB ", "BBBOOOOOOBB ",
+            "BBOOOOOOOOBB", "  OO    OO  ", " DDD    DDD ", "DDDD    DDDD"
+        ];
+
+        const goombaSprite = [
+            "   BBBB   ", "  BBBBBB  ", " BWWBBWWB ", " BKBBBKBB ",
+            " BBBBBBBB ", "   CCCC   ", "  K    K  ", " KK    KK "
+        ];
+
+        const coinSprite = [
+            "  YY  ", " YYYY ", " YYWY ", " YYYY ", " YYYY ", "  YY  "
+        ];
+
+        const gravity = 0.6;
+        const friction = 0.8;
+
+        // DỮ LIỆU CÁC MÀN CHƠI (Bao gồm Kẻ thù và Đồng tiền)
+        const levels = [
+            { // Màn 1
+                spawnX: 50, spawnY: 200,
+                platforms: [
+                    { x: 0, y: 350, width: 800, height: 50, type: 'ground' }, 
+                    { x: 200, y: 280, width: 100, height: 20, type: 'brick' }, 
+                    { x: 400, y: 220, width: 100, height: 20, type: 'brick' }, 
+                    { x: 600, y: 150, width: 100, height: 20, type: 'brick' }  
+                ],
+                coins: [
+                    { x: 235, y: 240, width: 20, height: 24, collected: false },
+                    { x: 435, y: 180, width: 20, height: 24, collected: false },
+                    { x: 635, y: 110, width: 20, height: 24, collected: false }
+                ],
+                enemies: [
+                    // Kẻ thù đi lại trên mặt đất từ x=300 đến x=500
+                    { x: 400, y: 310, width: 30, height: 32, minX: 300, maxX: 500, speed: 1.5, dir: 1, dead: false }
+                ],
+                goal: { x: 700, y: 50, width: 20, height: 100 }
+            },
+            { // Màn 2
+                spawnX: 50, spawnY: 200,
+                platforms: [
+                    { x: 0, y: 350, width: 300, height: 50, type: 'ground' }, 
+                    { x: 450, y: 350, width: 350, height: 50, type: 'ground' }, // Vực ở giữa
+                    { x: 150, y: 250, width: 80, height: 20, type: 'brick' },
+                    { x: 320, y: 150, width: 60, height: 20, type: 'brick' }, // Bệ giữa vực
+                    { x: 500, y: 250, width: 80, height: 20, type: 'brick' }
+                ],
+                coins: [
+                    { x: 180, y: 210, width: 20, height: 24, collected: false },
+                    { x: 340, y: 110, width: 20, height: 24, collected: false },
+                    { x: 530, y: 210, width: 20, height: 24, collected: false }
+                ],
+                enemies: [
+                    { x: 600, y: 310, width: 30, height: 32, minX: 450, maxX: 700, speed: 2, dir: -1, dead: false }
+                ],
+                goal: { x: 700, y: 250, width: 20, height: 100 }
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let platforms = [], coins = [], enemies = [], goal = {};
+        let isGameOver = false;
+        let isTransitioning = false; // Thêm cờ hiệu để kiểm tra trạng thái đang chuyển màn
+
+        // Hàm kiểm tra va chạm giữa 2 vật thể hình chữ nhật
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        // Tải màn chơi (Sử dụng JSON.parse/stringify để reset lại toàn bộ đồng tiền/kẻ thù)
+        function loadLevel(index) {
+            isTransitioning = false; // Đặt lại trạng thái mỗi khi tải màn mới
+
+            if (index >= levels.length) {
+                isGameOver = true;
+                setTimeout(() => alert("Tuyệt vời! Bạn đã phá đảo với số điểm: " + score), 100);
+                return;
+            }
+            
+            currentLevelIndex = index;
+            // Sao chép dữ liệu sâu (Deep copy) để không làm thay đổi dữ liệu gốc khi chơi lại
+            let levelData = JSON.parse(JSON.stringify(levels[index])); 
+            
+            platforms = levelData.platforms;
+            coins = levelData.coins;
+            enemies = levelData.enemies;
+            goal = levelData.goal;
+            
+            player.x = levelData.spawnX;
+            player.y = levelData.spawnY;
+            player.velX = 0; player.velY = 0;
+            player.facingRight = true;
+            
+            document.getElementById('levelDisplay').innerText = (index + 1);
+        }
+
+        loadLevel(0);
+
+        function update() {
+            if (isGameOver) return;
+
+            // Xử lý di chuyển
+            if (keys.up && player.grounded) {
+                player.velY = player.jumpPower;
+                player.grounded = false;
+            }
+            if (keys.right) {
+                if (player.velX < player.speed) player.velX++;
+                player.facingRight = true;
+            }
+            if (keys.left) {
+                if (player.velX > -player.speed) player.velX--;
+                player.facingRight = false;
+            }
+
+            player.velX *= friction;
+            player.velY += gravity;
+            player.x += player.velX;
+            player.y += player.velY;
+
+            // Giới hạn viền màn hình
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Xử lý va chạm nền tảng
+            player.grounded = false;
+            for (let i = 0; i < platforms.length; i++) {
+                let p = platforms[i];
+                if (checkCollision(player, p)) {
+                    if (player.velY > 0 && player.y + player.height - player.velY <= p.y) {
+                        player.grounded = true;
+                        player.velY = 0;
+                        player.y = p.y - player.height;
+                    } else if (player.velY < 0 && player.y - player.velY >= p.y + p.height) {
+                        player.velY = 0;
+                        player.y = p.y + p.height;
+                    }
+                }
+            }
+
+            // Xử lý Đồng tiền
+            for (let i = 0; i < coins.length; i++) {
+                let c = coins[i];
+                if (!c.collected && checkCollision(player, c)) {
+                    c.collected = true; // Đánh dấu đã ăn
+                    score += 100;
+                    document.getElementById('scoreDisplay').innerText = score;
+                }
+            }
+
+            // Xử lý Kẻ thù
+            for (let i = 0; i < enemies.length; i++) {
+                let e = enemies[i];
+                if (e.dead) continue;
+
+                // Di chuyển kẻ thù qua lại
+                e.x += e.speed * e.dir;
+                if (e.x < e.minX || e.x + e.width > e.maxX) {
+                    e.dir *= -1; // Đổi hướng
+                }
+
+                // Va chạm giữa Mario và Kẻ thù
+                if (checkCollision(player, e)) {
+                    // Nếu Mario đang rơi xuống và bàn chân Mario cao hơn nửa thân trên của kẻ thù -> ĐẠP TRÚNG
+                    if (player.velY > 0 && player.y + player.height < e.y + e.height / 2 + 10) {
+                        e.dead = true;      // Tiêu diệt kẻ thù
+                        player.velY = -8;   // Mario nảy lên một chút
+                        score += 100;
+                        document.getElementById('scoreDisplay').innerText = score;
+                    } else {
+                        // Bị chạm từ hai bên hoặc dưới lên -> CHẾT
+                        // Trừ điểm phạt nếu muốn, hiện tại ta chỉ chơi lại màn
+                        loadLevel(currentLevelIndex);
+                    }
+                }
+            }
+
+            // Kiểm tra rớt xuống vực
+            if (player.y > canvas.height) {
+                loadLevel(currentLevelIndex);
+            }
+
+            // Kiểm tra chiến thắng (chạm cột cờ)
+            if (!isTransitioning && checkCollision(player, goal)) {
+                isTransitioning = true; // Khóa lại để tránh kích hoạt va chạm nhiều lần
+                
+                // Dừng Mario lại một chút
+                player.velX = 0; 
+
+                // Đợi 0.1s rồi hiển thị thông báo và chuyển màn
+                setTimeout(() => {
+                    alert("Chúc mừng! Bạn đã vượt qua Màn " + (currentLevelIndex + 1));
+                    
+                    // CÁCH 1: Tải dữ liệu Màn 2 ngay trong file này (Khuyên dùng khi làm game)
+                    loadLevel(currentLevelIndex + 1);
+                    
+                    /* CÁCH 2: Nhảy sang file html mới như trong ảnh VS Code của bạn.
+                       Nếu bạn muốn dùng cách này, hãy XÓA dòng loadLevel ở trên 
+                       và BỎ DẤU gạch chéo kép (//) ở dòng bên dưới: */
+                    
+                    // window.location.href = 'mario_man2.html';
+                    
+                }, 100);
+            }
+        }
+
+        // Hàm tiện ích để vẽ Pixel Art
+        function drawPixelArt(sprite, x, y, width, height, flip) {
+            let rows = sprite.length;
+            let cols = sprite[0].length;
+            let pW = width / cols;
+            let pH = height / rows;
+
+            ctx.save();
+            if (flip) {
+                ctx.translate(x + width, y);
+                ctx.scale(-1, 1);
+            } else {
+                ctx.translate(x, y);
+            }
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    let colorCode = sprite[r][c];
+                    if (colors[colorCode]) {
+                        ctx.fillStyle = colors[colorCode];
+                        ctx.fillRect(c * pW, r * pH, Math.ceil(pW), Math.ceil(pH));
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Vẽ đích đến
+            ctx.fillStyle = '#bdc3c7'; ctx.fillRect(goal.x + 8, goal.y, 4, goal.height); 
+            ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.moveTo(goal.x + 12, goal.y + 10); ctx.lineTo(goal.x + 40, goal.y + 25); ctx.lineTo(goal.x + 12, goal.y + 40); ctx.fill();
+            ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(goal.x + 10, goal.y, 8, 0, Math.PI * 2); ctx.fill();
+
+            // Vẽ nền tảng
+            for (let i = 0; i < platforms.length; i++) {
+                let p = platforms[i];
+                if (p.type === 'ground') {
+                    ctx.fillStyle = '#8B4513'; ctx.fillRect(p.x, p.y, p.width, p.height);
+                    ctx.fillStyle = '#2ecc71'; ctx.fillRect(p.x, p.y, p.width, 10);
+                } else if (p.type === 'brick') {
+                    ctx.fillStyle = '#c0392b'; ctx.fillRect(p.x, p.y, p.width, p.height);
+                    ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, p.height);
+                }
+            }
+
+            // Vẽ Đồng tiền
+            for (let i = 0; i < coins.length; i++) {
+                if (!coins[i].collected) {
+                    drawPixelArt(coinSprite, coins[i].x, coins[i].y, coins[i].width, coins[i].height, false);
+                }
+            }
+
+            // Vẽ Kẻ thù
+            for (let i = 0; i < enemies.length; i++) {
+                if (!enemies[i].dead) {
+                    // Kẻ thù có thể xoay người khi đổi hướng
+                    let flipEnemy = enemies[i].dir === 1; 
+                    drawPixelArt(goombaSprite, enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height, flipEnemy);
+                }
+            }
+
+            // Vẽ Mario
+            drawPixelArt(marioSprite, player.x, player.y, player.width, player.height, !player.facingRight);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (!isGameOver) requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>

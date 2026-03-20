@@ -33,7 +33,7 @@
     <div id="instructions">
         <h2>Trò chơi đi cảnh cơ bản</h2>
         <p>Sử dụng <b>Mũi tên Trái/Phải</b> hoặc <b>A/D</b> để di chuyển. Nhấn <b>Mũi tên Lên</b>, <b>W</b> hoặc <b>Space</b> để nhảy.</p>
-        <p>Đi đến cột màu vàng để chiến thắng!</p>
+        <p>Đi đến cột màu vàng để chuyển sang Màn 2!</p>
     </div>
 
     <canvas id="gameCanvas" width="800" height="400"></canvas>
@@ -186,8 +186,14 @@
                 player.x + player.width > goal.x &&
                 player.y < goal.y + goal.height &&
                 player.y + player.height > goal.y) {
-                isGameOver = true;
-                setTimeout(() => alert("Chúc mừng! Bạn đã hoàn thành cấp độ!"), 100);
+                
+                isGameOver = true; // Dừng các di chuyển khác
+                
+                // Đợi 100ms rồi thông báo và chuyển hướng
+                setTimeout(() => {
+                    alert("Chúc mừng! Bạn đã hoàn thành Màn 1. Chuyển sang Màn 2!");
+                    window.location.href = 'mario_man2.html'; // Đây là lệnh chuyển sang file mới
+                }, 100);
             }
         }
 
