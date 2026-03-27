@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hành Trình Khám Phá: Bí Mật Châu Mỹ - Phong cách Explorer</title>
+    <style>
+        /* Thiết lập cơ bản */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a252f;
+            background-image: radial-gradient(#2c3e50, #1a252f);
+            /* Sử dụng Font chuẩn không lỗi tiếng Việt */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* KHUNG NHÌN (VIEWPORT) */
+        .viewport {
+            position: relative;
+            max-width: 1100px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background-color: #fff;
+            border: 6px solid #3e2723;
+        }
+
+        /* CONTAINER ẢNH */
+        .infographic-container {
+            position: relative;
+            width: 100%;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-origin: center center;
+        }
+
+        .main-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* --- CÁC ĐIỂM CLICK (HOTSPOT) --- */
+        .hotspot {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 3px dashed #f1c40f;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .hotspot:hover {
+            background-color: rgba(241, 196, 15, 0.6);
+            transform: translate(-50%, -50%) scale(1.15);
+            border-style: solid;
+            animation: none;
+        }
+
+        .infographic-container.zoomed .hotspot {
+            transform: translate(-50%, -50%) scale(0.45);
+            border-width: 5px; 
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(241, 196, 15, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+        }
+
+        /* ==============================================================
+           GIAO DIỆN POPUP MỚI: TÁCH RA HAI BÊN ĐỂ KHÔNG ĐÈ HÌNH VÀ TĂNG KÍCH THƯỚC CHỮ
+           ============================================================== */
+        .popup {
+            position: absolute;
+            width: 400px; /* Làm khung rộng hơn một chút để chứa chữ to */
+            max-height: 85vh;
+            background-color: #fdf8e7; 
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            border: 2px solid #5c4033;
+            border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(44, 25, 15, 0.6), inset 0 0 20px rgba(139, 90, 43, 0.1);
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Phông chữ dứt khoát, không lỗi */
+        }
+
+        /* Popup nằm bên PHẢI màn hình (Dùng khi con vật ở bên Trái) */
+        .popup-right {
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%) translateX(30px); /* Hiệu ứng trượt từ phải vào */
+        }
+        .popup-right.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* Popup nằm bên TRÁI màn hình (Dùng khi con vật ở bên Phải) */
+        .popup-left {
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%) translateX(-30px); /* Hiệu ứng trượt từ trái vào */
+        }
+        .popup-left.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* Phần Header Tiêu đề */
+        .popup-header {
+            background-color: #8b2500; 
+            border-bottom: 4px solid #cd853f; 
+            padding: 18px 15px; /* Tăng padding */
+            text-align: center;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #fdf8e7;
+            font-size: 28px; /* Dấu X to hơn */
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .close-btn:hover { opacity: 1; }
+
+        .popup-title {
+            margin: 0;
+            font-size: 22px; /* TIÊU ĐỀ TO RÕ HƠN */
+            color: #fdf8e7;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-right: 20px; 
+        }
+
+        /* Phần thân chứa chữ */
+        .popup-body {
+            padding: 25px; /* Rộng rãi hơn */
+            overflow-y: auto; 
+        }
+
+        .popup-body::-webkit-scrollbar { width: 8px; }
+        .popup-body::-webkit-scrollbar-track { background: #e8dbce; }
+        .popup-body::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 4px; }
+        .popup-body::-webkit-scrollbar-thumb:hover { background: #5c4033; }
+
+        .popup-content {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 16px; /* KÍCH THƯỚC CHỮ TĂNG LÊN (Dễ đọc) */
+            color: #3e2723; 
+            line-height: 1.7; /* Khoảng cách dòng thoáng hơn */
+        }
+
+        .popup-content li { margin-bottom: 12px; }
+        .popup-content strong { color: #8b2500; font-weight: bold; }
+
+        /* --- NÚT THU NHỎ LẠI --- */
+        .zoom-out-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #3e2723;
+            color: #fdf8e7;
+            border: 2px solid #cd853f;
+            padding: 12px 24px;
+            font-size: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 30;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .zoom-out-btn.show { opacity: 1; visibility: visible; }
+        .zoom-out-btn:hover { background-color: #8b2500; color: #fff; }
+
+        /* --- PHẦN TÍCH HỢP AI --- */
+        .ai-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #cd853f;
+        }
+
+        .ai-btn {
+            width: 100%;
+            background: #2c3e50;
+            color: #f1c40f;
+            border: 2px solid #f1c40f;
+            padding: 14px; /* Nút bấm to hơn */
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px; /* Chữ trong nút to hơn */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .ai-btn:hover {
+            background: #f1c40f;
+            color: #2c3e50;
+        }
+
+        .ai-btn:disabled {
+            background: #7f8c8d;
+            border-color: #bdc3c7;
+            color: #ecf0f1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .ai-response {
+            margin-top: 15px;
+            padding: 18px;
+            background-color: rgba(205, 133, 63, 0.15);
+            border: 1px solid #cd853f;
+            border-radius: 6px;
+            font-size: 15px; /* Chữ AI trả lời to hơn */
+            color: #3e2723;
+            line-height: 1.6;
+            display: none;
+            position: relative;
+        }
+
+        /* Chấm loading */
+        .loading-dots {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .loading-dots span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #8b2500;
+            transform: rotate(45deg); 
+            margin: 0 4px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0) rotate(45deg); }
+            40% { transform: scale(1) rotate(45deg); }
+        }
+
+        /* Gợi ý bật Fullscreen */
+        .fullscreen-hint {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            color: rgba(253, 248, 231, 0.6);
+            font-size: 14px;
+            font-style: italic;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="viewport">
+        <!-- Nút Reset Zoom -->
+        <button id="btn-zoom-out" class="zoom-out-btn" onclick="resetZoom()">◂ Quay Lại Toàn Cảnh</button>
+
+        <div class="infographic-container" id="info-container">
+            <!-- ẢNH CHÍNH -->
+            <img src="hamster.png" alt="Hành Trình Khám Phá Châu Mỹ" class="main-image">
+
+            <!-- Các điểm Click -->
+            <div class="hotspot" style="top: 67%; left: 16%;" onclick="zoomTo(16, 67, 'popup-eagle', event)"></div>
+            <div class="hotspot" style="top: 82%; left: 35%;" onclick="zoomTo(35, 82, 'popup-statues', event)"></div>
+            <div class="hotspot" style="top: 60%; left: 81%;" onclick="zoomTo(81, 60, 'popup-jaguar', event)"></div>
+        </div>
+
+        <!-- =====================================
+             CÁC POPUP THÔNG MINH (TRÁNH ĐÈ ẢNH)
+             ===================================== -->
+        
+        <!-- POPUP 1: ĐẠI BÀNG (Con vật ở Trái -> Khung trượt ra bên Phải) -->
+        <div id="popup-eagle" class="popup popup-right">
+            <div class="popup-header">
+                <h4 class="popup-title">Biểu Tượng: Tùng Ưng</h4>
+                <button class="close-btn" onclick="closePopup('popup-eagle')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content">
+                    <li>Loài chim quốc gia biểu tượng của Hoa Kỳ.</li>
+                    <li>Tượng trưng cho sự tự do, sức mạnh và lòng can đảm.</li>
+                    <li>Tìm thấy chủ yếu ở Bắc Mỹ, từ vùng đất lạnh giá Alaska đến biên giới Mexico.</li>
+                </ul>
+                <div class="ai-section">
+                    <button class="ai-btn" onclick="askGemini('Đại bàng hói Bắc Mỹ (Bald Eagle)', 'eagle')">
+                        🧭 Hỏi AI Thêm Bí Mật
+                    </button>
+                    <div id="loading-eagle" class="loading-dots"><span></span><span></span><span></span></div>
+                    <div id="ai-text-eagle" class="ai-response"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POPUP 2: TƯỢNG ĐÀI (Hình ở giữa/Trái -> Khung trượt ra bên Phải) -->
+        <div id="popup-statues" class="popup popup-right">
+            <div class="popup-header">
+                <h4 class="popup-title">Di Sản Đô Thị</h4>
+                <button class="close-btn" onclick="closePopup('popup-statues')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content">
+                    <li><strong>Statue of Liberty:</strong> Biểu tượng tự do soi sáng thế giới, món quà vô giá từ nước Pháp.</li>
+                    <li><strong>CN Tower:</strong> Từng là đỉnh cao của thế giới, một kỳ quan kỹ thuật đáng tự hào của Canada.</li>
+                    <li><strong>Totem Pole:</strong> Khúc ca bằng gỗ lưu giữ linh hồn và di sản của các bộ lạc bản địa.</li>
+                </ul>
+                <div class="ai-section">
+                    <button class="ai-btn" onclick="askGemini('Tượng Nữ thần Tự do và Tháp CN Tower', 'statues')">
+                        🧭 Hỏi AI Thêm Bí Mật
+                    </button>
+                    <div id="loading-statues" class="loading-dots"><span></span><span></span><span></span></div>
+                    <div id="ai-text-statues" class="ai-response"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POPUP 3: BÁO ĐỐM (Con vật ở Phải -> Khung trượt ra bên Trái) -->
+        <div id="popup-jaguar" class="popup popup-left">
+            <div class="popup-header">
+                <h4 class="popup-title">Chúa Tể Amazon</h4>
+                <button class="close-btn" onclick="closePopup('popup-jaguar')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content">
+                    <li>Loài mèo lớn nhất và uy dũng nhất ở Tây Bán Cầu.</li>
+                    <li>Kẻ săn mồi đỉnh cao với lực cắn xuyên giáp, bơi lội và trèo cây điêu luyện.</li>
+                    <li>Thống trị các khu rừng mưa nhiệt đới và vùng đất ngập nước Pantanal.</li>
+                </ul>
+                <div class="ai-section">
+                    <button class="ai-btn" onclick="askGemini('Loài Báo đốm (Jaguar) ở rừng Amazon', 'jaguar')">
+                        🧭 Hỏi AI Thêm Bí Mật
+                    </button>
+                    <div id="loading-jaguar" class="loading-dots"><span></span><span></span><span></span></div>
+                    <div id="ai-text-jaguar" class="ai-response"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gợi ý bật Fullscreen -->
+        <div class="fullscreen-hint">[ Bấm phím 'F' để Bật/Tắt Toàn màn hình ]</div>
+
+    </div>
+
+    <script>
+        const container = document.getElementById('info-container');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const allPopups = document.querySelectorAll('.popup');
+
+        function zoomTo(x, y, popupId, event) {
+            event.stopPropagation();
+            container.style.transformOrigin = `${x}% ${y}%`;
+            container.style.transform = 'scale(2.2)';
+            container.classList.add('zoomed');
+            btnZoomOut.classList.add('show');
+            allPopups.forEach(p => p.classList.remove('active'));
+            setTimeout(() => {
+                document.getElementById(popupId).classList.add('active');
+            }, 300);
+        }
+
+        function resetZoom() {
+            container.style.transform = 'scale(1)';
+            container.classList.remove('zoomed');
+            btnZoomOut.classList.remove('show');
+            allPopups.forEach(p => p.classList.remove('active'));
+        }
+
+        function closePopup(popupId) {
+            document.getElementById(popupId).classList.remove('active');
+        }
+
+        document.body.addEventListener('click', function(event) {
+            let isClickInsidePopup = false;
+            allPopups.forEach(p => {
+                if (p.contains(event.target)) isClickInsidePopup = true;
+            });
+            if (!isClickInsidePopup && event.target !== btnZoomOut && !event.target.classList.contains('hotspot') && !event.target.classList.contains('close-btn')) {
+                resetZoom();
+            }
+        });
+
+        // ==========================================
+        // TÍNH NĂNG TOÀN MÀN HÌNH (FULLSCREEN)
+        // ==========================================
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'f' || event.key === 'F') {
+                toggleFullScreen();
+            }
+        });
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Lỗi khi bật toàn màn hình: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // ==========================================
+        // TÍCH HỢP GEMINI API
+        // ==========================================
+        const apiKey = ""; 
+
+        async function askGemini(topic, sectionId) {
+            const btn = document.querySelector(`#popup-${sectionId} .ai-btn`);
+            const loading = document.getElementById(`loading-${sectionId}`);
+            const responseDiv = document.getElementById(`ai-text-${sectionId}`);
+
+            btn.disabled = true;
+            btn.innerHTML = "Đang giải mã bản đồ...";
+            loading.style.display = "block";
+            responseDiv.style.display = "none";
+
+            const prompt = `Kể cho tôi nghe một sự thật hoặc một câu chuyện ngắn cực kỳ thú vị và ít người biết về: ${topic}`;
+            const systemPrompt = "Bạn là một nhà thám hiểm lỗi lạc thời kỳ cận đại đang nghiên cứu về Châu Mỹ. Hãy chia sẻ 1-2 sự thật cực kỳ thú vị, hấp dẫn, ngắn gọn (tối đa 3-4 câu) về chủ đề được yêu cầu. Trả lời bằng tiếng Việt, giọng điệu bí ẩn, lôi cuốn và mang chút hoài cổ.";
+
+            try {
+                const text = await fetchWithRetry(prompt, systemPrompt);
+                responseDiv.innerHTML = "📝 <strong>Ghi chép:</strong><br><br>" + text.replace(/\n/g, '<br>'); 
+                responseDiv.style.display = "block";
+            } catch (error) {
+                responseDiv.innerHTML = "<i>❌ Tín hiệu điện báo bị nhiễu. Vui lòng thử lại sau!</i>";
+                responseDiv.style.display = "block";
+                console.error("Gemini API Error:", error);
+            } finally {
+                loading.style.display = "none";
+                btn.disabled = false;
+                btn.innerHTML = "🧭 Hỏi AI Thêm Bí Mật";
+            }
+        }
+
+        async function fetchWithRetry(prompt, systemPrompt, maxRetries = 5) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (textResult) return textResult;
+                    throw new Error("Không lấy được text từ API");
+
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error; 
+                    const delay = Math.pow(2, i) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
