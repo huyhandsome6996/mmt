@@ -232,8 +232,18 @@
             line-height: 1.6;
         }
 
-        .popup-content li { margin-bottom: 12px; }
+        .popup-content > li { margin-bottom: 12px; }
         .popup-content strong { color: #8b2500; font-weight: 600; }
+        
+        /* CSS cho các danh sách thụt lề (nested lists) */
+        .popup-content ul {
+            padding-left: 25px;
+            margin-top: 6px;
+            list-style-type: disc;
+        }
+        .popup-content ul li {
+            margin-bottom: 6px;
+        }
 
         /* =========================================
            LIVE EDIT FEATURE 
@@ -315,29 +325,20 @@
         <button id="btn-zoom-out" class="zoom-out-btn" onclick="resetZoom()">◂ Back to Map</button>
 
         <div class="infographic-container" id="info-container">
-            <!-- TÊN ẢNH ĐƯỢC CHỈNH LẠI CHUẨN XÁC -->
             <img src="chauchuppy.png" alt="The Americas Infographic" class="main-image">
 
             <!-- Các điểm Click (Hotspots) được căn chỉnh tọa độ Zoom siêu chuẩn -->
+            <!-- 1. Location/Terrain (Trái) -> Đã kéo camera xuống (0, 18) để thấy toàn cảnh vượt viền xanh và tiêu đề -->
+            <div class="hotspot" style="top: 45%; left: 20%;" onclick="zoomTo(0, 27, 'popup-location', 'pos-right', event)"></div>
             
-            <!-- 1. Location/Terrain (Trái) -->
-            <div class="hotspot" style="top: 45%; left: 20%;" onclick="zoomTo(0, 25, 'popup-location', 'pos-right', event)"></div>
-            
-            <!-- 2. Climate (Giữa Trên) -->
             <div class="hotspot" style="top: 22%; left: 52%;" onclick="zoomTo(100, 20, 'popup-climate', 'pos-right', event)"></div>
-            
-            <!-- 3. Rivers & Lakes (Giữa Dưới) -->
             <div class="hotspot" style="top: 65%; left: 52%;" onclick="zoomTo(20, 80, 'popup-rivers', 'pos-left', event)"></div>
-            
-            <!-- 4. Population (Phải Trên) -->
             <div class="hotspot" style="top: 25%; left: 82%;" onclick="zoomTo(100, 25, 'popup-population', 'pos-left', event)"></div>
-            
-            <!-- 5. Economy (Phải Dưới) -->
             <div class="hotspot" style="top: 72%; left: 82%;" onclick="zoomTo(100, 95, 'popup-economy', 'pos-left', event)"></div>
         </div>
 
         <!-- =====================================
-             CÁC POPUP (CÓ THỂ CHỈNH SỬA TRỰC TIẾP & TỰ CHỈNH KÍCH THƯỚC KÉO/THẢ)
+             CÁC POPUP NỘI DUNG ĐÃ ĐƯỢC CHÈN SẴN
              ===================================== -->
         
         <!-- POPUP 1: LOCATION -->
@@ -348,9 +349,26 @@
             </div>
             <div class="popup-body">
                 <ul class="popup-content" contenteditable="true">
-                    <li><strong>Location:</strong> Spans the Western Hemisphere from the Arctic Circle to near the South Pole. Total area ~42.13 million km².</li>
-                    <li><strong>Terrain:</strong> Massive young mountains in the West (Cordillera, Andes) and huge plains/plateaus in the East (Great Plains, Amazon).</li>
-                    <li><strong>Resources:</strong> Extremely rich but unevenly distributed. Abundant in copper, gold, iron, coal, and oil (Gulf of Mexico, Venezuela).</li>
+                    <li><strong>Geographical Location:</strong>
+                        <ul>
+                            <li>North America and South America in the Western Hemisphere.</li>
+                            <li>Bordered by: Arctic Ocean, Pacific Ocean, Atlantic Ocean.</li>
+                            <li>Total area: ~42.13 million km².</li>
+                            <li>Extreme points: Cape Murchison, Cape Freyark, Cape Saint Charles & Cape Branco, Cape Prince of Wales & Cape Parinas.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Terrain:</strong>
+                        <ul>
+                            <li>Western America: High mountains.</li>
+                            <li>Eastern America: Lowlands and plateaus.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Mineral Resources:</strong>
+                        <ul>
+                            <li>North America: Copper, gold, lead, zinc, coal, oil, gas, Iron, bauxite, nickel,...</li>
+                            <li>South America: Iron, copper, gold, silver, oil,...</li>
+                        </ul>
+                    </li>
                 </ul>
                 <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
             </div>
@@ -364,9 +382,8 @@
             </div>
             <div class="popup-body">
                 <ul class="popup-content" contenteditable="true">
-                    <li><strong>North America:</strong> Contains almost all climate zones of the Northern Hemisphere (Polar, Temperate, Subtropical, Tropical).</li>
-                    <li><strong>South America:</strong> Predominantly hot zones (Equatorial, Tropical) down to Temperate in the south. It has no polar climate.</li>
-                    <li><strong>Extremes:</strong> Ranging from the freezing $-40^{\circ}C$ Arctic winters to the humid, heavy rainfall of the Amazon basin.</li>
+                    <li><strong>North America:</strong> Polar climate, Subpolar climate, Temperate climate, Subtropical climate, Tropical climate, Sub-equatorial climate.</li>
+                    <li><strong>South America:</strong> Equatorial climate, Sub-equatorial climate, Tropical climate, Subtropical climate, Temperate climate.</li>
                 </ul>
                 <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
             </div>
@@ -380,9 +397,19 @@
             </div>
             <div class="popup-body">
                 <ul class="popup-content" contenteditable="true">
-                    <li><strong>Great Lakes & Mississippi:</strong> North America holds the world's largest freshwater lake system and the massive Mississippi river basin.</li>
-                    <li><strong>The Mighty Amazon:</strong> South America's Amazon boasts the world's largest drainage basin, holding 1/5 of the global freshwater supply.</li>
-                    <li><strong>Landscapes:</strong> A complete range from temperate coniferous forests to the world's highest forest cover in the Amazon rainforest.</li>
+                    <li><strong>Rivers and Lakes:</strong>
+                        <ul>
+                            <li>North America: Dense river network; home to the Great Lakes; main river is Mississippi–Missouri.</li>
+                            <li>South America: Wettest continent; dominated by the Amazon River with the largest basin and highest water flow.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Natural Landscapes:</strong>
+                        <ul>
+                            <li>Very diverse (from cold to tropical).</li>
+                            <li>North America: Forests, prairies, some deserts; includes giant Sequoia trees.</li>
+                            <li>South America: Tropical rainforests (Amazon Rainforest), rich wildlife, and extremes like the Atacama Desert.</li>
+                        </ul>
+                    </li>
                 </ul>
                 <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
             </div>
@@ -396,9 +423,21 @@
             </div>
             <div class="popup-body">
                 <ul class="popup-content" contenteditable="true">
-                    <li><strong>Population:</strong> Approx. 1.06 billion (2025). The US (347M), Brazil (213M), and Mexico (133M) are the most populous.</li>
-                    <li><strong>Distribution:</strong> Highly uneven. High density in the Caribbean, very low in areas like Greenland and northern Canada.</li>
-                    <li><strong>Diversity:</strong> A complex multi-racial continent blending Indigenous (Indian, Inuit), European, African, and mixed-race heritages.</li>
+                    <li><strong>Population:</strong>
+                        <ul>
+                            <li>~1.06 billion people; uneven distribution.</li>
+                            <li>Largest: United States, Brazil, Mexico.</li>
+                            <li>Moderate growth, multi-racial.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Development Characteristics:</strong>
+                        <ul>
+                            <li>Major economic region, led by North America.</li>
+                            <li>The United States dominates.</li>
+                            <li>Large gap: rich North America vs. Poorer Latin America.</li>
+                            <li>North &rarr; industry & services; South &rarr; raw materials.</li>
+                        </ul>
+                    </li>
                 </ul>
                 <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
             </div>
@@ -412,9 +451,23 @@
             </div>
             <div class="popup-body">
                 <ul class="popup-content" contenteditable="true">
-                    <li><strong>North America:</strong> Generates ~32% of global GDP. World's leading center for finance, high-tech, aerospace, and highly mechanized agriculture.</li>
-                    <li><strong>Latin America:</strong> Heavily dependent on resource exports and agriculture. Brazil leads globally in exporting soybeans, coffee, and beef.</li>
-                    <li><strong>Development Gap:</strong> A significant economic divide remains between the high-income North and the developing nations of the South.</li>
+                    <li><strong>North America:</strong>
+                        <ul>
+                            <li>Most developed region (global leader in tech & finance).</li>
+                            <li>Agriculture: Highly modern, large-scale, very productive (few workers).</li>
+                            <li>Industry: Advanced, shifting to high-tech (AI, aerospace, chips).</li>
+                            <li>Services: Dominant (~75–80% GDP), especially finance & technology.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Latin America (South America & Caribbean):</strong>
+                        <ul>
+                            <li>Lower development, depends on resources & agriculture.</li>
+                            <li>Agriculture: Major exporter (Brazil, Argentina).</li>
+                            <li>Industry: Uneven, focused on mining & raw materials.</li>
+                            <li>Services & trade: Export raw materials, import machinery; tourism important.</li>
+                            <li>Key advantage: Panama Canal (global trade route).</li>
+                        </ul>
+                    </li>
                 </ul>
                 <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
             </div>
@@ -441,7 +494,6 @@
             // Ẩn tất cả các popup
             allPopups.forEach(p => {
                 p.classList.remove('active', 'pos-right', 'pos-left', 'pos-top', 'pos-bottom');
-                // GHI CHÚ: Bỏ lệnh reset p.style.width và p.style.height ở đây để hệ thống luôn nhớ kích thước bạn đã kéo
             });
 
             // Gán vị trí thông minh cho popup và hiện lên
@@ -459,7 +511,6 @@
             btnZoomOut.classList.remove('show');
             allPopups.forEach(p => {
                 p.classList.remove('active');
-                // GHI CHÚ: Tương tự, bỏ lệnh reset kích thước khi đóng bảng
             });
         }
 
@@ -484,7 +535,7 @@
         });
 
         // ==========================================
-        // CẢI TIẾN TÍNH NĂNG TOÀN MÀN HÌNH (FULLSCREEN) 
+        // TÍNH NĂNG TOÀN MÀN HÌNH (FULLSCREEN) 
         // ==========================================
         document.addEventListener('keydown', function(event) {
             if (event.target.getAttribute('contenteditable') === 'true') {
