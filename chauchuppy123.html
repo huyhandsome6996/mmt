@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Americas: An Exploratory Journey</title>
+    <style>
+        /* =========================================
+           GLOBAL STYLES & VIEWPORT
+           ========================================= */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a252f;
+            background-image: radial-gradient(#2c3e50, #0d131a);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Khung hiển thị mặc định (Chưa Fullscreen) */
+        .viewport {
+            position: relative;
+            max-width: 1024px; 
+            width: 100%;
+            aspect-ratio: 16/9; 
+            border-radius: 12px;
+            overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            background-color: #e5e5e5;
+            border: 6px solid #4a3b32; 
+        }
+
+        /* =========================================
+           FULLSCREEN PRESENTATION MODE (CHUẨN CANVA)
+           ========================================= */
+        .viewport:fullscreen {
+            max-width: 100% !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border: none !important;
+            border-radius: 0 !important;
+            background-color: #000 !important;
+            aspect-ratio: auto !important;
+        }
+        
+        .viewport:-webkit-full-screen {
+            max-width: 100% !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border: none !important;
+            border-radius: 0 !important;
+            background-color: #000 !important;
+            aspect-ratio: auto !important;
+        }
+
+        /* Khi Fullscreen: Cố định tỷ lệ ảnh 16:9 nằm giữa màn hình đen */
+        .viewport:fullscreen .infographic-container,
+        .viewport:-webkit-full-screen .infographic-container {
+            width: 100vw;
+            height: 56.25vw; /* Tỷ lệ 16:9 */
+            max-height: 100vh;
+            max-width: 177.78vh; /* Tỷ lệ 16:9 */
+            margin: auto;
+            position: absolute;
+            top: 0; bottom: 0; left: 0; right: 0;
+        }
+
+        /* Ẩn dòng chữ gợi ý nhấn F khi đã vào Fullscreen */
+        .viewport:fullscreen .fullscreen-hint,
+        .viewport:-webkit-full-screen .fullscreen-hint {
+            display: none;
+        }
+
+        /* =========================================
+           IMAGE CONTAINER & HOTSPOTS
+           ========================================= */
+        .infographic-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-origin: center center;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .hotspot {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 3px dashed #f1c40f;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .hotspot:hover {
+            background-color: rgba(241, 196, 15, 0.6);
+            transform: translate(-50%, -50%) scale(1.15);
+            border-style: solid;
+            animation: none;
+        }
+
+        .infographic-container.zoomed .hotspot {
+            transform: translate(-50%, -50%) scale(0.6);
+            border-width: 4px; 
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(241, 196, 15, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+        }
+
+        /* =========================================
+           SMART POPUP PANELS 
+           ========================================= */
+        .popup {
+            position: absolute;
+            width: 450px; 
+            max-height: 85vh;
+            background-color: #fdf8e7; 
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            border: 2px solid #5c4033;
+            border-radius: 8px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(139, 90, 43, 0.1);
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            
+            /* Tách riêng transition để lúc user cầm kéo khung không bị lag/giật */
+            transition: opacity 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        visibility 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+            /* Cho phép người dùng tự tay nắm kéo góc dưới bên phải để chỉnh kích thước */
+            resize: both; 
+            min-width: 350px; /* Chiều rộng tối thiểu để không bị nát khung */
+            min-height: 250px; /* Chiều cao tối thiểu */
+        }
+
+        /* Làm cho nút kéo góc (resizer) nổi bật, dễ nhìn dễ cầm */
+        .popup::-webkit-resizer {
+            background-color: #cd853f; /* Màu cam đất */
+            border-left: 2px solid #5c4033;
+            border-top: 2px solid #5c4033;
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.3);
+        }
+
+        /* Vị trí xuất hiện cho Popup */
+        .pos-right { right: 20px; top: 50%; transform: translateY(-50%) translateX(40px); }
+        .pos-right.active { transform: translateY(-50%) translateX(0); }
+
+        .pos-left { left: 20px; top: 50%; transform: translateY(-50%) translateX(-40px); }
+        .pos-left.active { transform: translateY(-50%) translateX(0); }
+
+        .pos-top { top: 20px; left: 50%; transform: translateX(-50%) translateY(-40px); width: 520px; } 
+        .pos-top.active { transform: translateX(-50%) translateY(0); }
+
+        .pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%) translateY(40px); width: 520px; } 
+        .pos-bottom.active { transform: translateX(-50%) translateY(0); }
+
+        .popup.active { opacity: 1; visibility: visible; }
+
+        /* Popup Header */
+        .popup-header {
+            background-color: #2c3e50; 
+            border-bottom: 4px solid #cd853f; 
+            padding: 15px 20px; 
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #fdf8e7;
+            font-size: 26px; 
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .close-btn:hover { opacity: 1; }
+
+        .popup-title {
+            margin: 0;
+            font-size: 22px; 
+            color: #fdf8e7;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-right: 30px; 
+        }
+
+        /* Popup Body */
+        .popup-body {
+            padding: 25px; 
+            overflow-y: auto; 
+            flex: 1; /* Cho phép thân tự động giãn dọc ra khi khung bị kéo to lên */
+        }
+
+        .popup-body::-webkit-scrollbar { width: 8px; }
+        .popup-body::-webkit-scrollbar-track { background: #e8dbce; }
+        .popup-body::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 4px; }
+
+        .popup-content {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 16px; 
+            color: #2d1c15; 
+            line-height: 1.6;
+        }
+
+        .popup-content li { margin-bottom: 12px; }
+        .popup-content strong { color: #8b2500; font-weight: 600; }
+
+        /* =========================================
+           LIVE EDIT FEATURE 
+           ========================================= */
+        [contenteditable="true"] {
+            border-radius: 4px;
+            transition: background-color 0.2s, outline 0.2s;
+            outline: 2px solid transparent;
+        }
+        
+        [contenteditable="true"]:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+            cursor: text;
+        }
+
+        [contenteditable="true"]:focus {
+            background-color: rgba(255, 255, 255, 0.9);
+            outline: 2px dashed #cd853f;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            color: #000;
+        }
+
+        .edit-hint {
+            font-size: 13px;
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: right;
+            margin-top: 15px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* =========================================
+           UI CONTROLS
+           ========================================= */
+        .zoom-out-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #4a3b32;
+            color: #fdf8e7;
+            border: 2px solid #cd853f;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 30;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .zoom-out-btn.show { opacity: 1; visibility: visible; }
+        .zoom-out-btn:hover { background-color: #2c3e50; border-color: #f1c40f; }
+
+        .fullscreen-hint {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            color: rgba(0,0,0,0.5);
+            font-size: 13px;
+            font-style: italic;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(255,255,255,0.7);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PHẦN TỬ VIEWPORT SẼ TRỞ THÀNH TOÀN MÀN HÌNH -->
+    <div class="viewport">
+        <!-- Nút Reset Zoom -->
+        <button id="btn-zoom-out" class="zoom-out-btn" onclick="resetZoom()">◂ Back to Map</button>
+
+        <div class="infographic-container" id="info-container">
+            <!-- TÊN ẢNH ĐƯỢC CHỈNH LẠI CHUẨN XÁC -->
+            <img src="chauchuppy.png" alt="The Americas Infographic" class="main-image">
+
+            <!-- Các điểm Click (Hotspots) được căn chỉnh tọa độ Zoom siêu chuẩn -->
+            
+            <!-- 1. Location/Terrain (Trái) -->
+            <div class="hotspot" style="top: 45%; left: 20%;" onclick="zoomTo(0, 25, 'popup-location', 'pos-right', event)"></div>
+            
+            <!-- 2. Climate (Giữa Trên) -->
+            <div class="hotspot" style="top: 22%; left: 52%;" onclick="zoomTo(100, 20, 'popup-climate', 'pos-right', event)"></div>
+            
+            <!-- 3. Rivers & Lakes (Giữa Dưới) -->
+            <div class="hotspot" style="top: 65%; left: 52%;" onclick="zoomTo(20, 80, 'popup-rivers', 'pos-left', event)"></div>
+            
+            <!-- 4. Population (Phải Trên) -->
+            <div class="hotspot" style="top: 25%; left: 82%;" onclick="zoomTo(100, 25, 'popup-population', 'pos-left', event)"></div>
+            
+            <!-- 5. Economy (Phải Dưới) -->
+            <div class="hotspot" style="top: 72%; left: 82%;" onclick="zoomTo(100, 95, 'popup-economy', 'pos-left', event)"></div>
+        </div>
+
+        <!-- =====================================
+             CÁC POPUP (CÓ THỂ CHỈNH SỬA TRỰC TIẾP & TỰ CHỈNH KÍCH THƯỚC KÉO/THẢ)
+             ===================================== -->
+        
+        <!-- POPUP 1: LOCATION -->
+        <div id="popup-location" class="popup">
+            <div class="popup-header">
+                <h4 class="popup-title" contenteditable="true">1. Location, Terrain & Resources</h4>
+                <button class="close-btn" onclick="closePopup('popup-location')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content" contenteditable="true">
+                    <li><strong>Location:</strong> Spans the Western Hemisphere from the Arctic Circle to near the South Pole. Total area ~42.13 million km².</li>
+                    <li><strong>Terrain:</strong> Massive young mountains in the West (Cordillera, Andes) and huge plains/plateaus in the East (Great Plains, Amazon).</li>
+                    <li><strong>Resources:</strong> Extremely rich but unevenly distributed. Abundant in copper, gold, iron, coal, and oil (Gulf of Mexico, Venezuela).</li>
+                </ul>
+                <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
+            </div>
+        </div>
+
+        <!-- POPUP 2: CLIMATE -->
+        <div id="popup-climate" class="popup">
+            <div class="popup-header">
+                <h4 class="popup-title" contenteditable="true">2. Climate Diversity</h4>
+                <button class="close-btn" onclick="closePopup('popup-climate')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content" contenteditable="true">
+                    <li><strong>North America:</strong> Contains almost all climate zones of the Northern Hemisphere (Polar, Temperate, Subtropical, Tropical).</li>
+                    <li><strong>South America:</strong> Predominantly hot zones (Equatorial, Tropical) down to Temperate in the south. It has no polar climate.</li>
+                    <li><strong>Extremes:</strong> Ranging from the freezing $-40^{\circ}C$ Arctic winters to the humid, heavy rainfall of the Amazon basin.</li>
+                </ul>
+                <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
+            </div>
+        </div>
+
+        <!-- POPUP 3: RIVERS & LAKES -->
+        <div id="popup-rivers" class="popup">
+            <div class="popup-header">
+                <h4 class="popup-title" contenteditable="true">3. Rivers, Lakes & Landscapes</h4>
+                <button class="close-btn" onclick="closePopup('popup-rivers')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content" contenteditable="true">
+                    <li><strong>Great Lakes & Mississippi:</strong> North America holds the world's largest freshwater lake system and the massive Mississippi river basin.</li>
+                    <li><strong>The Mighty Amazon:</strong> South America's Amazon boasts the world's largest drainage basin, holding 1/5 of the global freshwater supply.</li>
+                    <li><strong>Landscapes:</strong> A complete range from temperate coniferous forests to the world's highest forest cover in the Amazon rainforest.</li>
+                </ul>
+                <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
+            </div>
+        </div>
+
+        <!-- POPUP 4: POPULATION -->
+        <div id="popup-population" class="popup">
+            <div class="popup-header">
+                <h4 class="popup-title" contenteditable="true">4. Population & Culture</h4>
+                <button class="close-btn" onclick="closePopup('popup-population')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content" contenteditable="true">
+                    <li><strong>Population:</strong> Approx. 1.06 billion (2025). The US (347M), Brazil (213M), and Mexico (133M) are the most populous.</li>
+                    <li><strong>Distribution:</strong> Highly uneven. High density in the Caribbean, very low in areas like Greenland and northern Canada.</li>
+                    <li><strong>Diversity:</strong> A complex multi-racial continent blending Indigenous (Indian, Inuit), European, African, and mixed-race heritages.</li>
+                </ul>
+                <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
+            </div>
+        </div>
+
+        <!-- POPUP 5: ECONOMY -->
+        <div id="popup-economy" class="popup">
+            <div class="popup-header">
+                <h4 class="popup-title" contenteditable="true">5. Economy & Industries</h4>
+                <button class="close-btn" onclick="closePopup('popup-economy')">&times;</button>
+            </div>
+            <div class="popup-body">
+                <ul class="popup-content" contenteditable="true">
+                    <li><strong>North America:</strong> Generates ~32% of global GDP. World's leading center for finance, high-tech, aerospace, and highly mechanized agriculture.</li>
+                    <li><strong>Latin America:</strong> Heavily dependent on resource exports and agriculture. Brazil leads globally in exporting soybeans, coffee, and beef.</li>
+                    <li><strong>Development Gap:</strong> A significant economic divide remains between the high-income North and the developing nations of the South.</li>
+                </ul>
+                <div class="edit-hint">✏️ Click on text to edit | 📐 Pull the highlighted bottom-right corner to resize</div>
+            </div>
+        </div>
+        
+        <div class="fullscreen-hint">[ Press 'F' for Fullscreen ]</div>
+
+    </div>
+
+    <script>
+        const container = document.getElementById('info-container');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const allPopups = document.querySelectorAll('.popup');
+
+        function zoomTo(x, y, popupId, positionClass, event) {
+            event.stopPropagation();
+            
+            // Zoom vào tâm điểm
+            container.style.transformOrigin = `${x}% ${y}%`;
+            container.style.transform = 'scale(1.7)';
+            container.classList.add('zoomed');
+            btnZoomOut.classList.add('show');
+
+            // Ẩn tất cả các popup
+            allPopups.forEach(p => {
+                p.classList.remove('active', 'pos-right', 'pos-left', 'pos-top', 'pos-bottom');
+                // GHI CHÚ: Bỏ lệnh reset p.style.width và p.style.height ở đây để hệ thống luôn nhớ kích thước bạn đã kéo
+            });
+
+            // Gán vị trí thông minh cho popup và hiện lên
+            const targetPopup = document.getElementById(popupId);
+            targetPopup.classList.add(positionClass);
+            
+            setTimeout(() => {
+                targetPopup.classList.add('active');
+            }, 300);
+        }
+
+        function resetZoom() {
+            container.style.transform = 'scale(1)';
+            container.classList.remove('zoomed');
+            btnZoomOut.classList.remove('show');
+            allPopups.forEach(p => {
+                p.classList.remove('active');
+                // GHI CHÚ: Tương tự, bỏ lệnh reset kích thước khi đóng bảng
+            });
+        }
+
+        function closePopup(popupId) {
+            const p = document.getElementById(popupId);
+            p.classList.remove('active');
+        }
+
+        // Bỏ qua sự kiện click nếu click vào vùng chỉnh sửa text hoặc thanh scroll/resize
+        document.body.addEventListener('click', function(event) {
+            if(event.target.getAttribute('contenteditable') === 'true') {
+                return; 
+            }
+
+            let isClickInsidePopup = false;
+            allPopups.forEach(p => {
+                if (p.contains(event.target)) isClickInsidePopup = true;
+            });
+            if (!isClickInsidePopup && event.target !== btnZoomOut && !event.target.classList.contains('hotspot') && !event.target.classList.contains('close-btn')) {
+                resetZoom();
+            }
+        });
+
+        // ==========================================
+        // CẢI TIẾN TÍNH NĂNG TOÀN MÀN HÌNH (FULLSCREEN) 
+        // ==========================================
+        document.addEventListener('keydown', function(event) {
+            if (event.target.getAttribute('contenteditable') === 'true') {
+                return;
+            }
+
+            if (event.key === 'f' || event.key === 'F') {
+                toggleFullScreen();
+            }
+        });
+
+        function toggleFullScreen() {
+            const viewport = document.querySelector('.viewport');
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (viewport.requestFullscreen) {
+                    viewport.requestFullscreen().catch(err => {
+                        console.error(`Error: ${err.message}`);
+                    });
+                } else if (viewport.webkitRequestFullscreen) { /* Dành cho Safari */
+                    viewport.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Dành cho Safari */
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
