@@ -58,6 +58,20 @@
         /* Scrollbar riêng cho Sidebar nền tối */
         .dark-scroll::-webkit-scrollbar-thumb { background: #4b5563; }
         .dark-scroll::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        /* Animation cho bài quiz */
+        .quiz-success {
+            animation: pulse-green 0.5s ease;
+            border-color: #22c55e !important;
+            background-color: #f0fdf4 !important;
+        }
+        .quiz-error {
+            animation: shake-red 0.5s ease;
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        @keyframes pulse-green { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        @keyframes shake-red { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body class="flex h-screen w-full bg-slate-50 relative">
@@ -226,13 +240,12 @@
                             <h2 class="text-3xl font-bold text-slate-800">7. Tuyệt chiêu "Số Bù 2" - Cách tính phép trừ</h2>
                         </div>
                         <p class="text-slate-600 mb-8 text-lg leading-relaxed">
-                            Sự thật bất ngờ: <strong>Máy tính cực kỳ ngốc, nó không hề biết làm phép Trừ!</strong> Nó chỉ biết làm phép Cộng thôi. 
+                            Sự thật bất ngờ: <strong>Máy tính cực kỳ ngốc, nó không hề biết làm phép Trừ!</strong> Nó chỉ biết làm phép Cộng thôi.
                             Vậy để tính <code>3 - 5</code>, nó lén lút biến bài toán thành <code>3 + (-5)</code>. Vậy làm sao để máy tính tạo ra số <strong>-5</strong> từ số 5? Nó dùng cỗ máy phép thuật 2 bước:
                         </p>
 
                         <div class="bg-blue-50 p-6 md:p-8 rounded-3xl border border-blue-100">
                             
-                            <!-- Bài học Nhị Phân (MỚI BỔ SUNG) -->
                             <div class="bg-indigo-900 text-white p-6 md:p-8 rounded-2xl shadow-lg mb-10 relative overflow-hidden">
                                 <div class="relative z-10">
                                     <h3 class="text-xl md:text-2xl font-bold text-amber-400 mb-4 flex items-center gap-3">
@@ -278,20 +291,15 @@
                                     </div>
                                 </div>
                                 
-                                <!-- BƯỚC 2: CẬP NHẬT CỘNG THEO HÀNG DỌC CHI TIẾT -->
                                 <div class="flex flex-col md:flex-row items-start gap-4 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500 relative">
                                     <div class="w-12 h-12 bg-green-500 text-white rounded-full flex shrink-0 items-center justify-center font-black">BÙ 2</div>
                                     <div class="flex-1 w-full relative z-10">
                                         <p class="text-sm text-slate-500 font-bold mb-4">Bước 2: Lấy kết quả trên cộng thêm 1. (Đặt tính theo cột dọc nào!)</p>
 
                                         <div class="flex flex-col xl:flex-row gap-6 items-start w-full">
-                                            <!-- Khối đặt tính -->
                                             <div class="bg-slate-800 p-6 rounded-xl shadow-inner font-mono text-2xl w-full xl:w-auto flex flex-col items-center">
-                                                <!-- Hàng nhớ -->
                                                 <div class="flex text-red-400 text-sm h-6 font-bold mb-2 w-full justify-end" id="twos-carry-row"></div>
-                                                <!-- Hàng Bù 1 -->
                                                 <div class="flex text-amber-400 w-full justify-end" id="twos-bu1-row"></div>
-                                                <!-- Hàng + 1 -->
                                                 <div class="flex border-b-2 border-slate-500 pb-3 mb-3 relative w-full justify-end mt-1">
                                                     <span class="absolute left-0 top-0 text-slate-400 font-sans">+</span>
                                                     <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
@@ -303,13 +311,10 @@
                                                     <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
                                                     <span class="w-6 md:w-8 text-center text-green-400 font-bold">1</span>
                                                 </div>
-                                                <!-- Kết quả -->
                                                 <div class="flex text-green-400 font-bold w-full justify-end" id="twos-result-row"></div>
                                             </div>
 
-                                            <!-- Lời giải thích -->
                                             <div class="flex-1 space-y-2 bg-green-50 p-5 rounded-xl border border-green-200 text-slate-700 w-full" id="twos-explanation">
-                                                <!-- JS fills this -->
                                             </div>
                                         </div>
 
@@ -323,53 +328,67 @@
                     </div>
                 </section>
 
-                <!-- TRANG 8: Endian -->
+                <!-- TRANG 8: Endian (ĐÃ SỬA THEO YÊU CẦU: Cất giấu 12.34.56.78) -->
                 <section id="sec-8" class="lesson-section hidden">
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border-t-4 border-purple-600">
                         <div class="flex items-center gap-4 mb-8">
                             <span class="text-4xl">📦</span>
                             <h2 class="text-3xl font-bold text-slate-800">8. Xếp Hàng Vào Kho: Big & Little Endian</h2>
                         </div>
+                        <p class="text-slate-600 mb-4 text-lg leading-relaxed">
+                            Hãy tưởng tượng bạn có một dãy số bí mật rất dài: <strong class="text-2xl text-purple-600 ml-2">12.34.56.78</strong>
+                        </p>
+                        <ul class="text-slate-600 mb-8 text-lg list-disc list-inside ml-4 space-y-3">
+                            <li><strong>"Khúc To" (Quan trọng nhất):</strong> Là số <strong>12</strong> (hàng triệu, mất nó là toi).</li>
+                            <li><strong>"Khúc Đuôi" (Nhỏ nhất):</strong> Là số <strong>78</strong> (hàng đơn vị lẻ tẻ).</li>
+                        </ul>
                         <p class="text-slate-600 mb-8 text-lg leading-relaxed">
-                            Máy tính có kho bộ nhớ khổng lồ, chia thành vô số <strong>ô nhỏ</strong> (mỗi ô chứa vừa khít 1 Byte). Nếu có con số cực lớn cần tới 4 Byte để chứa, ta phải "cưa" nó làm 4 khúc. Vậy <strong>khúc nào cất vào ô đầu tiên?</strong>
+                            Bạn muốn cất giấu con số này vào <strong>4 cái tủ</strong> (đánh số thứ tự: Tủ 1000, 1001, 1002, 1003). Nhưng mỗi tủ nhỏ xíu chỉ cất vừa đúng 1 khúc. Bạn phải chặt con số ra làm 4 phần. <br/>Vậy <strong>khúc nào sẽ được cất vào cái tủ đầu tiên (Tủ 1000)?</strong>
                         </p>
 
-                        <div class="bg-slate-50 border border-slate-200 p-8 rounded-3xl">
+                        <div class="bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl">
                             <div class="text-center mb-8">
-                                <p class="text-slate-500 font-medium mb-3">Ví dụ ta có số siêu to khổng lồ cần 4 hộp (4 Byte) để chứa:</p>
-                                <div class="inline-flex flex-wrap justify-center gap-2 p-4 bg-white border border-slate-200 rounded-xl font-mono text-xl font-black shadow-sm">
-                                    <span class="text-red-500 bg-red-50 px-2 rounded" title="Khúc To Nhất">00000000</span>
-                                    <span class="text-orange-500 bg-orange-50 px-2 rounded">00000000</span>
-                                    <span class="text-blue-500 bg-blue-50 px-2 rounded">00011100</span>
-                                    <span class="text-green-500 bg-green-50 px-2 rounded" title="Khúc Nhỏ Nhất">11110011</span>
+                                <p class="text-slate-500 font-medium mb-3">4 khúc đã được "chặt" ra:</p>
+                                <div class="inline-flex flex-wrap justify-center gap-3 p-4 bg-white border border-slate-200 rounded-xl font-mono text-2xl font-black shadow-sm">
+                                    <span class="text-red-500 bg-red-50 px-4 py-2 rounded-lg" title="Khúc To Nhất">12</span>
+                                    <span class="text-orange-500 bg-orange-50 px-4 py-2 rounded-lg">34</span>
+                                    <span class="text-blue-500 bg-blue-50 px-4 py-2 rounded-lg">56</span>
+                                    <span class="text-green-500 bg-green-50 px-4 py-2 rounded-lg" title="Khúc Đuôi Nhỏ Nhất">78</span>
                                 </div>
                             </div>
 
-                            <div class="flex justify-center gap-4 mb-10">
-                                <button id="btn-big" class="px-8 py-4 rounded-full font-bold text-lg bg-purple-600 text-white ring-4 ring-purple-200 transition">Big Endian</button>
-                                <button id="btn-little" class="px-8 py-4 rounded-full font-bold text-lg bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition">Little Endian</button>
+                            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-10">
+                                <button id="btn-big" class="px-8 py-4 rounded-full font-bold text-lg bg-purple-600 text-white ring-4 ring-purple-200 transition shadow-md hover:scale-105">Big Endian (Trường phái Bình thường)</button>
+                                <button id="btn-little" class="px-8 py-4 rounded-full font-bold text-lg bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition shadow-sm hover:scale-105">Little Endian (Trường phái Lập dị)</button>
                             </div>
 
-                            <div class="bg-[#1e293b] p-8 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <div class="bg-[#1e293b] p-6 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden">
                                 <h4 id="endian-title" class="text-center text-purple-400 font-black text-2xl mb-3 uppercase tracking-widest">Đầu To Đi Trước (Big Endian)</h4>
-                                <p id="endian-desc" class="text-center text-slate-400 text-base mb-10 min-h-[48px]">Khúc quan trọng nhất (bên trái) được cất vào địa chỉ kho nhỏ nhất. Giống hệt cách con người viết chữ!</p>
+                                <p id="endian-desc" class="text-center text-slate-300 text-lg mb-10 min-h-[56px] leading-relaxed">
+                                    "Khúc to nhất" (12) được cất vào tủ đầu tiên (1000).<br/>
+                                    <span class="text-slate-400 text-sm">Mở tủ ra đọc một mạch từ trái sang phải: 12.34.56.78. Rất thuận mắt con người!</span>
+                                </p>
                                 
                                 <div class="flex flex-col md:flex-row justify-center gap-4 relative z-10">
-                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 border-red-500 shadow-lg" id="mem-1000">
-                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Địa chỉ 1000</div>
-                                        <div class="font-mono font-black text-2xl text-white val">00000000</div>
+                                    <!-- Tủ 1000 -->
+                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 shadow-lg" id="mem-1000">
+                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Tủ 1000</div>
+                                        <div class="font-mono font-black text-4xl text-white val">--</div>
                                     </div>
-                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 border-orange-500 shadow-lg" id="mem-1001">
-                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Địa chỉ 1001</div>
-                                        <div class="font-mono font-black text-2xl text-white val">00000000</div>
+                                    <!-- Tủ 1001 -->
+                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 shadow-lg" id="mem-1001">
+                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Tủ 1001</div>
+                                        <div class="font-mono font-black text-4xl text-white val">--</div>
                                     </div>
-                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 border-blue-500 shadow-lg" id="mem-1002">
-                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Địa chỉ 1002</div>
-                                        <div class="font-mono font-black text-2xl text-white val">00011100</div>
+                                    <!-- Tủ 1002 -->
+                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 shadow-lg" id="mem-1002">
+                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Tủ 1002</div>
+                                        <div class="font-mono font-black text-4xl text-white val">--</div>
                                     </div>
-                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 border-green-500 shadow-lg" id="mem-1003">
-                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Địa chỉ 1003</div>
-                                        <div class="font-mono font-black text-2xl text-white val">11110011</div>
+                                    <!-- Tủ 1003 -->
+                                    <div class="memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 shadow-lg" id="mem-1003">
+                                        <div class="text-sm text-slate-400 font-mono mb-3 uppercase font-bold tracking-wider">Tủ 1003</div>
+                                        <div class="font-mono font-black text-4xl text-white val">--</div>
                                     </div>
                                 </div>
                             </div>
@@ -377,30 +396,82 @@
                     </div>
                 </section>
 
-                <!-- TRANG 9: Quiz -->
+                <!-- TRANG 9: Quiz (ĐÃ NÂNG CẤP THÀNH 5 CÂU HỎI INTERACTIVE) -->
                 <section id="sec-9" class="lesson-section hidden">
                     <div class="bg-amber-50 p-6 md:p-8 rounded-3xl shadow-sm border-2 border-amber-200">
                         <div class="flex items-center gap-4 mb-8">
-                            <span class="text-4xl">📝</span>
-                            <h2 class="text-3xl font-black text-amber-800">Thử Thách Ôn Tập</h2>
+                            <span class="text-4xl">🏆</span>
+                            <h2 class="text-3xl font-black text-amber-800">Thử Thách Ôn Tập Cuối Chương</h2>
                         </div>
+                        <p class="text-amber-700 mb-8 text-lg font-medium">Hoàn thành 5 câu hỏi dưới đây để chứng minh bạn đã nắm vững mọi bí kíp của máy tính nhé!</p>
+                        
                         <div class="space-y-6">
-                            <div class="p-6 bg-white rounded-2xl shadow-sm border border-amber-100">
-                                <p class="font-bold text-slate-800 text-lg mb-4">1. Số 9 (thập phân) đổi sang nhị phân là gì?</p>
-                                <div class="flex gap-3">
-                                    <input type="text" id="quiz-1" class="border-2 border-slate-200 rounded-xl p-4 flex-1 text-lg font-mono focus:border-amber-400 outline-none" placeholder="Nhập nhị phân...">
-                                    <button id="btn-q1" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition">KIỂM TRA</button>
+                            <!-- Câu 1 -->
+                            <div class="quiz-card p-6 bg-white rounded-2xl shadow-sm border border-amber-100 transition-colors" id="qc-1">
+                                <p class="font-bold text-slate-800 text-lg mb-4"><span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-lg mr-2">Câu 1</span> Số 9 (hệ thập phân) đổi sang hệ nhị phân là gì?</p>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <input type="text" id="quiz-1" class="border-2 border-slate-200 rounded-xl p-4 flex-1 text-xl font-mono focus:border-amber-400 outline-none" placeholder="Nhập dãy nhị phân...">
+                                    <button onclick="checkQ1()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition shadow-md">KIỂM TRA</button>
                                 </div>
-                                <div id="res-q1" class="mt-4 text-base font-bold"></div>
+                                <div id="res-q1" class="mt-4 text-base font-bold hidden"></div>
                             </div>
-                            <div class="p-6 bg-white rounded-2xl shadow-sm border border-amber-100">
-                                <p class="font-bold text-slate-800 text-lg mb-4">2. Số Hexa "F" tương đương với số mấy trong hệ thập phân?</p>
-                                <div class="flex gap-3">
-                                    <input type="number" id="quiz-2" class="border-2 border-slate-200 rounded-xl p-4 flex-1 text-lg font-mono focus:border-amber-400 outline-none" placeholder="Nhập thập phân...">
-                                    <button id="btn-q2" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition">KIỂM TRA</button>
+
+                            <!-- Câu 2 -->
+                            <div class="quiz-card p-6 bg-white rounded-2xl shadow-sm border border-amber-100 transition-colors" id="qc-2">
+                                <p class="font-bold text-slate-800 text-lg mb-4"><span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-lg mr-2">Câu 2</span> Trong hệ Hexa, chữ cái "F" tương đương với số mấy (hệ thập phân)?</p>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <input type="number" id="quiz-2" class="border-2 border-slate-200 rounded-xl p-4 flex-1 text-xl font-mono focus:border-amber-400 outline-none" placeholder="Nhập số thập phân...">
+                                    <button onclick="checkQ2()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition shadow-md">KIỂM TRA</button>
                                 </div>
-                                <div id="res-q2" class="mt-4 text-base font-bold"></div>
+                                <div id="res-q2" class="mt-4 text-base font-bold hidden"></div>
                             </div>
+
+                            <!-- Câu 3 (Trắc nghiệm) -->
+                            <div class="quiz-card p-6 bg-white rounded-2xl shadow-sm border border-amber-100 transition-colors" id="qc-3">
+                                <p class="font-bold text-slate-800 text-lg mb-4"><span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-lg mr-2">Câu 3</span> Máy tính không biết làm phép TRỪ, vậy nó dùng tuyệt chiêu gì để giải quyết bài toán trừ?</p>
+                                <div class="flex flex-col gap-3">
+                                    <label class="flex items-center gap-3 p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-500 focus:ring-amber-400"> <span class="text-lg text-slate-700">A. Dùng thuật toán Mượn 1</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-500 focus:ring-amber-400"> <span class="text-lg text-slate-700">B. Dùng phép tính Số Bù 2</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-500 focus:ring-amber-400"> <span class="text-lg text-slate-700">C. Dùng phép nhân đảo ngược</span>
+                                    </label>
+                                    <button onclick="checkQ3()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition shadow-md mt-2 w-full sm:w-auto self-start">KIỂM TRA</button>
+                                </div>
+                                <div id="res-q3" class="mt-4 text-base font-bold hidden"></div>
+                            </div>
+
+                            <!-- Câu 4 (Trắc nghiệm) -->
+                            <div class="quiz-card p-6 bg-white rounded-2xl shadow-sm border border-amber-100 transition-colors" id="qc-4">
+                                <p class="font-bold text-slate-800 text-lg mb-4"><span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-lg mr-2">Câu 4</span> Nếu máy tính đang ở chế độ nhớ "Số Có Dấu", bóng đèn (Bit) ngoài cùng bên trái dùng để làm gì?</p>
+                                <div class="flex flex-col gap-3">
+                                    <label class="flex items-center gap-3 p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="q4" value="A" class="w-5 h-5 text-amber-500 focus:ring-amber-400"> <span class="text-lg text-slate-700">A. Làm Đèn báo nợ (Chỉ định số Âm hay Dương)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="q4" value="B" class="w-5 h-5 text-amber-500 focus:ring-amber-400"> <span class="text-lg text-slate-700">B. Nhân đôi sức chứa của ô nhớ</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="q4" value="C" class="w-5 h-5 text-amber-500 focus:ring-amber-400"> <span class="text-lg text-slate-700">C. Cảnh báo khi máy tính bị lỗi</span>
+                                    </label>
+                                    <button onclick="checkQ4()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition shadow-md mt-2 w-full sm:w-auto self-start">KIỂM TRA</button>
+                                </div>
+                                <div id="res-q4" class="mt-4 text-base font-bold hidden"></div>
+                            </div>
+
+                            <!-- Câu 5 -->
+                            <div class="quiz-card p-6 bg-white rounded-2xl shadow-sm border border-amber-100 transition-colors" id="qc-5">
+                                <p class="font-bold text-slate-800 text-lg mb-4"><span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-lg mr-2">Câu 5</span> Mỗi 1 chữ số trong hệ Hexa đại diện cho bao nhiêu bóng đèn (Bit) Nhị phân?</p>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <input type="number" id="quiz-5" class="border-2 border-slate-200 rounded-xl p-4 flex-1 text-xl font-mono focus:border-amber-400 outline-none" placeholder="Nhập số lượng bit...">
+                                    <button onclick="checkQ5()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-black hover:bg-amber-600 transition shadow-md">KIỂM TRA</button>
+                                </div>
+                                <div id="res-q5" class="mt-4 text-base font-bold hidden"></div>
+                            </div>
+
                         </div>
                     </div>
                 </section>
@@ -410,24 +481,17 @@
     </main>
 
     <!-- LEFT SIDEBAR (MENU THEO PHONG CÁCH GEMINI) -->
-    <!-- Nền Overlay cho Mobile -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity opacity-0"></div>
     
-    <!-- Sidebar Container -->
     <aside id="left-sidebar" class="fixed left-0 top-0 h-full w-[300px] md:w-[320px] bg-[#131314] text-[#e3e3e3] transform -translate-x-full transition-transform duration-300 z-50 flex flex-col shadow-2xl">
-        
-        <!-- Sidebar Header -->
         <div class="p-4 flex justify-between items-center mb-2">
             <span class="text-sm text-[#949ba4] font-semibold tracking-wider uppercase ml-2">Mục lục giáo trình</span>
             <button id="close-sidebar" class="p-2 hover:bg-[#282a2c] rounded-full transition text-[#a8b3bd]">
-                <!-- Dấu X đóng menu -->
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
 
         <div class="px-3 flex-1 overflow-y-auto dark-scroll flex flex-col">
-            
-            <!-- Nút Tiêu đề lớn (Style Gemini) -->
             <div class="bg-[#282a2c] hover:bg-[#383a40] text-white rounded-full py-3.5 px-5 flex items-center justify-between cursor-pointer transition mb-6 mx-1">
                 <span class="font-medium text-sm">Chương I. Số học</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -435,14 +499,11 @@
             
             <div class="text-xs font-semibold text-[#a8b3bd] mb-3 px-3">CÁC BÀI HỌC GẦN ĐÂY</div>
             
-            <!-- Danh sách Bài Học -->
             <nav class="space-y-[2px] mb-8" id="sidebar-nav">
-                <!-- Item 1 -->
                 <div data-target="sec-1" class="sidebar-item active cursor-pointer py-3 px-4 rounded-full flex items-center gap-3 bg-[#004a77] text-[#c2e7ff] transition-colors">
                     <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     <span class="truncate text-sm font-medium">1. Hệ Nhị Phân là gì?</span>
                 </div>
-                <!-- Các Item khác -->
                 <div data-target="sec-2" class="sidebar-item cursor-pointer py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
                     <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     <span class="truncate text-sm font-medium">2. Đổi Số Nguyên</span>
@@ -464,8 +525,8 @@
                     <span class="truncate text-sm font-medium">6. Số Âm & Số Dương</span>
                 </div>
                 <div data-target="sec-7" class="sidebar-item cursor-pointer py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
-                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-amber-400 opacity-90"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="truncate text-sm font-medium">7. Số Bù 2 (Đặc biệt)</span>
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-blue-400 opacity-90"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">7. Số Bù 2 (Tuyệt chiêu trừ)</span>
                 </div>
                 <div data-target="sec-8" class="sidebar-item cursor-pointer py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
                     <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-purple-400 opacity-90"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -475,7 +536,7 @@
                 <div class="mt-6 mb-2 pt-4 border-t border-[#282a2c]"></div>
                 
                 <div data-target="sec-9" class="sidebar-item cursor-pointer py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
-                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-green-400 opacity-90"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-amber-400 opacity-90"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     <span class="truncate text-sm font-medium">9. Thử Thách Ôn Tập</span>
                 </div>
             </nav>
@@ -488,10 +549,9 @@
 
     <script>
         // ================= SPA NAVIGATION LOGIC =================
-        const leftSidebar = document.getElementById('left-sidebar'); 
+        const leftSidebar = document.getElementById('left-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         const mainScrollArea = document.getElementById('main-scroll-area');
-        
         let isSidebarOpen = false;
 
         function toggleSidebar(forceState) {
@@ -503,13 +563,13 @@
             } else {
                 leftSidebar.classList.add('-translate-x-full');
                 overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300); 
+                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
 
         document.getElementById('open-sidebar').addEventListener('click', () => toggleSidebar(true));
         document.getElementById('close-sidebar').addEventListener('click', () => toggleSidebar(false));
-        overlay.addEventListener('click', () => toggleSidebar(false)); 
+        overlay.addEventListener('click', () => toggleSidebar(false));
 
         function switchPage(targetId) {
             document.querySelectorAll('.lesson-section').forEach(sec => {
@@ -520,7 +580,7 @@
             const targetSec = document.getElementById(targetId);
             if(targetSec) {
                 targetSec.classList.remove('hidden');
-                void targetSec.offsetWidth; 
+                void targetSec.offsetWidth;
                 targetSec.classList.add('animate-fade-in');
             }
             
@@ -534,10 +594,7 @@
                 }
             });
 
-            if(targetId === 'sec-1' && chartInstance) {
-                setTimeout(() => chartInstance.resize(), 50);
-            }
-
+            if(targetId === 'sec-1' && chartInstance) { setTimeout(() => chartInstance.resize(), 50); }
             mainScrollArea.scrollTop = 0;
             toggleSidebar(false);
         }
@@ -579,12 +636,8 @@
         document.getElementById('btn-calc-int').onclick = () => {
             let num = parseInt(document.getElementById('input-int').value);
             const output = document.getElementById('output-int');
-            if (isNaN(num) || num < 0) {
-                output.innerHTML = '<span class="text-red-500">Vui lòng nhập số nguyên dương.</span>'; return;
-            }
-            if (num === 0) {
-                output.innerHTML = '0 : 2 = 0 dư <strong>0</strong><br><br><span class="text-blue-600 font-bold">Kết quả: 0</span>'; return;
-            }
+            if (isNaN(num) || num < 0) { output.innerHTML = '<span class="text-red-500">Vui lòng nhập số nguyên dương.</span>'; return; }
+            if (num === 0) { output.innerHTML = '0 : 2 = 0 dư <strong>0</strong><br><br><span class="text-blue-600 font-bold">Kết quả: 0</span>'; return; }
             let html = '', remainders = [], originalNum = num;
             while (num > 0) {
                 let rem = num % 2, nextNum = Math.floor(num / 2);
@@ -598,9 +651,7 @@
         document.getElementById('btn-calc-frac').onclick = () => {
             let num = parseFloat(document.getElementById('input-frac').value);
             const output = document.getElementById('output-frac');
-            if (isNaN(num) || num <= 0 || num >= 1) {
-                output.innerHTML = '<span class="text-red-500">Vui lòng nhập số lẻ trong khoảng (0, 1). Ví dụ: 0.625</span>'; return;
-            }
+            if (isNaN(num) || num <= 0 || num >= 1) { output.innerHTML = '<span class="text-red-500">Vui lòng nhập số lẻ khoảng (0, 1).</span>'; return; }
             let html = '', bitsArray = [], iterations = 0, originalNum = num;
             while (num > 0 && iterations < 8) {
                 let mult = num * 2, intPart = Math.floor(mult);
@@ -668,64 +719,47 @@
             document.getElementById('val-signed').innerText = intBits[0] ? unVal - 256 : unVal;
         }
 
-        // --- Phần 7: Số Bù 2 CẬP NHẬT CỘNG NHỊ PHÂN THEO HÀNG DỌC ---
+        // --- Phần 7: Số Bù 2 ---
         document.getElementById('btn-calc-twos').onclick = () => {
             let val = parseInt(document.getElementById('input-twos').value);
             if (isNaN(val) || val < 0 || val > 127) { alert("Chỉ nhập số dương từ 0 đến 127 nhé!"); return; }
             
-            let binStr = val.toString(2).padStart(8, '0'); 
+            let binStr = val.toString(2).padStart(8, '0');
             document.getElementById('twos-step0').innerText = binStr;
             
-            let flipStr = binStr.split('').map(b => b === '0' ? '1' : '0').join(''); 
+            let flipStr = binStr.split('').map(b => b === '0' ? '1' : '0').join('');
             document.getElementById('twos-step1').innerText = flipStr;
 
-            // XỬ LÝ PHÉP CỘNG BÙ 2 VÀ TẠO GIAO DIỆN
             let flipArr = flipStr.split('').map(Number);
-            let carryArrForView = new Array(8).fill('&nbsp;'); // Dùng để in số "nhớ" ra giao diện
+            let carryArrForView = new Array(8).fill('&nbsp;');
             let resultArr = new Array(8).fill(0);
             let explanationHtml = '';
-            
-            let carry = 1; // Khởi đầu ta luôn cộng thêm 1
+            let carry = 1; 
             let hasLoggedNoCarry = false;
 
-            // Chạy phép cộng từ phải sang trái (từ bit thứ 7 về bit thứ 0)
             for (let i = 7; i >= 0; i--) {
                 let bit = flipArr[i];
                 let sum = bit + carry;
 
-                if (sum === 2) { // 1 + 1 = 10 (viết 0 nhớ 1)
-                    resultArr[i] = 0;
-                    carry = 1;
-                    if (i > 0) carryArrForView[i - 1] = '1'; // Hiển thị số 1 nhỏ màu đỏ ở cột kế tiếp
-
-                    if (i === 7) {
-                        explanationHtml += `<p class="mb-2">👉 <b>Cột 1 (ngoài cùng bên phải):</b> <code>${bit} + 1 = 10</code>. <span class="text-red-600 font-bold bg-red-100 px-2 rounded">Viết 0, nhớ 1</span> sang cột 2.</p>`;
-                    } else {
-                        explanationHtml += `<p class="mb-2">👉 <b>Cột ${8 - i}:</b> Ở trên là ${bit}, cộng thêm 1 (nhớ) <code>= 10</code>. Tiếp tục <span class="text-red-600 font-bold bg-red-100 px-2 rounded">viết 0, nhớ 1</span> sang trái.</p>`;
-                    }
-                } else { // sum là 0 hoặc 1 (không có nhớ)
+                if (sum === 2) {
+                    resultArr[i] = 0; carry = 1;
+                    if (i > 0) carryArrForView[i - 1] = '1';
+                    if (i === 7) explanationHtml += `<p class="mb-2">👉 <b>Cột 1 (phải cùng):</b> <code>${bit} + 1 = 10</code>. <span class="text-red-600 font-bold bg-red-100 px-2 rounded">Viết 0, nhớ 1</span> sang trái.</p>`;
+                    else explanationHtml += `<p class="mb-2">👉 <b>Cột ${8 - i}:</b> Ở trên là ${bit}, cộng thêm 1 (nhớ) <code>= 10</code>. Tiếp tục <span class="text-red-600 font-bold bg-red-100 px-2 rounded">viết 0, nhớ 1</span>.</p>`;
+                } else {
                     resultArr[i] = sum;
-
-                    if (i === 7) {
-                        explanationHtml += `<p class="mb-2">👉 <b>Cột 1 (ngoài cùng bên phải):</b> <code>${bit} + 1 = ${sum}</code>. Viết ${sum}, không có nhớ.</p>`;
-                    } else if (carry === 1) { // Có "nhớ" từ cột trước bay sang
-                        explanationHtml += `<p class="mb-2">👉 <b>Cột ${8 - i}:</b> Ở trên là ${bit}, cộng thêm 1 (nhớ) <code>= ${sum}</code>. Viết ${sum}. <b>Đã hết nhớ!</b></p>`;
-                    } else if (!hasLoggedNoCarry && i < 7) {
-                        // In câu chốt khi đã hết sạch số nhớ
+                    if (i === 7) explanationHtml += `<p class="mb-2">👉 <b>Cột 1 (phải cùng):</b> <code>${bit} + 1 = ${sum}</code>. Viết ${sum}, không có nhớ.</p>`;
+                    else if (carry === 1) explanationHtml += `<p class="mb-2">👉 <b>Cột ${8 - i}:</b> Ở trên là ${bit}, cộng thêm 1 (nhớ) <code>= ${sum}</code>. Viết ${sum}. <b>Đã hết nhớ!</b></p>`;
+                    else if (!hasLoggedNoCarry && i < 7) {
                         explanationHtml += `<div class="bg-green-100/70 p-3 rounded-lg border border-green-300 mt-4 shadow-sm"><span class="text-xl">✨</span> <b class="text-green-800">Các cột còn lại không bị "nhớ" nữa, cứ thế hạ thẳng xuống là xong!</b></div>`;
                         hasLoggedNoCarry = true;
                     }
-                    
-                    carry = 0; // Xóa trạng thái nhớ
+                    carry = 0;
                 }
             }
 
-            // IN RA MÀN HÌNH THEO HÀNG DỌC
-            let carryRowHtml = '';
-            let bu1RowHtml = '';
-            let resultRowHtml = '';
+            let carryRowHtml = '', bu1RowHtml = '', resultRowHtml = '';
             for(let i=0; i<8; i++){
-                // w-6 hoặc w-8 giúp các chữ số thẳng hàng tắp lự
                 carryRowHtml += `<span class="w-6 md:w-8 text-center">${carryArrForView[i]}</span>`;
                 bu1RowHtml += `<span class="w-6 md:w-8 text-center">${flipArr[i]}</span>`;
                 resultRowHtml += `<span class="w-6 md:w-8 text-center">${resultArr[i]}</span>`;
@@ -735,14 +769,13 @@
             document.getElementById('twos-bu1-row').innerHTML = bu1RowHtml;
             document.getElementById('twos-result-row').innerHTML = resultRowHtml;
             document.getElementById('twos-explanation').innerHTML = explanationHtml;
-            
             document.getElementById('twos-result').innerText = `-${val}`;
         };
 
-        // --- Phần 8: Endian ---
+        // --- Phần 8: Endian (CẬP NHẬT 12.34.56.78) ---
         const endianBytes = [
-            { v: '00000000', c: 'border-red-500', bg: 'bg-red-500' }, { v: '00000000', c: 'border-orange-500', bg: 'bg-orange-500' },
-            { v: '00011100', c: 'border-blue-500', bg: 'bg-blue-500' }, { v: '11110011', c: 'border-green-500', bg: 'bg-green-500' }
+            { v: '12', c: 'border-red-500' }, { v: '34', c: 'border-orange-500' },
+            { v: '56', c: 'border-blue-500' }, { v: '78', c: 'border-green-500' }
         ];
         function renderEndian(type) {
             const btnBig = document.getElementById('btn-big'), btnLittle = document.getElementById('btn-little');
@@ -750,22 +783,79 @@
             const boxes = [document.getElementById('mem-1000'), document.getElementById('mem-1001'), document.getElementById('mem-1002'), document.getElementById('mem-1003')];
 
             if(type === 'big') {
-                btnBig.className = "px-8 py-4 rounded-full font-bold text-lg bg-purple-600 text-white ring-4 ring-purple-200 transition";
-                btnLittle.className = "px-8 py-4 rounded-full font-bold text-lg bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition";
-                title.innerText = "Đầu To Đi Trước (Big Endian)"; title.className = "text-center text-purple-400 font-black text-2xl mb-3 uppercase tracking-widest";
-                desc.innerText = "Khúc quan trọng nhất (bên trái) được cất vào địa chỉ kho nhỏ nhất. Giống hệt cách con người viết chữ!";
+                btnBig.className = "px-8 py-4 rounded-full font-bold text-lg bg-purple-600 text-white ring-4 ring-purple-200 transition shadow-md scale-105";
+                btnLittle.className = "px-8 py-4 rounded-full font-bold text-lg bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition shadow-sm";
+                title.innerText = "Đầu To Đi Trước (Big Endian)"; 
+                desc.innerHTML = `"Khúc to nhất" (12) được cất vào tủ đầu tiên (1000).<br/><span class="text-slate-400 text-sm">Mở tủ ra đọc một mạch từ trái sang phải: 12.34.56.78. Rất thuận mắt con người!</span>`;
                 boxes.forEach((box, i) => { box.className = `memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 ${endianBytes[i].c} shadow-lg transition-colors`; box.querySelector('.val').innerText = endianBytes[i].v; });
             } else {
-                btnLittle.className = "px-8 py-4 rounded-full font-bold text-lg bg-blue-500 text-white ring-4 ring-blue-200 transition";
-                btnBig.className = "px-8 py-4 rounded-full font-bold text-lg bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition";
-                title.innerText = "Cái Đuôi Đi Trước (Little Endian)"; title.className = "text-center text-blue-400 font-black text-2xl mb-3 uppercase tracking-widest";
-                desc.innerText = "Khúc bé nhất (cái đuôi bên phải) được cất vào địa chỉ kho nhỏ nhất. Cách này CPU của hãng Intel cực kỳ thích dùng!";
+                btnLittle.className = "px-8 py-4 rounded-full font-bold text-lg bg-blue-500 text-white ring-4 ring-blue-200 transition shadow-md scale-105";
+                btnBig.className = "px-8 py-4 rounded-full font-bold text-lg bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition shadow-sm";
+                title.innerText = "Cái Đuôi Đi Trước (Little Endian)"; 
+                title.className = "text-center text-blue-400 font-black text-2xl mb-3 uppercase tracking-widest";
+                desc.innerHTML = `"Khúc bé nhất" (cái đuôi 78) được cất vào tủ đầu tiên (1000).<br/><span class="text-slate-400 text-sm">Nhìn ngược đời (78.56.34.12) nhưng CPU cực kỳ thích vì nó làm toán từ hàng đơn vị trở lên!</span>`;
                 let reversedBytes = [...endianBytes].reverse();
                 boxes.forEach((box, i) => { box.className = `memory-box bg-slate-700 rounded-xl p-6 flex-1 text-center border-t-8 ${reversedBytes[i].c} shadow-lg transition-colors`; box.querySelector('.val').innerText = reversedBytes[i].v; });
             }
         }
-        document.getElementById('btn-big').onclick = () => renderEndian('big');
-        document.getElementById('btn-little').onclick = () => renderEndian('little');
+
+        // --- Phần 9: Quiz (CẬP NHẬT ĐẦY ĐỦ 5 CÂU) ---
+        function setFeedback(cardId, resId, isSuccess, msg) {
+            const card = document.getElementById(cardId);
+            const res = document.getElementById(resId);
+            res.classList.remove('hidden');
+            res.innerHTML = msg;
+            
+            card.classList.remove('quiz-success', 'quiz-error');
+            // Force reflow
+            void card.offsetWidth;
+            card.classList.add(isSuccess ? 'quiz-success' : 'quiz-error');
+        }
+
+        function checkQ1() {
+            const ans = document.getElementById('quiz-1').value.trim();
+            if (ans === '1001') setFeedback('qc-1', 'res-q1', true, '<span class="text-green-600">✅ Chính xác! (9 : 2 = 4 dư 1, 4 : 2 = 2 dư 0, 2 : 2 = 1 dư 0, 1 : 2 = 0 dư 1 -> Đọc ngược lại là 1001)</span>');
+            else setFeedback('qc-1', 'res-q1', false, '<span class="text-red-500">❌ Chưa đúng rồi, chia liên tục cho 2 rồi lấy phần dư nhé!</span>');
+        }
+
+        function checkQ2() {
+            const ans = document.getElementById('quiz-2').value.trim();
+            if (ans === '15') setFeedback('qc-2', 'res-q2', true, '<span class="text-green-600">✅ Chính xác! F là giá trị lớn nhất của 1 chữ số Hexa, tương đương 15.</span>');
+            else setFeedback('qc-2', 'res-q2', false, '<span class="text-red-500">❌ Chưa đúng, đếm tiếp từ A=10, B=11... xem F là bao nhiêu nhé!</span>');
+        }
+
+        function checkQ3() {
+            const checked = document.querySelector('input[name="q3"]:checked');
+            if (!checked) { setFeedback('qc-3', 'res-q3', false, '<span class="text-red-500">⚠️ Vui lòng chọn một đáp án!</span>'); return; }
+            if (checked.value === 'B') setFeedback('qc-3', 'res-q3', true, '<span class="text-green-600">✅ Chính xác! Máy tính dùng Số Bù 2 để biến phép Trừ thành phép Cộng với số âm.</span>');
+            else setFeedback('qc-3', 'res-q3', false, '<span class="text-red-500">❌ Sai rồi, hãy xem lại phần Tuyệt chiêu ở Mục 7 nhé!</span>');
+        }
+
+        function checkQ4() {
+            const checked = document.querySelector('input[name="q4"]:checked');
+            if (!checked) { setFeedback('qc-4', 'res-q4', false, '<span class="text-red-500">⚠️ Vui lòng chọn một đáp án!</span>'); return; }
+            if (checked.value === 'A') setFeedback('qc-4', 'res-q4', true, '<span class="text-green-600">✅ Chuẩn luôn! Bit đó được gọi là Sign Bit (Bit dấu).</span>');
+            else setFeedback('qc-4', 'res-q4', false, '<span class="text-red-500">❌ Không đúng, nhớ lại ví dụ chiếc "Đèn báo nợ" ở Mục 6 xem nào!</span>');
+        }
+
+        function checkQ5() {
+            const ans = document.getElementById('quiz-5').value.trim();
+            if (ans === '4') setFeedback('qc-5', 'res-q5', true, '<span class="text-green-600">✅ Chính xác! Mỗi chữ số Hexa đại diện cho đúng 4 bit (Vì 2^4 = 16).</span>');
+            else setFeedback('qc-5', 'res-q5', false, '<span class="text-red-500">❌ Gần đúng rồi, gợi ý: 2 mũ mấy bằng 16?</span>');
+        }
+
+        // Gắn phím Enter cho các input text
+        ['quiz-1', 'quiz-2', 'quiz-5'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    if(id==='quiz-1') checkQ1();
+                    if(id==='quiz-2') checkQ2();
+                    if(id==='quiz-5') checkQ5();
+                }
+            });
+        });
 
         // --- Init ---
         window.onload = () => {
@@ -782,7 +872,8 @@
             updateUI(); initIntBulbs();
             document.getElementById('btn-calc-int').click(); document.getElementById('btn-calc-frac').click();
             document.getElementById('btn-calc-hex').click(); document.getElementById('btn-calc-hex-to-dec').click();
-            document.getElementById('btn-calc-twos').click(); // Chạy sẵn mẫu
+            document.getElementById('btn-calc-twos').click();
+            document.getElementById('btn-big').click(); // Chạy sẵn Endian mặc định
             
             toggleSidebar(true);
         };
