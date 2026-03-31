@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Bubble Sort Trực Quan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Hiệu ứng chuyển động mượt mà cho các khối số */
+        .array-block {
+            transition: left 0.4s ease-in-out, background-color 0.3s, transform 0.2s;
+            position: absolute;
+            top: 20px;
+        }
+        /* Hiệu ứng nhấp nháy nhẹ cho khung giải thích để thu hút sự chú ý */
+        @keyframes flashInfo {
+            0% { background-color: #fef9c3; } /* yellow-100 */
+            100% { background-color: #f8fafc; } /* slate-50 */
+        }
+        .flash-effect {
+            animation: flashInfo 0.6s ease-out;
+        }
+        /* Tuỳ chỉnh thanh cuộn cho code */
+        pre::-webkit-scrollbar, .resizable-panel::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        pre::-webkit-scrollbar-thumb, .resizable-panel::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 4px;
+        }
+        /* Style cho phần comment code để phân biệt */
+        .code-comment {
+            color: #94a3b8; /* slate-400 */
+            font-style: italic;
+        }
+        /* Style cho phép tự do kéo thả kích thước khung code */
+        .resizable-panel {
+            resize: both;
+            overflow: auto;
+            min-height: 250px;
+            min-width: 280px;
+            max-width: 100%; /* Đảm bảo không bị kéo tràn ra khỏi màn hình */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 pb-20">
+
+    <div class="max-w-5xl mx-auto pt-8 px-4">
+        <!-- Tiêu đề & Lý thuyết -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
+            <h1 class="text-3xl font-bold text-blue-600 mb-3">Học Sắp Xếp Nổi Bọt (Bubble Sort)</h1>
+            <p class="mb-2"><strong>Ý tưởng cốt lõi:</strong> Thuật toán sẽ duyệt qua mảng nhiều lần. Trong mỗi lần duyệt, nó so sánh <strong>hai phần tử đứng cạnh nhau</strong>. Nếu phần tử đứng trước lớn hơn phần tử đứng sau (sai thứ tự), nó sẽ <strong>hoán đổi</strong> hai phần tử đó. Quá trình này giúp phần tử lớn nhất "nổi" dần về phía cuối mảng sau mỗi vòng lặp.</p>
+            <p class="text-gray-600 text-sm italic">💡 Cứ tiếp tục như vậy, mảng sẽ được sắp xếp hoàn toàn!</p>
+        </div>
+
+        <!-- Khu vực Điều khiển & Input -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">1. Nhập Dữ Liệu</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <input type="text" id="arrayInput" value="45, 12, 89, 33, 21, 56, 9, 77, 64, 2" 
+                    class="flex-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-lg"
+                    placeholder="Nhập các số cách nhau bằng dấu phẩy...">
+                <button onclick="initSimulation()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md whitespace-nowrap">
+                    Bắt đầu mô phỏng
+                </button>
+            </div>
+            <p id="errorMsg" class="text-red-500 mt-2 text-sm hidden">Vui lòng nhập danh sách các số hợp lệ, cách nhau bằng dấu phẩy.</p>
+        </div>
+
+        <!-- Khu vực Mô phỏng Hình ảnh -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-700">2. Mô phỏng Chuyển động</h2>
+                <div class="flex gap-2">
+                    <button onclick="autoPlay()" id="btnAuto" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-2 px-4 rounded-lg transition">
+                        ▶ Chơi tự động
+                    </button>
+                    <button onclick="nextStep()" id="btnNext" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition shadow-md">
+                        Bước tiếp theo ⏭
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khung chứa các phần tử mảng -->
+            <div id="arrayContainer" class="relative w-full h-32 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                <!-- Các thẻ div chứa số sẽ được sinh ra ở đây qua JS -->
+            </div>
+
+            <!-- Chú thích màu sắc -->
+            <div class="flex flex-wrap justify-center gap-6 mt-4 text-sm text-gray-600">
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-blue-500 rounded"></div> Chưa sắp xếp</div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-yellow-400 rounded"></div> Đang so sánh</div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-red-500 rounded"></div> Hoán đổi</div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-green-500 rounded"></div> Đã đúng vị trí</div>
+            </div>
+        </div>
+
+        <!-- Khu vực Code & Giải thích (Bố cục 2 cột linh hoạt Flexbox) -->
+        <div class="flex flex-col lg:flex-row gap-6 items-stretch">
+            
+            <!-- Cột Code (Đã thêm class resizable-panel để cho kéo thả kích thước) -->
+            <div class="bg-slate-800 rounded-2xl shadow-sm border border-gray-700 flex flex-col resizable-panel w-full lg:w-1/2 flex-shrink-0">
+                <div class="bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700 sticky top-0">
+                    <h2 class="text-lg font-semibold text-slate-200">3. Mã nguồn</h2>
+                    <select id="langSelect" onchange="renderCode()" class="bg-slate-700 text-slate-200 border border-slate-600 rounded p-1 outline-none text-sm">
+                        <option value="pseudo">Mã giả (Dễ hiểu nhất)</option>
+                        <option value="python">Python</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                <div class="p-4 overflow-x-auto text-slate-300 font-mono text-sm leading-relaxed whitespace-pre" id="codeContainer">
+                    <!-- Code lines rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Cột Giải thích (Đã được chuyển sang flex-1 để tự động co giãn) -->
+            <div class="bg-slate-50 rounded-2xl shadow-sm p-6 border border-gray-200 flex flex-col flex-1 min-w-[280px]" id="explanationBox">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Giải thích bước hiện tại</h2>
+                
+                <div class="flex-1 flex flex-col gap-5 justify-center">
+                    <!-- Giải thích chuẩn đại học -->
+                    <div>
+                        <h3 class="font-bold text-blue-700 mb-2 flex items-center gap-2">
+                            <span>🎓</span> Kiểu Sinh viên CNTT / Đại học:
+                        </h3>
+                        <p id="explanationText" class="text-md text-gray-800 leading-relaxed font-medium">
+                            Hãy nhập các số và bấm "Bắt đầu mô phỏng" để xem giải thích chi tiết tại đây.
+                        </p>
+                    </div>
+
+                    <!-- Giải thích kiểu học sinh lớp 6 -->
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 shadow-sm">
+                        <h3 class="font-bold text-orange-600 mb-2 flex items-center gap-2">
+                            <span>👶</span> Kiểu Học sinh lớp 6:
+                        </h3>
+                        <p id="explanationSimpleText" class="text-md text-gray-800 leading-relaxed">
+                            Ví dụ thực tế siêu dễ hiểu sẽ xuất hiện ở đây khi bạn bắt đầu mô phỏng!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu mã nguồn cho từng ngôn ngữ (Đã thêm giải thích cặn kẽ từng dòng)
+        const codeData = {
+            pseudo: {
+                lines: [
+                    "Hàm BubbleSort(Mảng):",
+                    "  n = độ dài của Mảng",
+                    "  Lặp i từ 0 đến n - 1:                  <span class='code-comment'>// Vòng lặp ngoài kiểm soát số bước</span>",
+                    "    Lặp j từ 0 đến n - i - 1:            <span class='code-comment'>// QUAN TRỌNG: Trừ đi i vì i số lớn nhất đã về đúng cuối mảng, không xét lại</span>",
+                    "      Nếu Mảng[j] > Mảng[j + 1]:         <span class='code-comment'>// So sánh 2 số đứng cạnh nhau</span>",
+                    "        Hoán đổi Mảng[j] và Mảng[j + 1]  <span class='code-comment'>// Đổi chỗ nếu đứng sai thứ tự</span>"
+                ],
+                map: { start: 1, outer: 2, inner: 3, compare: 4, swap: 5, done: 0 }
+            },
+            python: {
+                lines: [
+                    "def bubble_sort(arr):",
+                    "    n = len(arr)",
+                    "    for i in range(n - 1):                <span class='code-comment'># Lặp n-1 lần để đẩy phần tử max về cuối</span>",
+                    "        for j in range(0, n - i - 1):     <span class='code-comment'># LƯU Ý: Giảm đoạn cần duyệt đi i, vì i phần tử cuối đã đúng</span>",
+                    "            if arr[j] > arr[j + 1]:       <span class='code-comment'># Nếu số trước lớn hơn số sau</span>",
+                    "                arr[j], arr[j + 1] = arr[j + 1], arr[j] <span class='code-comment'># Đổi chỗ</span>"
+                ],
+                map: { start: 1, outer: 2, inner: 3, compare: 4, swap: 5, done: 0 }
+            },
+            cpp: {
+                lines: [
+                    "void bubbleSort(int arr[], int n) {",
+                    "    for (int i = 0; i < n - 1; i++) {              <span class='code-comment'>// Lặp ngoài để đảm bảo đủ lượt đẩy số lớn về cuối</span>",
+                    "        for (int j = 0; j < n - i - 1; j++) {      <span class='code-comment'>// BÍ QUYẾT LÀ ĐÂY: Dừng ở 'n - i - 1' vì sau 'i' vòng, 'i' số cuối cùng đã được sắp xếp xong</span>",
+                    "            if (arr[j] > arr[j + 1]) {             <span class='code-comment'>// So sánh cặp kề nhau</span>",
+                    "                swap(arr[j], arr[j + 1]);          <span class='code-comment'>// Hoán đổi vị trí</span>",
+                    "            }",
+                    "        }",
+                    "    }",
+                    "}"
+                ],
+                map: { start: 0, outer: 1, inner: 2, compare: 3, swap: 4, done: 8 }
+            }
+        };
+
+        // Biến toàn cục quản lý trạng thái
+        let dataArray = [];    
+        let domArray = [];     
+        let stepGenerator = null;
+        let autoPlayInterval = null;
+        let isAutoPlaying = false;
+        let currentLineKey = 'start';
+        
+        // Cấu hình giao diện khối
+        const BLOCK_WIDTH = 50;
+        const BLOCK_GAP = 12;
+
+        window.onload = () => {
+            renderCode();
+        };
+
+        // Xử lý khi người dùng đổi ngôn ngữ hiển thị code
+        function renderCode() {
+            const lang = document.getElementById('langSelect').value;
+            const lines = codeData[lang].lines;
+            const container = document.getElementById('codeContainer');
+            container.innerHTML = ''; 
+            
+            lines.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.id = `code-line-${index}`;
+                div.className = 'px-2 py-1 rounded border-l-4 border-transparent';
+                div.innerHTML = line; 
+                container.appendChild(div);
+            });
+
+            highlightLine(currentLineKey);
+        }
+
+        function highlightLine(lineKey) {
+            currentLineKey = lineKey;
+            const lang = document.getElementById('langSelect').value;
+            const lineIndex = codeData[lang].map[lineKey];
+            const linesCount = codeData[lang].lines.length;
+
+            for(let i=0; i<linesCount; i++) {
+                const el = document.getElementById(`code-line-${i}`);
+                if (el) {
+                    el.classList.remove('bg-slate-700', 'border-blue-400', 'text-white');
+                    el.classList.add('border-transparent');
+                }
+            }
+
+            const activeEl = document.getElementById(`code-line-${lineIndex}`);
+            if (activeEl) {
+                activeEl.classList.remove('border-transparent');
+                activeEl.classList.add('bg-slate-700', 'border-blue-400', 'text-white');
+            }
+        }
+
+        function updateExplanation(textAcademic, textSimple) {
+            const box = document.getElementById('explanationBox');
+            const textEl = document.getElementById('explanationText');
+            const simpleEl = document.getElementById('explanationSimpleText');
+            
+            textEl.innerHTML = textAcademic;
+            simpleEl.innerHTML = textSimple;
+            
+            box.classList.remove('flash-effect');
+            void box.offsetWidth; 
+            box.classList.add('flash-effect');
+        }
+
+        function initSimulation() {
+            stopAutoPlay();
+            document.getElementById('btnNext').disabled = false;
+            document.getElementById('btnAuto').disabled = false;
+            
+            const inputVal = document.getElementById('arrayInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            const parsedArray = inputVal.split(',').map(item => parseInt(item.trim())).filter(item => !isNaN(item));
+            
+            if (parsedArray.length < 2 || parsedArray.length > 20) {
+                errorMsg.classList.remove('hidden');
+                errorMsg.innerText = "Vui lòng nhập từ 2 đến 20 số, cách nhau bằng dấu phẩy.";
+                return;
+            }
+            errorMsg.classList.add('hidden');
+            
+            dataArray = [...parsedArray];
+            createArrayDOM();
+            
+            stepGenerator = bubbleSortGenerator(dataArray);
+            
+            highlightLine('start');
+            updateExplanation(
+                'Đã nạp mảng thành công! Sẵn sàng thực hiện thuật toán Bubble Sort. Hãy bấm <b>"Bước tiếp theo"</b>.',
+                'Tưởng tượng các con số là các bạn học sinh trong lớp. Cô giáo yêu cầu các bạn đổi chỗ dần dần để xếp hàng từ bé đến lớn nhé! Hãy bấm <b>"Bước tiếp theo"</b> để bắt đầu.'
+            );
+        }
+
+        function createArrayDOM() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            domArray = [];
+            
+            const n = dataArray.length;
+            const containerWidth = container.clientWidth;
+            const totalWidth = n * BLOCK_WIDTH + (n - 1) * BLOCK_GAP;
+            const startX = (containerWidth - totalWidth) / 2;
+
+            dataArray.forEach((value, index) => {
+                const block = document.createElement('div');
+                block.className = 'array-block flex items-center justify-center w-12 h-16 rounded-lg text-white font-bold text-xl shadow-md bg-blue-500';
+                block.innerText = value;
+                
+                block.style.left = `${startX + index * (BLOCK_WIDTH + BLOCK_GAP)}px`;
+                
+                container.appendChild(block);
+                domArray.push(block);
+            });
+        }
+
+        function updateBlockPositions() {
+            const containerWidth = document.getElementById('arrayContainer').clientWidth;
+            const n = domArray.length;
+            const totalWidth = n * BLOCK_WIDTH + (n - 1) * BLOCK_GAP;
+            const startX = (containerWidth - totalWidth) / 2;
+
+            domArray.forEach((block, index) => {
+                block.style.left = `${startX + index * (BLOCK_WIDTH + BLOCK_GAP)}px`;
+            });
+        }
+
+        function setBlockColor(index, colorClass) {
+            domArray[index].classList.remove('bg-blue-500', 'bg-yellow-400', 'bg-red-500', 'bg-green-500');
+            domArray[index].classList.add(colorClass);
+        }
+
+        function resetColors(excludeSorted = true) {
+            domArray.forEach(block => {
+                if (excludeSorted && block.classList.contains('bg-green-500')) {
+                    return; 
+                }
+                block.classList.remove('bg-yellow-400', 'bg-red-500');
+                block.classList.add('bg-blue-500');
+            });
+        }
+
+        function swapElements(i, j) {
+            let tempVal = dataArray[i];
+            dataArray[i] = dataArray[j];
+            dataArray[j] = tempVal;
+
+            let tempDOM = domArray[i];
+            domArray[i] = domArray[j];
+            domArray[j] = tempDOM;
+
+            updateBlockPositions();
+        }
+
+        // Hàm Generator cốt lõi - sinh ra các bước để JS chạy dần dần
+        function* bubbleSortGenerator(array) {
+            let n = array.length;
+            
+            for (let i = 0; i < n - 1; i++) {
+                yield { 
+                    type: 'OUTER', 
+                    line: 'outer', 
+                    msg: `<b>Vòng lặp ngoài (i = ${i}):</b><br>Mục tiêu vòng này: Tìm phần tử lớn nhất trong đoạn chưa sắp xếp và sủi bọt nó về vị trí cuối cùng.`,
+                    msgSimple: `Chúng ta bắt đầu <b>Lượt số ${i + 1}</b>. Mục tiêu là tìm ra bạn "to béo" (số lớn nhất) còn lộn xộn trong hàng và đẩy bạn ấy xuống vị trí cuối cùng.`
+                };
+                
+                yield { 
+                    type: 'INNER_START', 
+                    line: 'inner', 
+                    msg: `<b>Giải mã vòng lặp trong (j < ${n} - ${i} - 1):</b><br>Tại sao phải trừ đi <b>i = ${i}</b>?<br>👉 Bởi vì ta đã hoàn thành <b>${i}</b> vòng lặp ngoài, đồng nghĩa với việc <b>${i} phần tử lớn nhất</b> đã nằm chốt ở cuối mảng một cách an toàn. Ta bỏ qua chúng không xét nữa.`,
+                    msgSimple: `Tại sao lại không đi hết hàng? Vì <b>${i} bạn to béo nhất</b> đã ngoan ngoãn đứng ở cuối hàng vào các lượt trước rồi. Chỗ của các bạn ấy đã "chốt sổ", ta kệ các bạn ấy, không gọi ra đo lại nữa cho đỡ mất thời gian!`
+                };
+
+                for (let j = 0; j < n - i - 1; j++) {
+                    yield { 
+                        type: 'COMPARE', 
+                        line: 'compare', 
+                        j: j, 
+                        msg: `<b>Vòng lặp trong (j = ${j}):</b><br>So sánh hai số kề nhau: <b>${array[j]}</b> và <b>${array[j+1]}</b>.<br>Nếu <b>${array[j]} > ${array[j+1]}</b> thì sẽ hoán đổi.`,
+                        msgSimple: `Hai bạn đứng cạnh nhau quay sang nhìn nhau. Hai bạn mang số <b>${array[j]}</b> và <b>${array[j+1]}</b>. Sắp xếp nguyên tắc "ai to thì lùi về sau".`
+                    };
+                    
+                    if (array[j] > array[j + 1]) {
+                        yield { 
+                            type: 'SWAP', 
+                            line: 'swap', 
+                            j: j, 
+                            msg: `Thấy <b>${array[j]} > ${array[j+1]}</b>, nên ta <b>hoán đổi</b> vị trí của chúng.`,
+                            msgSimple: `Ồ! Bạn <b>${array[j]}</b> lại to hơn bạn <b>${array[j+1]}</b> mất rồi (như vậy là sai thứ tự). Bắt buộc hai bạn phải <b>đổi chỗ</b> cho nhau thôi!`
+                        };
+                        
+                        let temp = array[j];
+                        array[j] = array[j+1];
+                        array[j+1] = temp;
+                    } else {
+                        yield { 
+                            type: 'NO_SWAP', 
+                            line: 'compare', 
+                            j: j, 
+                            msg: `Vì <b>${array[j]} ≤ ${array[j+1]}</b> (Đã đúng thứ tự), nên <b>không cần hoán đổi</b>.`,
+                            msgSimple: `Bạn <b>${array[j]}</b> nhỏ hơn (hoặc bằng) bạn <b>${array[j+1]}</b>. Vậy là bé đứng trước, to đứng sau đúng nguyên tắc rồi! <b>Không cần tráo chỗ</b>.`
+                        };
+                    }
+                }
+                yield { 
+                    type: 'MARK_SORTED', 
+                    line: 'outer', 
+                    index: n - i - 1, 
+                    msg: `Kết thúc vòng lặp trong.<br>Phần tử lớn nhất trong đoạn vừa xét là <b>${array[n - i - 1]}</b> đã được đẩy về đúng vị trí cuối. Đánh dấu nó hoàn thành (màu xanh).`,
+                    msgSimple: `Xong 1 lượt! Chúc mừng bạn số <b>${array[n - i - 1]}</b> (bạn to nhất trong đoạn vừa xét) đã bị đẩy tít về cuối hàng. Khoác cho bạn ấy cái áo màu xanh lá để "chốt sổ", vòng sau không phiền bạn ấy nữa.`
+                };
+            }
+            yield { 
+                type: 'MARK_SORTED', 
+                line: 'done', 
+                index: 0, 
+                msg: `Chỉ còn lại phần tử đầu tiên <b>${array[0]}</b>, hiển nhiên nó đã nằm đúng vị trí.`,
+                msgSimple: `Tất cả các bạn phía sau đều đã chốt sổ, vậy bạn nhỏ nhất <b>${array[0]}</b> đầu hàng dĩ nhiên là đang đứng đúng chỗ rồi, mặc áo xanh luôn cho đẹp đội hình!`
+            };
+            yield { 
+                type: 'DONE', 
+                line: 'done', 
+                msg: `🎉 <b>Hoàn tất!</b> Mảng đã được sắp xếp tăng dần thành công.`,
+                msgSimple: `🎉 <b>Xong rồi! Hoan hô!</b> Tất cả các bạn học sinh đã xếp hàng rất thẳng tắp từ thấp đến cao, từ bé đến to rồi!`
+            };
+        }
+
+        function nextStep() {
+            if (!stepGenerator) {
+                initSimulation();
+                return;
+            }
+
+            const step = stepGenerator.next();
+            
+            if (step.done) {
+                stopAutoPlay();
+                return;
+            }
+
+            const data = step.value;
+            highlightLine(data.line);
+            updateExplanation(data.msg, data.msgSimple);
+
+            switch (data.type) {
+                case 'OUTER':
+                case 'INNER_START':
+                    resetColors();
+                    break;
+                case 'COMPARE':
+                    resetColors();
+                    setBlockColor(data.j, 'bg-yellow-400');
+                    setBlockColor(data.j + 1, 'bg-yellow-400');
+                    domArray[data.j].style.transform = 'scale(1.1)';
+                    domArray[data.j + 1].style.transform = 'scale(1.1)';
+                    break;
+                case 'SWAP':
+                    setBlockColor(data.j, 'bg-red-500');
+                    setBlockColor(data.j + 1, 'bg-red-500');
+                    swapElements(data.j, data.j + 1);
+                    break;
+                case 'NO_SWAP':
+                    domArray[data.j].style.transform = 'scale(1)';
+                    domArray[data.j + 1].style.transform = 'scale(1)';
+                    break;
+                case 'MARK_SORTED':
+                    resetColors();
+                    setBlockColor(data.index, 'bg-green-500');
+                    domArray.forEach(block => block.style.transform = 'scale(1)');
+                    break;
+                case 'DONE':
+                    resetColors(false); 
+                    domArray.forEach(block => block.classList.add('bg-green-500'));
+                    document.getElementById('btnNext').disabled = true;
+                    stopAutoPlay();
+                    break;
+            }
+        }
+
+        function autoPlay() {
+            if (isAutoPlaying) {
+                stopAutoPlay();
+            } else {
+                isAutoPlaying = true;
+                const btnAuto = document.getElementById('btnAuto');
+                btnAuto.innerText = "⏸ Dừng tự động";
+                btnAuto.classList.replace('bg-purple-100', 'bg-red-100');
+                btnAuto.classList.replace('text-purple-700', 'text-red-700');
+                
+                autoPlayInterval = setInterval(() => {
+                    nextStep();
+                }, 1800); // Kéo dài thời gian một chút để người xem kịp đọc 2 phần giải thích
+            }
+        }
+
+        function stopAutoPlay() {
+            isAutoPlaying = false;
+            clearInterval(autoPlayInterval);
+            const btnAuto = document.getElementById('btnAuto');
+            if(btnAuto) {
+                btnAuto.innerText = "▶ Chơi tự động";
+                btnAuto.classList.replace('bg-red-100', 'bg-purple-100');
+                btnAuto.classList.replace('text-red-700', 'text-purple-700');
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (domArray.length > 0) {
+                updateBlockPositions();
+            }
+        });
+
+    </script>
+</body>
+</html>
