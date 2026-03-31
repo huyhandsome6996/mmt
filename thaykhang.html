@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Nhị Phân - Ngôn Ngữ Bóng Đèn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .bulb {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .bulb.on {
+            background-color: #fbbf24;
+            box-shadow: 0 0 15px #fbbf24;
+            color: #78350f;
+            transform: translateY(-2px);
+        }
+        .bulb.off {
+            background-color: #cbd5e1;
+            color: #475569;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Chosen Palette: Warm neutral background (slate-50), dark slate for text, amber/yellow for active bits, blue for accents -->
+    <!-- Application Structure Plan: The SPA is structured into 5 logical sections. 1. Intro & Interactive Bit Explorer (allows tangible interaction with 0s and 1s, visualized with a dynamic Chart.js bar chart). 2 & 3. Decimal to Binary Converters for integers and fractions (step-by-step algorithmic visualization). 4. Hexadecimal visualizer (demonstrates the 1-to-4 relationship). 5. Mini Quiz for retention. This linear flow transforms static text into an exploratory, step-by-step learning journey. -->
+    <!-- Visualization & Content Choices: 1. Bit Explorer -> Interactive HTML divs acting as toggles + Chart.js Bar Chart showing weights -> Tangible understanding of Base-2. 2. Converters -> Dynamic DOM lists -> Shows the exact algorithmic steps from the report. 3. Hex Visualizer -> Flexbox grid -> Shows 1-to-4 relationship clearly. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <header class="text-center py-8 bg-white rounded-2xl shadow-sm border border-slate-200">
+            <h1 class="text-4xl font-bold text-slate-800 mb-3">💡 Hệ Nhị Phân</h1>
+            <h2 class="text-xl text-slate-500">Ngôn Ngữ Của Các Bóng Đèn</h2>
+        </header>
+
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">1. Hệ Nhị Phân Là Gì?</h2>
+            <p class="text-slate-600 mb-6 text-lg leading-relaxed">
+                Máy tính không có 10 ngón tay như con người để dùng hệ thập phân. Nó chỉ có các mạch điện tử hoạt động như những công tắc: <strong>Bật (1)</strong> và <strong>Tắt (0)</strong>. Mỗi chữ số 0 hoặc 1 này được gọi là một <strong>Bit</strong>. Hãy thử tương tác với dải 8 bóng đèn (1 Byte) dưới đây để xem giá trị thập phân thay đổi như thế nào, và quan sát biểu đồ thể hiện "trọng số" của từng vị trí Bit.
+            </p>
+            
+            <div class="bg-slate-50 p-6 rounded-xl text-center">
+                <div id="bulb-container" class="flex flex-wrap justify-center gap-3 mb-6">
+                </div>
+                <div class="text-3xl font-mono font-bold text-slate-800 mb-2">
+                    Giá trị Thập phân: <span id="decimal-value" class="text-blue-600">0</span>
+                </div>
+                <div class="text-lg text-slate-500 mb-8 font-mono">
+                    Nhị phân: <span id="binary-value">00000000</span>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="bitChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4">2. Đổi Số Nguyên Sang Nhị Phân</h2>
+                <p class="text-slate-600 mb-4">
+                    Để chuyển một số nguyên thập phân sang nhị phân, ta chia liên tục số đó cho 2 và ghi lại phần dư từ dưới lên trên. Hãy nhập một số (ví dụ: 13) để xem các bước tính.
+                </p>
+                <div class="flex gap-2 mb-4">
+                    <input type="number" id="input-int" class="flex-1 border border-slate-300 rounded-lg p-3 text-lg" placeholder="Nhập số nguyên, vd: 13" value="13">
+                    <button id="btn-calc-int" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Tính</button>
+                </div>
+                <div id="output-int" class="bg-slate-50 p-4 rounded-lg font-mono text-lg min-h-[150px]">
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4">3. Đổi "Số Lẻ" Sang Nhị Phân</h2>
+                <p class="text-slate-600 mb-4">
+                    Với phần thập phân (số lẻ), ta không chia mà làm phép <strong>Nhân 2</strong>. Sau đó lấy phần nguyên của kết quả. Quá trình dừng lại khi phần lẻ bằng 0.
+                </p>
+                <div class="flex gap-2 mb-4">
+                    <input type="number" step="0.001" id="input-frac" class="flex-1 border border-slate-300 rounded-lg p-3 text-lg" placeholder="Nhập số lẻ, vd: 0.625" value="0.625">
+                    <button id="btn-calc-frac" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Tính</button>
+                </div>
+                <div id="output-frac" class="bg-slate-50 p-4 rounded-lg font-mono text-lg min-h-[150px]">
+                </div>
+            </section>
+        </div>
+
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">4. Hệ Hexa (Cơ Số 16) - Lối Tắt</h2>
+            <p class="text-slate-600 mb-6">
+                Đọc một dãy nhị phân dài rất dễ hoa mắt. Hệ Hexa (0-9, A-F) giúp rút gọn: <strong>Mỗi chữ số Hexa đại diện chính xác cho 4 chữ số Nhị phân</strong>. Hãy nhập một chuỗi Hexa để xem nó được phân tách thành nhị phân như thế nào.
+            </p>
+            <div class="flex gap-2 mb-6 max-w-md">
+                <input type="text" id="input-hex" class="flex-1 border border-slate-300 rounded-lg p-3 text-lg uppercase" placeholder="Nhập Hexa, vd: AC1B" value="AC1B" maxlength="6">
+                <button id="btn-calc-hex" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Dịch</button>
+            </div>
+            <div id="output-hex" class="flex flex-wrap gap-4">
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 bg-amber-50 border-amber-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4">📝 Thử Thách Ôn Tập</h2>
+            <p class="text-slate-700 mb-4">Kiểm tra lại kiến thức của bạn qua hai câu hỏi trong giáo trình nhé!</p>
+            <div class="space-y-4">
+                <div class="p-4 bg-white rounded-xl shadow-sm">
+                    <p class="font-bold text-slate-800 mb-2">1. Số 9 (thập phân) đổi sang nhị phân là gì?</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="quiz-1" class="border border-slate-300 rounded-lg p-2 flex-1" placeholder="Nhập nhị phân...">
+                        <button id="btn-q1" class="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold">Kiểm tra</button>
+                    </div>
+                    <div id="res-q1" class="mt-2 text-sm font-bold"></div>
+                </div>
+                <div class="p-4 bg-white rounded-xl shadow-sm">
+                    <p class="font-bold text-slate-800 mb-2">2. Số Hexa "F" tương đương với số mấy trong hệ thập phân?</p>
+                    <div class="flex gap-2">
+                        <input type="number" id="quiz-2" class="border border-slate-300 rounded-lg p-2 flex-1" placeholder="Nhập thập phân...">
+                        <button id="btn-q2" class="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold">Kiểm tra</button>
+                    </div>
+                    <div id="res-q2" class="mt-2 text-sm font-bold"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        let bits = [0, 0, 0, 0, 0, 0, 0, 0];
+        const weights = [128, 64, 32, 16, 8, 4, 2, 1];
+        let chartInstance = null;
+
+        function initBulbs() {
+            const container = document.getElementById('bulb-container');
+            container.innerHTML = '';
+            bits.forEach((bit, index) => {
+                const bulb = document.createElement('div');
+                bulb.className = `bulb w-12 h-16 sm:w-16 sm:h-20 flex flex-col items-center justify-center rounded-2xl font-bold text-xl sm:text-2xl select-none ${bit ? 'on' : 'off'}`;
+                bulb.innerHTML = `<span>${bit ? '1' : '0'}</span><span class="text-xs mt-1 opacity-60">${weights[index]}</span>`;
+                bulb.onclick = () => toggleBit(index);
+                container.appendChild(bulb);
+            });
+        }
+
+        function toggleBit(index) {
+            bits[index] = bits[index] === 0 ? 1 : 0;
+            updateUI();
+        }
+
+        function calculateDecimal() {
+            let sum = 0;
+            bits.forEach((bit, index) => {
+                if (bit === 1) sum += weights[index];
+            });
+            return sum;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('bitChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['128', '64', '32', '16', '8', '4', '2', '1'],
+                    datasets: [{
+                        label: 'Giá trị Bit đang bật',
+                        data: weights.map((w, i) => bits[i] ? w : 0),
+                        backgroundColor: '#fbbf24',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Trọng số (Tắt)',
+                        data: weights.map((w, i) => bits[i] ? 0 : w),
+                        backgroundColor: '#cbd5e1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function updateUI() {
+            initBulbs();
+            document.getElementById('decimal-value').innerText = calculateDecimal();
+            document.getElementById('binary-value').innerText = bits.join('');
+            
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = weights.map((w, i) => bits[i] ? w : 0);
+                chartInstance.data.datasets[1].data = weights.map((w, i) => bits[i] ? 0 : w);
+                chartInstance.update();
+            }
+        }
+
+        document.getElementById('btn-calc-int').onclick = () => {
+            let num = parseInt(document.getElementById('input-int').value);
+            const output = document.getElementById('output-int');
+            if (isNaN(num) || num < 0) {
+                output.innerHTML = '<span class="text-red-500">Vui lòng nhập số nguyên dương.</span>';
+                return;
+            }
+            if (num === 0) {
+                output.innerHTML = '0 : 2 = 0 dư <strong>0</strong><br><br><span class="text-blue-600">Kết quả: 0</span>';
+                return;
+            }
+            
+            let html = '';
+            let remainders = [];
+            let originalNum = num;
+            
+            while (num > 0) {
+                let rem = num % 2;
+                let nextNum = Math.floor(num / 2);
+                html += `<div>${num} : 2 = ${nextNum} dư <strong class="text-amber-600">${rem}</strong></div>`;
+                remainders.push(rem);
+                num = nextNum;
+            }
+            html += `<div class="mt-4 pt-4 border-t border-slate-200">Đọc ngược từ dưới lên: <br><strong class="text-blue-600 text-xl">${originalNum} = ${remainders.reverse().join('')}</strong></div>`;
+            output.innerHTML = html;
+        };
+
+        document.getElementById('btn-calc-frac').onclick = () => {
+            let numStr = document.getElementById('input-frac').value;
+            let num = parseFloat(numStr);
+            const output = document.getElementById('output-frac');
+            
+            if (isNaN(num) || num < 0 || num >= 1) {
+                output.innerHTML = '<span class="text-red-500">Vui lòng nhập phần lẻ (ví dụ 0.5, 0.625).</span>';
+                return;
+            }
+            if (num === 0) {
+                output.innerHTML = 'Kết quả: 0.0';
+                return;
+            }
+
+            let html = '';
+            let bitsArray = [];
+            let iterations = 0;
+            let originalNum = num;
+
+            while (num > 0 && iterations < 8) {
+                let mult = num * 2;
+                let intPart = Math.floor(mult);
+                html += `<div>${num} × 2 = ${mult} (Lấy <strong class="text-amber-600">${intPart}</strong>)</div>`;
+                bitsArray.push(intPart);
+                num = mult - intPart;
+                iterations++;
+            }
+            
+            if (num > 0) html += `<div class="text-slate-400 text-sm mt-1">... (dừng ở 8 bước)</div>`;
+            html += `<div class="mt-4 pt-4 border-t border-slate-200">Đọc xuôi từ trên xuống: <br><strong class="text-blue-600 text-xl">${originalNum} = 0.${bitsArray.join('')}</strong></div>`;
+            output.innerHTML = html;
+        };
+
+        const hexToBin = {
+            '0': '0000', '1': '0001', '2': '0010', '3': '0011',
+            '4': '0100', '5': '0101', '6': '0110', '7': '0111',
+            '8': '1000', '9': '1001', 'A': '1010', 'B': '1011',
+            'C': '1100', 'D': '1101', 'E': '1110', 'F': '1111'
+        };
+
+        document.getElementById('btn-calc-hex').onclick = () => {
+            let hex = document.getElementById('input-hex').value.toUpperCase();
+            const output = document.getElementById('output-hex');
+            output.innerHTML = '';
+            
+            let finalBin = '';
+            for (let char of hex) {
+                if (hexToBin[char]) {
+                    const block = document.createElement('div');
+                    block.className = 'bg-slate-100 border border-slate-300 p-3 rounded-xl text-center flex-1 min-w-[80px]';
+                    block.innerHTML = `<div class="text-2xl font-bold text-slate-800">${char}</div><div class="text-blue-600 font-mono tracking-widest mt-1">${hexToBin[char]}</div>`;
+                    output.appendChild(block);
+                    finalBin += hexToBin[char] + ' ';
+                }
+            }
+            if (finalBin) {
+                const total = document.createElement('div');
+                total.className = 'w-full mt-4 text-center font-mono text-xl text-slate-700 bg-blue-50 p-2 rounded-lg';
+                total.innerHTML = finalBin.trim();
+                output.appendChild(total);
+            } else {
+                output.innerHTML = '<span class="text-red-500">Ký tự Hexa không hợp lệ!</span>';
+            }
+        };
+
+        document.getElementById('btn-q1').onclick = () => {
+            const ans = document.getElementById('quiz-1').value.trim();
+            const res = document.getElementById('res-q1');
+            if (ans === '1001') {
+                res.innerHTML = '<span class="text-green-600">✅ Chính xác! (9 : 2 = 4 dư 1, 4 : 2 = 2 dư 0, 2 : 2 = 1 dư 0, 1 : 2 = 0 dư 1 -> 1001)</span>';
+            } else {
+                res.innerHTML = '<span class="text-red-500">❌ Chưa đúng rồi, thử dùng bộ chia ở mục 2 xem sao!</span>';
+            }
+        };
+
+        document.getElementById('btn-q2').onclick = () => {
+            const ans = document.getElementById('quiz-2').value.trim();
+            const res = document.getElementById('res-q2');
+            if (ans === '15') {
+                res.innerHTML = '<span class="text-green-600">✅ Chính xác! F là giá trị lớn nhất của 1 chữ số Hexa, tương đương với 15.</span>';
+            } else {
+                res.innerHTML = '<span class="text-red-500">❌ Chưa đúng rồi, đếm từ A=10, B=11... đến F xem bằng bao nhiêu nhé!</span>';
+            }
+        };
+
+        updateUI();
+        initChart();
+        document.getElementById('btn-calc-int').click();
+        document.getElementById('btn-calc-frac').click();
+        document.getElementById('btn-calc-hex').click();
+    </script>
+</body>
+</html>

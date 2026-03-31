@@ -1,7 +1,7 @@
-
 public class chanle
 {
-    public static void 
+    public static void ch(){}
+
     public static void Main()
     {
         
