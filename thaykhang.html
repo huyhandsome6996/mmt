@@ -45,8 +45,8 @@
 <body class="p-4 md:p-8">
 
     <!-- Chosen Palette: Warm neutral background (slate-50), dark slate for text, amber/yellow for active bits, blue for accents -->
-    <!-- Application Structure Plan: The SPA is structured into 5 logical sections. 1. Intro & Interactive Bit Explorer (allows tangible interaction with 0s and 1s, visualized with a dynamic Chart.js bar chart). 2 & 3. Decimal to Binary Converters for integers and fractions (step-by-step algorithmic visualization). 4. Hexadecimal visualizer (demonstrates the 1-to-4 relationship). 5. Mini Quiz for retention. This linear flow transforms static text into an exploratory, step-by-step learning journey. -->
-    <!-- Visualization & Content Choices: 1. Bit Explorer -> Interactive HTML divs acting as toggles + Chart.js Bar Chart showing weights -> Tangible understanding of Base-2. 2. Converters -> Dynamic DOM lists -> Shows the exact algorithmic steps from the report. 3. Hex Visualizer -> Flexbox grid -> Shows 1-to-4 relationship clearly. NO SVG/Mermaid used. -->
+    <!-- Application Structure Plan: The SPA is structured into logical sections. 1. Intro & Interactive Bit Explorer. 2 & 3. Decimal to Binary Converters. 4. Hexadecimal visualizer. 5. Hex to Dec Converter. 6. Integer Representation (signed/unsigned). 7. Mini Quiz for retention. -->
+    <!-- Visualization & Content Choices: 1. Bit Explorer -> Interactive HTML divs. 2. Converters -> Dynamic DOM lists. 3. Hex Visualizer -> Flexbox grid. 4. Hex to Dec -> Mathematical steps visualizer. 5. Integers -> Tables & interactive 8-bit sign-bit toggler. NO SVG/Mermaid used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <div class="max-w-5xl mx-auto space-y-8">
@@ -119,6 +119,97 @@
             </div>
         </section>
 
+        <!-- PHẦN 5: Hexa sang Thập phân -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">5. Đổi Hexa Sang Thập Phân (Hệ 10)</h2>
+            <p class="text-slate-600 mb-6">
+                Mỗi vị trí trong hệ Hexa có "trọng số" tăng gấp 16 lần từ phải sang trái ($16^0, 16^1, 16^2...$). Để đổi sang thập phân, ta lấy giá trị của từng chữ số nhân với trọng số tại vị trí đó rồi cộng lại.
+            </p>
+            <div class="flex gap-2 mb-6 max-w-md">
+                <input type="text" id="input-hex-to-dec" class="flex-1 border border-slate-300 rounded-lg p-3 text-lg uppercase" placeholder="Nhập số Hexa, vd: AB2C" value="AB2C" maxlength="6">
+                <button id="btn-calc-hex-to-dec" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Tính</button>
+            </div>
+            <div id="output-hex-to-dec" class="bg-slate-50 p-4 rounded-lg font-mono text-lg min-h-[150px] space-y-3 border border-slate-200">
+                <!-- Javascript will populate this -->
+            </div>
+        </section>
+
+        <!-- PHẦN 6 ĐÃ ĐƯỢC CHỈNH SỬA CHO HỌC SINH LỚP 6 -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">6. Máy tính nhớ số âm và số dương thế nào?</h2>
+            <p class="text-slate-600 mb-6 leading-relaxed">
+                Giống như bạn dùng hộp để đựng đồ chơi, máy tính dùng các <strong>Bit</strong> (bóng đèn) để chứa các con số. Càng có nhiều bóng đèn, máy tính càng nhớ được số to hơn! Tùy vào lúc lập trình, người ta sẽ cài đặt cho máy tính đếm theo 2 "chế độ":
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <!-- Không dấu -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-xl text-slate-800 mb-3">a. Chế độ "Đếm Kẹo" (Số Không Dấu)</h3>
+                    <p class="text-slate-600 text-sm mb-4">Ở chế độ này, tất cả các bóng đèn đều dùng để tính điểm cộng. Giống như bạn đếm kẹo, ta chỉ có từ <strong>0 cái kẹo trở lên</strong> (chứ không ai có -5 cái kẹo cả).</p>
+                    <div class="bg-blue-100 text-blue-800 p-2 rounded text-center font-bold mb-4 font-mono">
+                        Sức chứa tối đa: Từ 0 đến (2ⁿ - 1)
+                    </div>
+                    <ul class="space-y-3 font-mono text-sm">
+                        <li class="flex justify-between items-center border-b border-slate-200 pb-2">
+                            <span class="text-slate-500">Nếu có 8 đèn (8-bit)</span>
+                            <span class="text-blue-600 font-bold text-base">Đếm được 0 .. 255</span>
+                        </li>
+                        <li class="flex justify-between items-center border-b border-slate-200 pb-2">
+                            <span class="text-slate-500">Nếu có 16 đèn (16-bit)</span>
+                            <span class="text-blue-600 font-bold text-base">Đếm được 0 .. 65.535</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Có dấu -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-xl text-slate-800 mb-3">b. Chế độ "Tiền Túi / Tiền Nợ" (Số Có Dấu)</h3>
+                    <p class="text-slate-600 text-sm mb-4">Đời không chỉ có tiền trong túi mà còn có... tiền đi mượn (số âm). Máy tính sẽ hy sinh <strong>bóng đèn ngoài cùng bên trái</strong> làm "Đèn Báo Nợ":<br>
+                    - Đèn Tắt (0): Số dương (+)<br>
+                    - Đèn Bật (1): Số âm (-)
+                    </p>
+                    <div class="bg-amber-100 text-amber-800 p-2 rounded text-center font-bold mb-4 font-mono text-[13px] md:text-sm">
+                        Sức chứa: Phải chia đôi cho cả số âm và dương
+                    </div>
+                    <ul class="space-y-3 font-mono text-sm">
+                        <li class="flex justify-between items-center border-b border-slate-200 pb-2">
+                            <span class="text-slate-500">Nếu có 8 đèn</span>
+                            <span class="text-amber-600 font-bold">-128 .. 127</span>
+                        </li>
+                        <li class="flex justify-between items-center border-b border-slate-200 pb-2">
+                            <span class="text-slate-500">Nếu có 16 đèn</span>
+                            <span class="text-amber-600 font-bold">-32.768 .. 32.767</span>
+                        </li>
+                        <li class="flex justify-between items-center border-b border-slate-200 pb-2 flex-wrap">
+                            <span class="text-slate-500">Nếu có 32 đèn</span>
+                            <span class="text-amber-600 font-bold truncate">Khoảng ±2 tỷ</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tương tác Bit Dấu -->
+            <div class="bg-slate-800 rounded-2xl p-6 text-white text-center shadow-lg">
+                <h4 class="font-bold text-xl mb-2">Thử nghiệm: Chiếc "Đèn Báo Nợ" thần kỳ!</h4>
+                <p class="text-slate-400 text-sm mb-6">Hãy thử bật bóng đèn ngoài cùng bên trái (đèn số 128). Thay vì được cộng thêm điểm, máy tính sẽ hiểu bạn đang "nợ" và ngay lập tức biến con số của bạn thành số âm đấy!</p>
+                
+                <div id="int-bulb-container" class="flex flex-wrap justify-center gap-3 mb-8">
+                    <!-- Javascript will populate 8 bulbs here -->
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-center gap-6 md:gap-16">
+                    <div class="bg-slate-700 p-4 rounded-xl flex-1">
+                        <div class="text-sm text-slate-400 mb-1 uppercase tracking-wider font-bold">Nếu ở chế độ "Đếm kẹo"</div>
+                        <div id="val-unsigned" class="text-4xl font-black text-blue-400 font-mono">0</div>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded-xl flex-1">
+                        <div class="text-sm text-slate-400 mb-1 uppercase tracking-wider font-bold">Nếu ở chế độ "Có nợ"</div>
+                        <div id="val-signed" class="text-4xl font-black text-amber-400 font-mono">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 bg-amber-50 border-amber-200">
             <h2 class="text-2xl font-bold text-amber-700 mb-4">📝 Thử Thách Ôn Tập</h2>
             <p class="text-slate-700 mb-4">Kiểm tra lại kiến thức của bạn qua hai câu hỏi trong giáo trình nhé!</p>
@@ -145,6 +236,7 @@
     </div>
 
     <script>
+        // --- LOGIC CHO PHẦN 1: Bit Explorer ---
         let bits = [0, 0, 0, 0, 0, 0, 0, 0];
         const weights = [128, 64, 32, 16, 8, 4, 2, 1];
         let chartInstance = null;
@@ -219,6 +311,7 @@
             }
         }
 
+        // --- LOGIC CHO PHẦN 2 & 3: Converters ---
         document.getElementById('btn-calc-int').onclick = () => {
             let num = parseInt(document.getElementById('input-int').value);
             const output = document.getElementById('output-int');
@@ -279,6 +372,7 @@
             output.innerHTML = html;
         };
 
+        // --- LOGIC CHO PHẦN 4: Hexa ---
         const hexToBin = {
             '0': '0000', '1': '0001', '2': '0010', '3': '0011',
             '4': '0100', '5': '0101', '6': '0110', '7': '0111',
@@ -311,6 +405,121 @@
             }
         };
 
+        // --- LOGIC CHO PHẦN 5: Hexa sang Thập Phân (MỚI BỔ SUNG) ---
+        const hexMapDec = {
+            '0':0, '1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
+            'A':10, 'B':11, 'C':12, 'D':13, 'E':14, 'F':15
+        };
+
+        document.getElementById('btn-calc-hex-to-dec').onclick = () => {
+            const input = document.getElementById('input-hex-to-dec').value.toUpperCase().replace(/[^0-9A-F]/g, '');
+            const output = document.getElementById('output-hex-to-dec');
+            
+            if (!input) {
+                output.innerHTML = '<span class="text-red-500">Vui lòng nhập số Hexa hợp lệ (chỉ chứa 0-9 và A-F).</span>';
+                return;
+            }
+
+            let total = 0;
+            let html = '';
+            const len = input.length;
+
+            for (let i = 0; i < len; i++) {
+                const char = input[i];
+                const val = hexMapDec[char];
+                const power = len - 1 - i;
+                const weight = Math.pow(16, power);
+                const subTotal = val * weight;
+                total += subTotal;
+
+                html += `
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2 last:border-0">
+                        <div>
+                            <span class="inline-block w-8 h-8 bg-blue-600 text-white text-center leading-8 rounded-full font-bold mr-2">${char}</span>
+                            <span class="text-slate-500">vị trí bậc ${power}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-slate-400 mr-2">${val} × 16<sup>${power}</sup> =</span>
+                            <strong class="text-amber-600">${subTotal.toLocaleString('vi-VN')}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+            html += `
+                <div class="mt-4 pt-4 border-t-2 border-slate-300 text-right">
+                    <span class="text-slate-500 mr-2 text-lg">Tổng cộng:</span>
+                    <strong class="text-blue-600 text-3xl">${total.toLocaleString('vi-VN')}</strong>
+                </div>
+            `;
+            output.innerHTML = html;
+        };
+
+        // --- LOGIC CHO PHẦN 6: Biểu Diễn Số Nguyên (MỚI BỔ SUNG) ---
+        let intBitsArray = [0, 0, 0, 0, 0, 0, 0, 0];
+        
+        function initIntBulbs() {
+            const container = document.getElementById('int-bulb-container');
+            container.innerHTML = '';
+            intBitsArray.forEach((bit, index) => {
+                const isSignBit = index === 0;
+                const bulb = document.createElement('div');
+                
+                // Styling the bulbs differently from section 1 to stand out in the dark UI
+                bulb.className = `bulb w-12 h-16 sm:w-16 sm:h-20 flex flex-col items-center justify-center rounded-2xl font-bold text-xl sm:text-2xl select-none`;
+                
+                if (bit) {
+                    bulb.classList.add('on');
+                    if (isSignBit) {
+                        // Special Red styling for Sign bit when ON (Negative)
+                        bulb.style.backgroundColor = '#ef4444'; // red-500
+                        bulb.style.boxShadow = '0 0 15px #ef4444';
+                        bulb.style.color = '#ffffff';
+                    } else {
+                        // Normal Yellow styling when ON
+                        bulb.style.backgroundColor = '#fbbf24';
+                        bulb.style.boxShadow = '0 0 15px #fbbf24';
+                        bulb.style.color = '#78350f';
+                    }
+                } else {
+                    bulb.classList.add('off');
+                    bulb.style.backgroundColor = '#334155'; // slate-700
+                    bulb.style.boxShadow = 'none';
+                    bulb.style.color = '#94a3b8'; // slate-400
+                }
+
+                bulb.innerHTML = `
+                    <span>${bit ? '1' : '0'}</span>
+                    <span class="text-[10px] mt-1 opacity-60">${isSignBit ? 'DẤU(+/-)' : weights[index]}</span>
+                `;
+                if(isSignBit) bulb.title = "Đèn Báo Nợ (Sign Bit)";
+                
+                bulb.onclick = () => toggleIntBit(index);
+                container.appendChild(bulb);
+            });
+            updateIntValues();
+        }
+
+        function toggleIntBit(index) {
+            intBitsArray[index] = intBitsArray[index] === 0 ? 1 : 0;
+            initIntBulbs();
+        }
+
+        function updateIntValues() {
+            let unsignedVal = 0;
+            intBitsArray.forEach((b, i) => { if (b) unsignedVal += weights[i]; });
+            
+            // Tính số có dấu bằng Bù 2
+            let signedVal = unsignedVal;
+            if (intBitsArray[0] === 1) { // Nếu bit dấu là 1 (âm)
+                signedVal = unsignedVal - 256; // 256 = 2^8
+            }
+
+            document.getElementById('val-unsigned').innerText = unsignedVal;
+            document.getElementById('val-signed').innerText = signedVal;
+        }
+
+
+        // --- LOGIC CHO PHẦN QUIZ ---
         document.getElementById('btn-q1').onclick = () => {
             const ans = document.getElementById('quiz-1').value.trim();
             const res = document.getElementById('res-q1');
@@ -331,11 +540,16 @@
             }
         };
 
-        updateUI();
-        initChart();
-        document.getElementById('btn-calc-int').click();
-        document.getElementById('btn-calc-frac').click();
-        document.getElementById('btn-calc-hex').click();
+        // Khởi tạo tất cả khi trang tải xong
+        window.onload = () => {
+            updateUI();
+            initChart();
+            initIntBulbs(); // Khởi tạo bóng đèn phần số nguyên
+            document.getElementById('btn-calc-int').click();
+            document.getElementById('btn-calc-frac').click();
+            document.getElementById('btn-calc-hex').click();
+            document.getElementById('btn-calc-hex-to-dec').click(); // Chạy sẵn mẫu AB2C
+        };
     </script>
 </body>
 </html>
