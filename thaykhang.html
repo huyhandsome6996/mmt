@@ -67,7 +67,7 @@
         
         <!-- HEADER (Thanh điều hướng trên cùng) -->
         <header class="flex-shrink-0 bg-white border-b border-slate-200 p-3 md:p-4 flex items-center gap-4 z-10 shadow-sm">
-            <!-- Nút Mở Sidebar (Đã chuyển sang trái) -->
+            <!-- Nút Mở Sidebar -->
             <button id="open-sidebar" class="p-2 hover:bg-slate-100 rounded-full text-slate-600 transition flex items-center justify-center" title="Danh sách bài học">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
@@ -231,6 +231,29 @@
                         </p>
 
                         <div class="bg-blue-50 p-6 md:p-8 rounded-3xl border border-blue-100">
+                            
+                            <!-- Bài học Nhị Phân (MỚI BỔ SUNG) -->
+                            <div class="bg-indigo-900 text-white p-6 md:p-8 rounded-2xl shadow-lg mb-10 relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <h3 class="text-xl md:text-2xl font-bold text-amber-400 mb-4 flex items-center gap-3">
+                                        <span>📝</span> Bí kíp: Quy tắc Cộng Nhị Phân
+                                    </h3>
+                                    <p class="text-slate-300 mb-6 text-lg">Máy tính chỉ biết số 0 và 1, nên phép cộng cực kỳ dễ, có 4 phép tính sau:</p>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center font-mono text-xl font-bold">
+                                        <div class="bg-indigo-800/50 py-4 rounded-xl border border-indigo-700">0 + 0 = 0</div>
+                                        <div class="bg-indigo-800/50 py-4 rounded-xl border border-indigo-700">0 + 1 = 1</div>
+                                        <div class="bg-indigo-800/50 py-4 rounded-xl border border-indigo-700">1 + 0 = 1</div>
+                                        <div class="bg-amber-500 text-indigo-950 py-4 rounded-xl border border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.4)] relative group cursor-help transition-transform hover:scale-105">
+                                            1 + 1 = 10
+                                            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-max bg-white text-slate-800 text-sm font-sans font-bold px-4 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                Viết 0, nhớ 1 sang trái!
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-amber-300 mt-6 text-base font-medium italic text-center bg-indigo-950/50 py-2 rounded-lg">* Cực kỳ lưu ý: Cột cuối cùng 1 + 1 = 10 nghĩa là "Viết 0, nhớ 1 sang cột bên trái" nhé!</p>
+                                </div>
+                            </div>
+
                             <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-10 bg-white p-4 rounded-2xl shadow-sm">
                                 <label class="font-bold text-slate-700 text-lg">Nhập số dương (0-127):</label>
                                 <div class="flex gap-2">
@@ -241,29 +264,59 @@
 
                             <div class="space-y-6">
                                 <div class="flex items-center gap-4 bg-white p-5 rounded-2xl shadow-sm">
-                                    <div class="w-12 h-12 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center font-black">GỐC</div>
-                                    <div class="flex-1">
+                                    <div class="w-12 h-12 bg-slate-200 text-slate-600 rounded-full flex shrink-0 items-center justify-center font-black">GỐC</div>
+                                    <div class="flex-1 overflow-hidden">
                                         <p class="text-sm text-slate-500 font-bold mb-1">Số ban đầu trong hệ nhị phân (8-bit):</p>
-                                        <div id="twos-step0" class="text-3xl font-mono tracking-[0.2em] font-bold text-slate-800">00000101</div>
+                                        <div id="twos-step0" class="text-3xl font-mono tracking-[0.2em] font-bold text-slate-800 overflow-x-auto">00000101</div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-amber-400">
-                                    <div class="w-12 h-12 bg-amber-400 text-white rounded-full flex items-center justify-center font-black">BÙ 1</div>
-                                    <div class="flex-1">
+                                    <div class="w-12 h-12 bg-amber-400 text-white rounded-full flex shrink-0 items-center justify-center font-black">BÙ 1</div>
+                                    <div class="flex-1 overflow-hidden">
                                         <p class="text-sm text-slate-500 font-bold mb-1">Bước 1: Đảo ngược tất cả bóng đèn (0 thành 1, 1 thành 0):</p>
-                                        <div id="twos-step1" class="text-3xl font-mono tracking-[0.2em] font-bold text-amber-600">11111010</div>
+                                        <div id="twos-step1" class="text-3xl font-mono tracking-[0.2em] font-bold text-amber-600 overflow-x-auto">11111010</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500 relative overflow-hidden">
-                                    <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center font-black">BÙ 2</div>
-                                    <div class="flex-1 relative z-10">
-                                        <p class="text-sm text-slate-500 font-bold mb-1">Bước 2: Cộng thêm 1 vào kết quả trên.</p>
-                                        <div class="text-3xl font-mono tracking-[0.2em] font-bold text-green-600 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                                            <span id="twos-step2">11111011</span>
-                                            <span class="text-sm bg-green-100 px-4 py-2 rounded-full text-green-800 font-sans tracking-normal self-start">Chính là số <b id="twos-result" class="text-lg">-5</b></span>
+                                
+                                <!-- BƯỚC 2: CẬP NHẬT CỘNG THEO HÀNG DỌC CHI TIẾT -->
+                                <div class="flex flex-col md:flex-row items-start gap-4 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500 relative">
+                                    <div class="w-12 h-12 bg-green-500 text-white rounded-full flex shrink-0 items-center justify-center font-black">BÙ 2</div>
+                                    <div class="flex-1 w-full relative z-10">
+                                        <p class="text-sm text-slate-500 font-bold mb-4">Bước 2: Lấy kết quả trên cộng thêm 1. (Đặt tính theo cột dọc nào!)</p>
+
+                                        <div class="flex flex-col xl:flex-row gap-6 items-start w-full">
+                                            <!-- Khối đặt tính -->
+                                            <div class="bg-slate-800 p-6 rounded-xl shadow-inner font-mono text-2xl w-full xl:w-auto flex flex-col items-center">
+                                                <!-- Hàng nhớ -->
+                                                <div class="flex text-red-400 text-sm h-6 font-bold mb-2 w-full justify-end" id="twos-carry-row"></div>
+                                                <!-- Hàng Bù 1 -->
+                                                <div class="flex text-amber-400 w-full justify-end" id="twos-bu1-row"></div>
+                                                <!-- Hàng + 1 -->
+                                                <div class="flex border-b-2 border-slate-500 pb-3 mb-3 relative w-full justify-end mt-1">
+                                                    <span class="absolute left-0 top-0 text-slate-400 font-sans">+</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-slate-600/30">0</span>
+                                                    <span class="w-6 md:w-8 text-center text-green-400 font-bold">1</span>
+                                                </div>
+                                                <!-- Kết quả -->
+                                                <div class="flex text-green-400 font-bold w-full justify-end" id="twos-result-row"></div>
+                                            </div>
+
+                                            <!-- Lời giải thích -->
+                                            <div class="flex-1 space-y-2 bg-green-50 p-5 rounded-xl border border-green-200 text-slate-700 w-full" id="twos-explanation">
+                                                <!-- JS fills this -->
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-6 inline-block bg-green-100 px-6 py-3 rounded-full text-green-800 font-bold shadow-sm">
+                                            Kết quả Bù 2 cuối cùng chính là số <span id="twos-result" class="text-2xl text-green-600">-5</span>
                                         </div>
                                     </div>
-                                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-10 text-8xl">🪄</div>
                                 </div>
                             </div>
                         </div>
@@ -357,7 +410,7 @@
     </main>
 
     <!-- LEFT SIDEBAR (MENU THEO PHONG CÁCH GEMINI) -->
-    <!-- Nền Overlay cho Mobile (Hoặc đóng menu trên màn lớn) -->
+    <!-- Nền Overlay cho Mobile -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity opacity-0"></div>
     
     <!-- Sidebar Container -->
@@ -435,7 +488,7 @@
 
     <script>
         // ================= SPA NAVIGATION LOGIC =================
-        const leftSidebar = document.getElementById('left-sidebar'); // Sửa ID
+        const leftSidebar = document.getElementById('left-sidebar'); 
         const overlay = document.getElementById('sidebar-overlay');
         const mainScrollArea = document.getElementById('main-scroll-area');
         
@@ -444,38 +497,33 @@
         function toggleSidebar(forceState) {
             isSidebarOpen = forceState !== undefined ? forceState : !isSidebarOpen;
             if(isSidebarOpen) {
-                leftSidebar.classList.remove('-translate-x-full'); // Sửa thành âm translate X
+                leftSidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
-                // Timeout để opacity transition hoạt động
                 setTimeout(() => overlay.classList.remove('opacity-0'), 10);
             } else {
                 leftSidebar.classList.add('-translate-x-full');
                 overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300); // Đợi CSS transition chạy xong
+                setTimeout(() => overlay.classList.add('hidden'), 300); 
             }
         }
 
         document.getElementById('open-sidebar').addEventListener('click', () => toggleSidebar(true));
         document.getElementById('close-sidebar').addEventListener('click', () => toggleSidebar(false));
-        overlay.addEventListener('click', () => toggleSidebar(false)); // Bấm ra ngoài để đóng
+        overlay.addEventListener('click', () => toggleSidebar(false)); 
 
         function switchPage(targetId) {
-            // 1. Ẩn tất cả các trang
             document.querySelectorAll('.lesson-section').forEach(sec => {
                 sec.classList.add('hidden');
                 sec.classList.remove('animate-fade-in');
             });
             
-            // 2. Hiện trang mục tiêu với hiệu ứng fade-in
             const targetSec = document.getElementById(targetId);
             if(targetSec) {
                 targetSec.classList.remove('hidden');
-                // Trigger reflow để animation chạy lại
                 void targetSec.offsetWidth; 
                 targetSec.classList.add('animate-fade-in');
             }
             
-            // 3. Đổi style (Màu xanh / Xám) cho các nút Menu kiểu Gemini
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 if(item.dataset.target === targetId) {
                     item.classList.add('bg-[#004a77]', 'text-[#c2e7ff]', 'active');
@@ -486,19 +534,14 @@
                 }
             });
 
-            // 4. Sửa lỗi Resize của Chart.js khi hiển thị lại trang 1
             if(targetId === 'sec-1' && chartInstance) {
                 setTimeout(() => chartInstance.resize(), 50);
             }
 
-            // 5. Cuộn trang lên đầu
             mainScrollArea.scrollTop = 0;
-            
-            // Đóng sidebar tự động để người dùng trải nghiệm ngay (nếu muốn nó luôn mở trên Desktop thì có thể thêm điều kiện innerWidth)
             toggleSidebar(false);
         }
 
-        // Gắn sự kiện Click cho mọi Item trong Menu
         document.querySelectorAll('.sidebar-item').forEach(item => {
             item.addEventListener('click', () => switchPage(item.dataset.target));
         });
@@ -625,16 +668,75 @@
             document.getElementById('val-signed').innerText = intBits[0] ? unVal - 256 : unVal;
         }
 
-        // --- Phần 7: Số Bù 2 ---
+        // --- Phần 7: Số Bù 2 CẬP NHẬT CỘNG NHỊ PHÂN THEO HÀNG DỌC ---
         document.getElementById('btn-calc-twos').onclick = () => {
             let val = parseInt(document.getElementById('input-twos').value);
             if (isNaN(val) || val < 0 || val > 127) { alert("Chỉ nhập số dương từ 0 đến 127 nhé!"); return; }
-            let binStr = val.toString(2).padStart(8, '0'); document.getElementById('twos-step0').innerText = binStr;
-            let flipStr = binStr.split('').map(b => b === '0' ? '1' : '0').join(''); document.getElementById('twos-step1').innerText = flipStr;
-            let addOneInt = parseInt(flipStr, 2) + 1;
-            let finalStr = addOneInt.toString(2).padStart(8, '0');
-            if(finalStr.length > 8) finalStr = finalStr.slice(-8);
-            document.getElementById('twos-step2').innerText = finalStr; document.getElementById('twos-result').innerText = `-${val}`;
+            
+            let binStr = val.toString(2).padStart(8, '0'); 
+            document.getElementById('twos-step0').innerText = binStr;
+            
+            let flipStr = binStr.split('').map(b => b === '0' ? '1' : '0').join(''); 
+            document.getElementById('twos-step1').innerText = flipStr;
+
+            // XỬ LÝ PHÉP CỘNG BÙ 2 VÀ TẠO GIAO DIỆN
+            let flipArr = flipStr.split('').map(Number);
+            let carryArrForView = new Array(8).fill('&nbsp;'); // Dùng để in số "nhớ" ra giao diện
+            let resultArr = new Array(8).fill(0);
+            let explanationHtml = '';
+            
+            let carry = 1; // Khởi đầu ta luôn cộng thêm 1
+            let hasLoggedNoCarry = false;
+
+            // Chạy phép cộng từ phải sang trái (từ bit thứ 7 về bit thứ 0)
+            for (let i = 7; i >= 0; i--) {
+                let bit = flipArr[i];
+                let sum = bit + carry;
+
+                if (sum === 2) { // 1 + 1 = 10 (viết 0 nhớ 1)
+                    resultArr[i] = 0;
+                    carry = 1;
+                    if (i > 0) carryArrForView[i - 1] = '1'; // Hiển thị số 1 nhỏ màu đỏ ở cột kế tiếp
+
+                    if (i === 7) {
+                        explanationHtml += `<p class="mb-2">👉 <b>Cột 1 (ngoài cùng bên phải):</b> <code>${bit} + 1 = 10</code>. <span class="text-red-600 font-bold bg-red-100 px-2 rounded">Viết 0, nhớ 1</span> sang cột 2.</p>`;
+                    } else {
+                        explanationHtml += `<p class="mb-2">👉 <b>Cột ${8 - i}:</b> Ở trên là ${bit}, cộng thêm 1 (nhớ) <code>= 10</code>. Tiếp tục <span class="text-red-600 font-bold bg-red-100 px-2 rounded">viết 0, nhớ 1</span> sang trái.</p>`;
+                    }
+                } else { // sum là 0 hoặc 1 (không có nhớ)
+                    resultArr[i] = sum;
+
+                    if (i === 7) {
+                        explanationHtml += `<p class="mb-2">👉 <b>Cột 1 (ngoài cùng bên phải):</b> <code>${bit} + 1 = ${sum}</code>. Viết ${sum}, không có nhớ.</p>`;
+                    } else if (carry === 1) { // Có "nhớ" từ cột trước bay sang
+                        explanationHtml += `<p class="mb-2">👉 <b>Cột ${8 - i}:</b> Ở trên là ${bit}, cộng thêm 1 (nhớ) <code>= ${sum}</code>. Viết ${sum}. <b>Đã hết nhớ!</b></p>`;
+                    } else if (!hasLoggedNoCarry && i < 7) {
+                        // In câu chốt khi đã hết sạch số nhớ
+                        explanationHtml += `<div class="bg-green-100/70 p-3 rounded-lg border border-green-300 mt-4 shadow-sm"><span class="text-xl">✨</span> <b class="text-green-800">Các cột còn lại không bị "nhớ" nữa, cứ thế hạ thẳng xuống là xong!</b></div>`;
+                        hasLoggedNoCarry = true;
+                    }
+                    
+                    carry = 0; // Xóa trạng thái nhớ
+                }
+            }
+
+            // IN RA MÀN HÌNH THEO HÀNG DỌC
+            let carryRowHtml = '';
+            let bu1RowHtml = '';
+            let resultRowHtml = '';
+            for(let i=0; i<8; i++){
+                // w-6 hoặc w-8 giúp các chữ số thẳng hàng tắp lự
+                carryRowHtml += `<span class="w-6 md:w-8 text-center">${carryArrForView[i]}</span>`;
+                bu1RowHtml += `<span class="w-6 md:w-8 text-center">${flipArr[i]}</span>`;
+                resultRowHtml += `<span class="w-6 md:w-8 text-center">${resultArr[i]}</span>`;
+            }
+
+            document.getElementById('twos-carry-row').innerHTML = carryRowHtml;
+            document.getElementById('twos-bu1-row').innerHTML = bu1RowHtml;
+            document.getElementById('twos-result-row').innerHTML = resultRowHtml;
+            document.getElementById('twos-explanation').innerHTML = explanationHtml;
+            
+            document.getElementById('twos-result').innerText = `-${val}`;
         };
 
         // --- Phần 8: Endian ---
@@ -680,9 +782,8 @@
             updateUI(); initIntBulbs();
             document.getElementById('btn-calc-int').click(); document.getElementById('btn-calc-frac').click();
             document.getElementById('btn-calc-hex').click(); document.getElementById('btn-calc-hex-to-dec').click();
-            document.getElementById('btn-calc-twos').click();
+            document.getElementById('btn-calc-twos').click(); // Chạy sẵn mẫu
             
-            // LUÔN LUÔN MỞ SIDEBAR LÚC MỚI LOAD TRANG (Áp dụng yêu cầu)
             toggleSidebar(true);
         };
     </script>
