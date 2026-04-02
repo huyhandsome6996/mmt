@@ -106,7 +106,7 @@
                 <h3 class="text-white font-bold mb-3 border-b border-[#444] pb-2"><i class="fas fa-map-signs mr-2 text-yellow-400"></i>Bản đồ học tập:</h3>
                 <ul class="space-y-3 text-sm text-gray-300">
                     <li><span class="bg-gray-700 text-white px-2 py-1 rounded text-xs mr-2">Tab 0</span> Ôn tập nhanh cú pháp OOP cơ bản (Khai báo Lớp, Hàm tạo, Đối tượng).</li>
-                    <li><span class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-2">Tab 1-4</span> So sánh trực tiếp 4 tính chất OOP (Trái: Python, Phải: C#).</li>
+                    <li><span class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-2">Tab 1-5</span> So sánh trực tiếp 4 tính chất OOP và Phân tích từ khóa Self/This.</li>
                     <li><span class="bg-emerald-600 text-white px-2 py-1 rounded text-xs mr-2">Playground</span> Trình biên dịch thực tế - Bạn có thể viết và <strong>chạy code thật</strong> tại đây!</li>
                     <li><span class="bg-red-600 text-white px-2 py-1 rounded text-xs mr-2">Từ Điển</span> Bảng tra cứu "Bách khoa toàn thư" mọi cú pháp.</li>
                 </ul>
@@ -161,6 +161,12 @@
             <div id="tab-abstract" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('abstract')">
                 <i class="fas fa-file-signature text-blue-400"></i>
                 <span>4. Trừu Tượng</span>
+            </div>
+
+            <!-- Tab 5: Self vs This -->
+            <div id="tab-selfthis" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('selfthis')">
+                <i class="fas fa-hand-point-right text-pink-400"></i>
+                <span>5. Self vs This</span>
             </div>
 
             <!-- Tab Playground -->
@@ -679,6 +685,88 @@ class Program {
             </div>
 
             <!-- ========================================== -->
+            <!-- CONTENT 5: SELF vs THIS                    -->
+            <!-- ========================================== -->
+            <div id="content-selfthis" class="absolute inset-0 flex flex-row hide-tab">
+                <!-- PYTHON -->
+                <div class="w-1/2 flex flex-col border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> self_keyword.py
+                    </div>
+                    <div class="flex-1 overflow-auto relative group">
+<pre><code class="language-python"># TỪ KHÓA 'self' TRONG PYTHON
+# self đại diện cho chính đối tượng đang gọi hàm.
+
+class Computer:
+    # 1. BẮT BUỘC có 'self' làm tham số đầu tiên 
+    # ở MỌI phương thức (kể cả hàm tạo).
+    def __init__(self, gia_ban):
+        
+        # 2. BẮT BUỘC dùng 'self.' để tạo và truy cập 
+        # thuộc tính của class. 
+        # Nếu chỉ ghi: gia_ban = gia_ban (Sẽ bị tính là biến cục bộ)
+        self.gia_ban = gia_ban
+
+    # Tham số self tự động được truyền ngầm khi ta gọi đối tượng
+    def hien_thi(self):
+        # 3. Muốn xài đồ của class, phải gọi qua self
+        print(f"Giá máy tính: {self.gia_ban}")
+
+# --- Chạy thử ---
+may1 = Computer(1500)
+
+# Thực chất, Python ngầm hiểu là: Computer.hien_thi(may1)
+# Đối tượng 'may1' được ném thẳng vào chữ 'self'
+may1.hien_thi()</code></pre>
+                    </div>
+                </div>
+                <!-- C# -->
+                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> ThisKeyword.cs
+                    </div>
+                    <div class="flex-1 overflow-auto relative group">
+<pre><code class="language-csharp">using System;
+
+// TỪ KHÓA 'this' TRONG C#
+// Tương đương self, nhưng C# đủ thông minh để tự ngầm hiểu.
+
+public class Computer
+{
+    private double giaBan; // Khai báo thuộc tính ở ngoài hàm
+
+    // 1. KHÔNG BAO GIỜ viết 'this' vào tham số của hàm
+    public Computer(double giaBan) 
+    {
+        // 2. CHỈ BẮT BUỘC dùng 'this.' khi tên tham số bị TRÙNG 
+        // với tên thuộc tính của class (như chữ giaBan ở trên).
+        // this.giaBan (Tài sản của class) = giaBan (Biến truyền vào)
+        this.giaBan = giaBan;
+    }
+
+    // Không cần ghi this vào tham số
+    public void HienThi() 
+    {
+        // 3. KHÔNG BẮT BUỘC dùng 'this.' ở đây
+        // Do không có biến nào trùng tên, C# tự biết giaBan 
+        // là tài sản của class.
+        Console.WriteLine($"Giá máy tính: {giaBan}");
+        
+        // (Viết this.giaBan ở đây cũng không sai, nhưng thường lược bỏ)
+    }
+}
+
+class Program {
+    static void Main() {
+        Computer may1 = new Computer(1500);
+        may1.HienThi();
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
             <!-- CONTENT 6: CHẠY CODE (PLAYGROUND - REAL)   -->
             <!-- ========================================== -->
             <div id="content-play" class="absolute inset-0 flex flex-row hide-tab">
@@ -792,52 +880,59 @@ class Program {
                                 <td><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">__init__</span>(<span style="color:#9CDCFE">self</span>, <span style="color:#9CDCFE">ten</span>):</td>
                                 <td><span style="color:#569CD6">public</span> <span style="color:#DCDCAA">Computer</span>(<span style="color:#569CD6">string</span> <span style="color:#9CDCFE">ten</span>) { }</td>
                             </tr>
+                            
+                            <!-- BỔ SUNG SELF vs THIS -->
+                            <tr class="bg-[#2a2d2e]">
+                                <td class="font-sans text-pink-300"><strong>Đại diện Đối tượng<br>(Self vs This)</strong></td>
+                                <td>Bắt buộc ở tham số: <span style="color:#569CD6">def</span> <span style="color:#DCDCAA">ham</span>(<span style="color:#9CDCFE">self</span>):<br>Bắt buộc khi gọi: <span style="color:#9CDCFE">self.ten</span> = ten</td>
+                                <td>Không ghi ở tham số hàm.<br>Chỉ dùng <span style="color:#569CD6">this.</span><span style="color:#9CDCFE">Ten</span> khi tham số bị trùng tên.</td>
+                            </tr>
 
                             <!-- Đóng gói -->
-                            <tr class="bg-[#2a2d2e]">
+                            <tr>
                                 <td class="font-sans text-orange-300"><strong>1. ĐÓNG GÓI</strong><br><span class="text-sm text-gray-400">Giấu dữ liệu thành Private</span></td>
                                 <td><span style="color:#9CDCFE">self.__gia</span> = <span style="color:#B5CEA8">0</span></td>
                                 <td><span style="color:#569CD6">private double</span> <span style="color:#9CDCFE">_gia</span>;</td>
                             </tr>
-                            <tr class="bg-[#2a2d2e]">
+                            <tr>
                                 <td class="font-sans text-orange-300"><span class="text-sm text-gray-400">Tạo cổng giao tiếp an toàn</span></td>
                                 <td><span style="color:#569CD6">@property</span><br><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">gia</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#C586C0">return self</span>.__gia</td>
                                 <td><span style="color:#569CD6">public double</span> <span style="color:#9CDCFE">Gia</span> { <span style="color:#569CD6">get</span>; <span style="color:#569CD6">set</span>; }</td>
                             </tr>
 
                             <!-- Kế thừa -->
-                            <tr>
+                            <tr class="bg-[#2a2d2e]">
                                 <td class="font-sans text-purple-300"><strong>2. KẾ THỪA</strong><br><span class="text-sm text-gray-400">Lớp con nhận thuộc tính từ cha</span></td>
                                 <td><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Laptop</span>(<span style="color:#4EC9B0">Computer</span>):</td>
                                 <td><span style="color:#569CD6">public class</span> <span style="color:#4EC9B0">Laptop</span> : <span style="color:#4EC9B0">Computer</span></td>
                             </tr>
-                            <tr>
+                            <tr class="bg-[#2a2d2e]">
                                 <td class="font-sans text-purple-300"><span class="text-sm text-gray-400">Gọi hàm tạo của Lớp Cha</span></td>
                                 <td><span style="color:#C586C0">super</span>().<span style="color:#DCDCAA">__init__</span>(<span style="color:#9CDCFE">ten</span>)</td>
                                 <td><span style="color:#C586C0">: base</span>(<span style="color:#9CDCFE">ten</span>) <span style="color:#6A9955">// Ở chữ ký hàm</span></td>
                             </tr>
 
                             <!-- Đa hình -->
-                            <tr class="bg-[#2a2d2e]">
+                            <tr>
                                 <td class="font-sans text-emerald-300"><strong>3. ĐA HÌNH</strong><br><span class="text-sm text-gray-400">Xin phép Ghi đè (Ở lớp Cha)</span></td>
                                 <td><span style="color:#6A9955"># Mặc định Python tự cho phép</span><br><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">tinh_tien</span>(<span style="color:#9CDCFE">self</span>):</td>
                                 <td><span style="color:#569CD6">public virtual double</span> <span style="color:#DCDCAA">TinhTien</span>()</td>
                             </tr>
-                            <tr class="bg-[#2a2d2e]">
+                            <tr>
                                 <td class="font-sans text-emerald-300"><span class="text-sm text-gray-400">Thực hiện Ghi đè (Ở lớp Con)</span></td>
                                 <td><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">tinh_tien</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#6A9955"># Viết lại y hệt</span></td>
                                 <td><span style="color:#569CD6">public override double</span> <span style="color:#DCDCAA">TinhTien</span>()</td>
                             </tr>
 
                             <!-- Trừu tượng -->
-                            <tr>
+                            <tr class="bg-[#2a2d2e]">
                                 <td class="font-sans text-blue-300"><strong>4. TRỪU TƯỢNG</strong><br><span class="text-sm text-gray-400">Bản hợp đồng bắt buộc lớp con.</span></td>
                                 <td><span style="color:#C586C0">from</span> abc <span style="color:#C586C0">import</span> ABC, abstractmethod<br><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Hinh</span>(<span style="color:#4EC9B0">ABC</span>):<br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">@abstractmethod</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">def</span> <span style="color:#DCDCAA">d_tich</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#569CD6">pass</span></td>
                                 <td><span style="color:#569CD6">public abstract class</span> <span style="color:#4EC9B0">Hinh</span><br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">public abstract double</span> <span style="color:#DCDCAA">DTich</span>();<br>}</td>
                             </tr>
 
                             <!-- Nạp chồng -->
-                            <tr class="bg-[#2a2d2e]">
+                            <tr>
                                 <td class="font-sans text-pink-300 border-b-0"><strong>* BONUS</strong><br><span class="text-sm text-gray-400">Nạp chồng Toán tử (+, -, >)</span></td>
                                 <td class="border-b-0"><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">__gt__</span>(<span style="color:#9CDCFE">self</span>, <span style="color:#9CDCFE">other</span>):</td>
                                 <td class="border-b-0"><span style="color:#569CD6">public static bool operator</span> >(<span style="color:#4EC9B0">A</span> <span style="color:#9CDCFE">a</span>, <span style="color:#4EC9B0">A</span> <span style="color:#9CDCFE">b</span>)</td>
@@ -863,9 +958,9 @@ class Program {
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
-        // Chuyển Tab
+        // Chuyển Tab (BỔ SUNG THÊM tab 'selfthis')
         function switchTab(tabId) {
-            const tabIds = ['basics', 'encap', 'inherit', 'poly', 'abstract', 'play', 'dict'];
+            const tabIds = ['basics', 'encap', 'inherit', 'poly', 'abstract', 'selfthis', 'play', 'dict'];
             tabIds.forEach(id => {
                 document.getElementById('content-' + id).classList.add('hide-tab');
                 document.getElementById('tab-' + id).classList.remove('active');
