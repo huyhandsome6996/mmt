@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>So Sánh OOP: Python vs C#</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -12,8 +12,8 @@
         /* Tùy chỉnh màu sắc chuẩn VS Code Dark+ */
         body { background-color: #111; color: #ccc; }
         .vscode-editor { background-color: #1e1e1e; font-family: 'Consolas', 'Courier New', monospace; font-size: 14.5px; line-height: 1.6; }
-        .vscode-tabs { background-color: #252526; }
-        .vscode-tab { background-color: #2d2d2d; border-top: 1px solid #2d2d2d; color: #969696; cursor: pointer; border-right: 1px solid #1e1e1e; transition: background-color 0.2s; }
+        .vscode-tabs { background-color: #252526; scroll-behavior: smooth; }
+        .vscode-tab { background-color: #2d2d2d; border-top: 1px solid #2d2d2d; color: #969696; cursor: pointer; border-right: 1px solid #1e1e1e; transition: background-color 0.2s; white-space: nowrap; }
         .vscode-tab:hover:not(.active) { background-color: #2a2d2e; }
         .vscode-tab.active { background-color: #1e1e1e; border-top: 2px solid #007acc; color: #fff; border-right: 1px solid #252526; }
         
@@ -23,7 +23,7 @@
             border: none !important; 
             box-shadow: none !important; 
             margin: 0 !important; 
-            padding: 1.5rem !important;
+            padding: 1rem 1.5rem !important;
             overflow: auto !important;
             height: 100%;
         }
@@ -32,7 +32,10 @@
             text-shadow: none !important; 
             color: #D4D4D4 !important; 
             font-family: 'Consolas', 'Courier New', monospace !important;
-            font-size: 14px !important;
+            font-size: 13px !important;
+        }
+        @media (min-width: 768px) {
+            code[class*="language-"], pre[class*="language-"] { font-size: 14px !important; }
         }
 
         code[class*="language-"] { padding: 0 !important; }
@@ -44,15 +47,16 @@
             background-color: #1e1e1e;
             color: #9cdcfe; /* Màu chữ biến mặc định cho giống IDE */
             font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 15px;
+            font-size: 13px;
             border: none;
             resize: none;
-            padding: 1.5rem;
+            padding: 1rem 1.5rem;
             outline: none;
             white-space: pre;
             overflow-wrap: normal;
             overflow-x: auto;
         }
+        @media (min-width: 768px) { .code-textarea { font-size: 15px; } }
         .code-textarea:focus { outline: none; }
 
         /* Bảng Từ Điển */
@@ -72,9 +76,11 @@
         .token.variable, .token.property { color: #9CDCFE !important; }
         .token.boolean { color: #569CD6 !important; }
 
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        /* Tùy chỉnh thanh cuộn để dễ thao tác trên mobile hơn */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        @media (min-width: 768px) { ::-webkit-scrollbar { width: 10px; height: 10px; } }
         ::-webkit-scrollbar-track { background: #1e1e1e; }
-        ::-webkit-scrollbar-thumb { background: #424242; border: 2px solid #1e1e1e; border-radius: 5px;}
+        ::-webkit-scrollbar-thumb { background: #424242; border: 1px solid #1e1e1e; border-radius: 5px;}
         ::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
         
         .hide-tab { display: none !important; }
@@ -89,96 +95,96 @@
     <!-- ========================================== -->
     <!-- MODAL HƯỚNG DẪN (Hiển thị khi mới vào)     -->
     <!-- ========================================== -->
-    <div id="welcome-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity">
-        <div class="bg-[#1e1e1e] border border-[#333] rounded-2xl p-8 max-w-3xl text-center shadow-2xl modal-animate relative">
-            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
+    <div id="welcome-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity px-4">
+        <div class="bg-[#1e1e1e] border border-[#333] rounded-2xl p-6 md:p-8 w-full max-w-3xl text-center shadow-2xl modal-animate relative max-h-[90vh] overflow-y-auto">
+            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 hidden md:block">
                 <div class="bg-blue-500 rounded-full p-4 border-4 border-[#1e1e1e] shadow-lg">
                     <i class="fas fa-graduation-cap text-3xl text-white"></i>
                 </div>
             </div>
             
-            <h2 class="text-3xl font-extrabold text-blue-400 mt-6 mb-4 drop-shadow-md">Học OOP: Python sang C#</h2>
-            <p class="text-gray-300 mb-6 text-[15px] leading-relaxed">
+            <h2 class="text-2xl md:text-3xl font-extrabold text-blue-400 mt-2 md:mt-6 mb-4 drop-shadow-md">Học OOP: Python sang C#</h2>
+            <p class="text-gray-300 mb-6 text-sm md:text-[15px] leading-relaxed">
                 Chào mừng bạn đến với Môi trường giả lập IDE! Công cụ này được thiết kế để giúp bạn chuyển đổi tư duy lập trình hướng đối tượng một cách trực quan và nhanh chóng nhất.
             </p>
             
-            <div class="bg-[#252526] rounded-xl p-5 text-left mb-8 border border-[#333]">
-                <h3 class="text-white font-bold mb-3 border-b border-[#444] pb-2"><i class="fas fa-map-signs mr-2 text-yellow-400"></i>Bản đồ học tập:</h3>
-                <ul class="space-y-3 text-sm text-gray-300">
-                    <li><span class="bg-gray-700 text-white px-2 py-1 rounded text-xs mr-2">Tab 0</span> Ôn tập nhanh cú pháp OOP cơ bản (Khai báo Lớp, Hàm tạo, Đối tượng).</li>
-                    <li><span class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-2">Tab 1-5</span> So sánh trực tiếp 4 tính chất OOP và Phân tích từ khóa Self/This.</li>
-                    <li><span class="bg-emerald-600 text-white px-2 py-1 rounded text-xs mr-2">Playground</span> Trình biên dịch thực tế - Bạn có thể viết và <strong>chạy code thật</strong> tại đây!</li>
-                    <li><span class="bg-red-600 text-white px-2 py-1 rounded text-xs mr-2">Từ Điển</span> Bảng tra cứu "Bách khoa toàn thư" mọi cú pháp.</li>
+            <div class="bg-[#252526] rounded-xl p-4 md:p-5 text-left mb-8 border border-[#333]">
+                <h3 class="text-white font-bold mb-3 border-b border-[#444] pb-2 text-sm md:text-base"><i class="fas fa-map-signs mr-2 text-yellow-400"></i>Bản đồ học tập:</h3>
+                <ul class="space-y-3 text-xs md:text-sm text-gray-300">
+                    <li class="flex items-start"><span class="bg-gray-700 text-white px-2 py-1 rounded text-[10px] md:text-xs mr-2 mt-0.5 whitespace-nowrap">Tab 0</span> <span>Ôn tập nhanh cú pháp OOP cơ bản (Khai báo Lớp, Hàm tạo, Đối tượng).</span></li>
+                    <li class="flex items-start"><span class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] md:text-xs mr-2 mt-0.5 whitespace-nowrap">Tab 1-5</span> <span>So sánh trực tiếp 4 tính chất OOP và Phân tích từ khóa Self/This.</span></li>
+                    <li class="flex items-start"><span class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px] md:text-xs mr-2 mt-0.5 whitespace-nowrap">Playground</span> <span>Trình biên dịch thực tế - Bạn có thể viết và <strong>chạy code thật</strong> tại đây!</span></li>
+                    <li class="flex items-start"><span class="bg-red-600 text-white px-2 py-1 rounded text-[10px] md:text-xs mr-2 mt-0.5 whitespace-nowrap">Từ Điển</span> <span>Bảng tra cứu "Bách khoa toàn thư" mọi cú pháp.</span></li>
                 </ul>
             </div>
 
-            <button onclick="closeModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-10 rounded-full transition transform hover:scale-105 shadow-lg border border-blue-400/30">
+            <button onclick="closeModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 md:py-3 px-6 md:px-10 rounded-full transition transform hover:scale-105 shadow-lg border border-blue-400/30 text-sm md:text-base">
                 Đã hiểu, Bắt đầu học ngay! <i class="fas fa-rocket ml-2"></i>
             </button>
         </div>
     </div>
 
     <!-- Header -->
-    <header class="bg-[#333333] text-white p-2 text-center flex justify-between items-center px-4 z-20 shadow-md">
+    <header class="bg-[#333333] text-white p-2 text-center flex flex-col md:flex-row justify-center md:justify-between items-center px-4 z-20 shadow-md">
         <div class="flex items-center space-x-2">
             <i class="fas fa-code text-blue-400"></i>
             <h1 class="font-semibold text-sm tracking-wide">VS Code Emulator</h1>
         </div>
-        <div class="text-xs text-gray-400 hidden md:block">Interactive Learning: Python vs C#</div>
+        <div class="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-0">Interactive Learning: Python vs C#</div>
     </header>
 
     <!-- Main Workspace -->
     <main class="flex-1 flex flex-col overflow-hidden">
         
         <!-- Tab Bar -->
-        <div class="vscode-tabs flex text-[13px] select-none overflow-x-auto border-b border-[#333]">
+        <div class="vscode-tabs flex text-[12px] md:text-[13px] select-none overflow-x-auto border-b border-[#333]">
             
             <!-- Tab 0: Cơ bản -->
-            <div id="tab-basics" class="vscode-tab active px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('basics')">
+            <div id="tab-basics" class="vscode-tab active px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('basics')">
                 <i class="fas fa-bolt text-yellow-400"></i>
-                <span>0. Cú pháp OOP cơ bản</span>
+                <span>0. Cú pháp OOP</span>
             </div>
 
             <!-- Tab 1: Đóng Gói -->
-            <div id="tab-encap" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('encap')">
+            <div id="tab-encap" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('encap')">
                 <i class="fas fa-box-open text-orange-400"></i>
                 <span>1. Đóng Gói</span>
             </div>
             
             <!-- Tab 2: Kế Thừa -->
-            <div id="tab-inherit" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('inherit')">
+            <div id="tab-inherit" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('inherit')">
                 <i class="fas fa-sitemap text-purple-400"></i>
                 <span>2. Kế Thừa</span>
             </div>
 
             <!-- Tab 3: Đa Hình -->
-            <div id="tab-poly" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('poly')">
+            <div id="tab-poly" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('poly')">
                 <i class="fas fa-shapes text-emerald-400"></i>
                 <span>3. Đa Hình</span>
             </div>
 
             <!-- Tab 4: Trừu Tượng -->
-            <div id="tab-abstract" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('abstract')">
+            <div id="tab-abstract" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('abstract')">
                 <i class="fas fa-file-signature text-blue-400"></i>
                 <span>4. Trừu Tượng</span>
             </div>
 
             <!-- Tab 5: Self vs This -->
-            <div id="tab-selfthis" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('selfthis')">
+            <div id="tab-selfthis" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit" onclick="switchTab('selfthis')">
                 <i class="fas fa-hand-point-right text-pink-400"></i>
                 <span>5. Self vs This</span>
             </div>
 
             <!-- Tab Playground -->
-            <div id="tab-play" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit border-l border-[#444]" onclick="switchTab('play')">
+            <div id="tab-play" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit border-l border-[#444]" onclick="switchTab('play')">
                 <i class="fas fa-play-circle text-green-400"></i>
-                <span class="font-bold text-gray-200">Chạy Code (Playground)</span>
+                <span class="font-bold text-gray-200">Playground</span>
             </div>
 
             <!-- Tab Dictionary -->
-            <div id="tab-dict" class="vscode-tab px-4 py-2.5 flex items-center gap-2 min-w-fit border-l border-[#444]" onclick="switchTab('dict')">
+            <div id="tab-dict" class="vscode-tab px-3 md:px-4 py-2.5 flex items-center gap-2 min-w-fit border-l border-[#444]" onclick="switchTab('dict')">
                 <i class="fas fa-book text-red-400"></i>
-                <span>Từ Điển OOP</span>
+                <span>Từ Điển</span>
             </div>
         </div>
 
@@ -188,10 +194,10 @@
             <!-- ========================================== -->
             <!-- CONTENT 0: CÚ PHÁP OOP CƠ BẢN              -->
             <!-- ========================================== -->
-            <div id="content-basics" class="absolute inset-0 flex flex-row">
+            <div id="content-basics" class="absolute inset-0 flex flex-col md:flex-row">
                 <!-- PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> basic_oop.py
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -231,8 +237,8 @@ print("Trường đang học:", sv1.truong_hoc)
                     </div>
                 </div>
                 <!-- C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> BasicOOP.cs
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -291,10 +297,10 @@ class Program
             <!-- ========================================== -->
             <!-- CONTENT 1: ĐÓNG GÓI                        -->
             <!-- ========================================== -->
-            <div id="content-encap" class="absolute inset-0 flex flex-row hide-tab">
+            <div id="content-encap" class="absolute inset-0 flex flex-col md:flex-row hide-tab">
                 <!-- PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> ĐóngGói.py
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -332,8 +338,8 @@ print(tk.so_du) # Gọi getter</code></pre>
                     </div>
                 </div>
                 <!-- C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> DongGoi.cs
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -388,10 +394,10 @@ class Program {
             <!-- ========================================== -->
             <!-- CONTENT 2: KẾ THỪA                         -->
             <!-- ========================================== -->
-            <div id="content-inherit" class="absolute inset-0 flex flex-row hide-tab">
+            <div id="content-inherit" class="absolute inset-0 flex flex-col md:flex-row hide-tab">
                 <!-- PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> KếThừa.py
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -412,7 +418,7 @@ class QuanLy(NhanVien):
         # Dùng super() để ném Tên và Lương lên cho cha xử lý
         super().__init__(ten, luong_cb)
         
-        # Bổ sung đặc điểm riêng của lớp con
+        # Bổ tương đặc điểm riêng của lớp con
         self.thuong = thuong
         
     # Thêm hành vi riêng của Quản Lý
@@ -430,8 +436,8 @@ sep.hop_nhan_vien()</code></pre>
                     </div>
                 </div>
                 <!-- C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> KeThua.cs
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -489,10 +495,10 @@ class Program {
             <!-- ========================================== -->
             <!-- CONTENT 3: ĐA HÌNH                         -->
             <!-- ========================================== -->
-            <div id="content-poly" class="absolute inset-0 flex flex-row hide-tab">
+            <div id="content-poly" class="absolute inset-0 flex flex-col md:flex-row hide-tab">
                 <!-- PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> ĐaHình.py
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -531,8 +537,8 @@ for nv in danh_sach:
                     </div>
                 </div>
                 <!-- C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> DaHinh.cs
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -590,10 +596,10 @@ class Program {
             <!-- ========================================== -->
             <!-- CONTENT 4: TRỪU TƯỢNG                      -->
             <!-- ========================================== -->
-            <div id="content-abstract" class="absolute inset-0 flex flex-row hide-tab">
+            <div id="content-abstract" class="absolute inset-0 flex flex-col md:flex-row hide-tab">
                 <!-- PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> TrừuTượng.py
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -634,8 +640,8 @@ print(h1.tinh_dien_tich())</code></pre>
                     </div>
                 </div>
                 <!-- C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> TruuTuong.cs
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -687,10 +693,10 @@ class Program {
             <!-- ========================================== -->
             <!-- CONTENT 5: SELF vs THIS                    -->
             <!-- ========================================== -->
-            <div id="content-selfthis" class="absolute inset-0 flex flex-row hide-tab">
+            <div id="content-selfthis" class="absolute inset-0 flex flex-col md:flex-row hide-tab">
                 <!-- PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] text-[#9cdcfe] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-3.5 h-3.5" alt="Python"> self_keyword.py
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -721,8 +727,8 @@ may1.hien_thi()</code></pre>
                     </div>
                 </div>
                 <!-- C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] text-[#4EC9B0] text-xs py-1 px-4 flex items-center gap-2 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-3.5 h-3.5" alt="C#"> ThisKeyword.cs
                     </div>
                     <div class="flex-1 overflow-auto relative group">
@@ -769,22 +775,22 @@ class Program {
             <!-- ========================================== -->
             <!-- CONTENT 6: CHẠY CODE (PLAYGROUND - REAL)   -->
             <!-- ========================================== -->
-            <div id="content-play" class="absolute inset-0 flex flex-row hide-tab">
+            <div id="content-play" class="absolute inset-0 flex flex-col md:flex-row hide-tab">
                 
                 <!-- PLAYGROUND PYTHON -->
-                <div class="w-1/2 flex flex-col border-r border-[#333]">
-                    <div class="bg-[#252526] flex justify-between items-center py-2 px-4 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-[#333]">
+                    <div class="bg-[#252526] flex justify-between items-center py-2 px-4 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <div class="flex items-center gap-2 text-[#9cdcfe] text-sm font-bold">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-4 h-4" alt="Python"> Trình biên dịch Python
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-4 h-4" alt="Python"> <span class="hidden md:inline">Trình biên dịch</span> Python
                         </div>
-                        <button onclick="runCode('python')" id="btn-run-python" class="bg-green-600 hover:bg-green-500 text-white text-xs px-4 py-1.5 rounded flex items-center gap-2 transition font-bold shadow-lg">
+                        <button onclick="runCode('python')" id="btn-run-python" class="bg-green-600 hover:bg-green-500 text-white text-xs px-4 py-1.5 rounded flex items-center gap-2 transition font-bold shadow-lg whitespace-nowrap">
                             <i class="fas fa-play"></i> RUN
                         </button>
                     </div>
                     
-                    <div class="flex-1 flex flex-col">
+                    <div class="flex-1 flex flex-col overflow-hidden">
                         <!-- Code Area -->
-                        <div class="h-3/5 border-b border-[#333] relative">
+                        <div class="h-[60%] border-b border-[#333] relative">
 <textarea id="editor-python" class="code-textarea" spellcheck="false" placeholder="Viết code Python của bạn ở đây...">class NhanVien:
     def __init__(self, ten, luong):
         self.ten = ten
@@ -798,7 +804,7 @@ nv.hien_thi()
 print("Code Python này đang được chạy thật 100%!")</textarea>
                         </div>
                         <!-- Console Area -->
-                        <div class="h-2/5 bg-[#0a0a0a] p-4 font-mono text-[13.5px] overflow-y-auto" id="console-python">
+                        <div class="h-[40%] bg-[#0a0a0a] p-3 md:p-4 font-mono text-[12px] md:text-[13.5px] overflow-y-auto" id="console-python">
                             <span class="text-blue-400"># Gõ code bên trên và bấm nút "RUN" để chạy thực tế...</span><br>
                             <span class="text-gray-500"># Bạn có thể dùng phím Tab để thụt lề code.</span><br><br>
                         </div>
@@ -806,19 +812,19 @@ print("Code Python này đang được chạy thật 100%!")</textarea>
                 </div>
 
                 <!-- PLAYGROUND C# -->
-                <div class="w-1/2 flex flex-col bg-[#1e1e1e]">
-                    <div class="bg-[#252526] flex justify-between items-center py-2 px-4 border-b border-[#1e1e1e] shadow-sm z-10">
+                <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-[#1e1e1e]">
+                    <div class="bg-[#252526] flex justify-between items-center py-2 px-4 border-b border-[#1e1e1e] shadow-sm z-10 shrink-0">
                         <div class="flex items-center gap-2 text-[#4EC9B0] text-sm font-bold">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-4 h-4" alt="C#"> Trình biên dịch C#
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-4 h-4" alt="C#"> <span class="hidden md:inline">Trình biên dịch</span> C#
                         </div>
-                        <button onclick="runCode('csharp')" id="btn-run-csharp" class="bg-green-600 hover:bg-green-500 text-white text-xs px-4 py-1.5 rounded flex items-center gap-2 transition font-bold shadow-lg">
+                        <button onclick="runCode('csharp')" id="btn-run-csharp" class="bg-green-600 hover:bg-green-500 text-white text-xs px-4 py-1.5 rounded flex items-center gap-2 transition font-bold shadow-lg whitespace-nowrap">
                             <i class="fas fa-play"></i> RUN
                         </button>
                     </div>
                     
-                    <div class="flex-1 flex flex-col">
+                    <div class="flex-1 flex flex-col overflow-hidden">
                         <!-- Code Area -->
-                        <div class="h-3/5 border-b border-[#333] relative">
+                        <div class="h-[60%] border-b border-[#333] relative">
 <textarea id="editor-csharp" class="code-textarea text-[#D4D4D4]" spellcheck="false" placeholder="Viết code C# của bạn ở đây...">using System;
 
 public class NhanVien {
@@ -842,7 +848,7 @@ class Program {
 }</textarea>
                         </div>
                         <!-- Console Area -->
-                        <div class="h-2/5 bg-[#0a0a0a] p-4 font-mono text-[13.5px] overflow-y-auto" id="console-csharp">
+                        <div class="h-[40%] bg-[#0a0a0a] p-3 md:p-4 font-mono text-[12px] md:text-[13.5px] overflow-y-auto" id="console-csharp">
                             <span class="text-blue-400"># Gõ code bên trên và bấm nút "RUN" để chạy thực tế...</span><br>
                             <span class="text-gray-500"># Lưu ý: C# yêu cầu phải có class Program chứa static void Main().</span><br><br>
                         </div>
@@ -853,92 +859,94 @@ class Program {
             <!-- ========================================== -->
             <!-- CONTENT 7: DICTIONARY (BẢNG SO SÁNH)       -->
             <!-- ========================================== -->
-            <div id="content-dict" class="absolute inset-0 hide-tab overflow-auto p-8">
+            <div id="content-dict" class="absolute inset-0 hide-tab overflow-auto p-4 md:p-8">
                 <div class="max-w-6xl mx-auto pb-12">
-                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3 border-b border-[#333] pb-4">
+                    <h2 class="text-xl md:text-2xl font-bold text-white mb-6 flex items-center gap-3 border-b border-[#333] pb-4">
                         <i class="fas fa-book-open text-red-400"></i>
                         BẢNG TỪ ĐIỂN TỔNG HỢP OOP (PYTHON vs C#)
                     </h2>
                     
-                    <table class="w-full text-left border-collapse vscode-table bg-[#1e1e1e] rounded-lg overflow-hidden shadow-2xl mb-12">
-                        <thead>
-                            <tr>
-                                <th class="w-1/4">TÍNH CHẤT / TÁC DỤNG</th>
-                                <th class="w-3/8"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-4 h-4 inline mr-2 -mt-1"> CÚ PHÁP PYTHON</th>
-                                <th class="w-3/8"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-4 h-4 inline mr-2 -mt-1"> CÚ PHÁP C#</th>
-                            </tr>
-                        </thead>
-                        <tbody class="font-mono text-[14px]">
-                            <!-- Basic -->
-                            <tr>
-                                <td class="font-sans text-gray-300"><strong>Khởi tạo Lớp</strong></td>
-                                <td><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Computer</span>:</td>
-                                <td><span style="color:#569CD6">public class</span> <span style="color:#4EC9B0">Computer</span> { }</td>
-                            </tr>
-                            <tr>
-                                <td class="font-sans text-gray-300"><strong>Hàm Tạo (Constructor)</strong></td>
-                                <td><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">__init__</span>(<span style="color:#9CDCFE">self</span>, <span style="color:#9CDCFE">ten</span>):</td>
-                                <td><span style="color:#569CD6">public</span> <span style="color:#DCDCAA">Computer</span>(<span style="color:#569CD6">string</span> <span style="color:#9CDCFE">ten</span>) { }</td>
-                            </tr>
-                            
-                            <!-- BỔ SUNG SELF vs THIS -->
-                            <tr class="bg-[#2a2d2e]">
-                                <td class="font-sans text-pink-300"><strong>Đại diện Đối tượng<br>(Self vs This)</strong></td>
-                                <td>Bắt buộc ở tham số: <span style="color:#569CD6">def</span> <span style="color:#DCDCAA">ham</span>(<span style="color:#9CDCFE">self</span>):<br>Bắt buộc khi gọi: <span style="color:#9CDCFE">self.ten</span> = ten</td>
-                                <td>Không ghi ở tham số hàm.<br>Chỉ dùng <span style="color:#569CD6">this.</span><span style="color:#9CDCFE">Ten</span> khi tham số bị trùng tên.</td>
-                            </tr>
+                    <div class="overflow-x-auto w-full bg-[#1e1e1e] rounded-lg shadow-2xl mb-12 border border-[#333]">
+                        <table class="w-full text-left border-collapse vscode-table min-w-[700px]">
+                            <thead>
+                                <tr>
+                                    <th class="w-1/4">TÍNH CHẤT / TÁC DỤNG</th>
+                                    <th class="w-3/8"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" class="w-4 h-4 inline mr-2 -mt-1"> CÚ PHÁP PYTHON</th>
+                                    <th class="w-3/8"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" class="w-4 h-4 inline mr-2 -mt-1"> CÚ PHÁP C#</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-mono text-[13px] md:text-[14px]">
+                                <!-- Basic -->
+                                <tr>
+                                    <td class="font-sans text-gray-300"><strong>Khởi tạo Lớp</strong></td>
+                                    <td><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Computer</span>:</td>
+                                    <td><span style="color:#569CD6">public class</span> <span style="color:#4EC9B0">Computer</span> { }</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-sans text-gray-300"><strong>Hàm Tạo (Constructor)</strong></td>
+                                    <td><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">__init__</span>(<span style="color:#9CDCFE">self</span>, <span style="color:#9CDCFE">ten</span>):</td>
+                                    <td><span style="color:#569CD6">public</span> <span style="color:#DCDCAA">Computer</span>(<span style="color:#569CD6">string</span> <span style="color:#9CDCFE">ten</span>) { }</td>
+                                </tr>
+                                
+                                <!-- BỔ SUNG SELF vs THIS -->
+                                <tr class="bg-[#2a2d2e]">
+                                    <td class="font-sans text-pink-300"><strong>Đại diện Đối tượng<br>(Self vs This)</strong></td>
+                                    <td>Bắt buộc ở tham số: <span style="color:#569CD6">def</span> <span style="color:#DCDCAA">ham</span>(<span style="color:#9CDCFE">self</span>):<br>Bắt buộc khi gọi: <span style="color:#9CDCFE">self.ten</span> = ten</td>
+                                    <td>Không ghi ở tham số hàm.<br>Chỉ dùng <span style="color:#569CD6">this.</span><span style="color:#9CDCFE">Ten</span> khi tham số bị trùng tên.</td>
+                                </tr>
 
-                            <!-- Đóng gói -->
-                            <tr>
-                                <td class="font-sans text-orange-300"><strong>1. ĐÓNG GÓI</strong><br><span class="text-sm text-gray-400">Giấu dữ liệu thành Private</span></td>
-                                <td><span style="color:#9CDCFE">self.__gia</span> = <span style="color:#B5CEA8">0</span></td>
-                                <td><span style="color:#569CD6">private double</span> <span style="color:#9CDCFE">_gia</span>;</td>
-                            </tr>
-                            <tr>
-                                <td class="font-sans text-orange-300"><span class="text-sm text-gray-400">Tạo cổng giao tiếp an toàn</span></td>
-                                <td><span style="color:#569CD6">@property</span><br><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">gia</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#C586C0">return self</span>.__gia</td>
-                                <td><span style="color:#569CD6">public double</span> <span style="color:#9CDCFE">Gia</span> { <span style="color:#569CD6">get</span>; <span style="color:#569CD6">set</span>; }</td>
-                            </tr>
+                                <!-- Đóng gói -->
+                                <tr>
+                                    <td class="font-sans text-orange-300"><strong>1. ĐÓNG GÓI</strong><br><span class="text-xs text-gray-400">Giấu dữ liệu thành Private</span></td>
+                                    <td><span style="color:#9CDCFE">self.__gia</span> = <span style="color:#B5CEA8">0</span></td>
+                                    <td><span style="color:#569CD6">private double</span> <span style="color:#9CDCFE">_gia</span>;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-sans text-orange-300"><span class="text-xs text-gray-400">Tạo cổng giao tiếp an toàn</span></td>
+                                    <td><span style="color:#569CD6">@property</span><br><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">gia</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#C586C0">return self</span>.__gia</td>
+                                    <td><span style="color:#569CD6">public double</span> <span style="color:#9CDCFE">Gia</span> { <span style="color:#569CD6">get</span>; <span style="color:#569CD6">set</span>; }</td>
+                                </tr>
 
-                            <!-- Kế thừa -->
-                            <tr class="bg-[#2a2d2e]">
-                                <td class="font-sans text-purple-300"><strong>2. KẾ THỪA</strong><br><span class="text-sm text-gray-400">Lớp con nhận thuộc tính từ cha</span></td>
-                                <td><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Laptop</span>(<span style="color:#4EC9B0">Computer</span>):</td>
-                                <td><span style="color:#569CD6">public class</span> <span style="color:#4EC9B0">Laptop</span> : <span style="color:#4EC9B0">Computer</span></td>
-                            </tr>
-                            <tr class="bg-[#2a2d2e]">
-                                <td class="font-sans text-purple-300"><span class="text-sm text-gray-400">Gọi hàm tạo của Lớp Cha</span></td>
-                                <td><span style="color:#C586C0">super</span>().<span style="color:#DCDCAA">__init__</span>(<span style="color:#9CDCFE">ten</span>)</td>
-                                <td><span style="color:#C586C0">: base</span>(<span style="color:#9CDCFE">ten</span>) <span style="color:#6A9955">// Ở chữ ký hàm</span></td>
-                            </tr>
+                                <!-- Kế thừa -->
+                                <tr class="bg-[#2a2d2e]">
+                                    <td class="font-sans text-purple-300"><strong>2. KẾ THỪA</strong><br><span class="text-xs text-gray-400">Lớp con nhận thuộc tính từ cha</span></td>
+                                    <td><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Laptop</span>(<span style="color:#4EC9B0">Computer</span>):</td>
+                                    <td><span style="color:#569CD6">public class</span> <span style="color:#4EC9B0">Laptop</span> : <span style="color:#4EC9B0">Computer</span></td>
+                                </tr>
+                                <tr class="bg-[#2a2d2e]">
+                                    <td class="font-sans text-purple-300"><span class="text-xs text-gray-400">Gọi hàm tạo của Lớp Cha</span></td>
+                                    <td><span style="color:#C586C0">super</span>().<span style="color:#DCDCAA">__init__</span>(<span style="color:#9CDCFE">ten</span>)</td>
+                                    <td><span style="color:#C586C0">: base</span>(<span style="color:#9CDCFE">ten</span>) <span style="color:#6A9955">// Ở chữ ký hàm</span></td>
+                                </tr>
 
-                            <!-- Đa hình -->
-                            <tr>
-                                <td class="font-sans text-emerald-300"><strong>3. ĐA HÌNH</strong><br><span class="text-sm text-gray-400">Xin phép Ghi đè (Ở lớp Cha)</span></td>
-                                <td><span style="color:#6A9955"># Mặc định Python tự cho phép</span><br><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">tinh_tien</span>(<span style="color:#9CDCFE">self</span>):</td>
-                                <td><span style="color:#569CD6">public virtual double</span> <span style="color:#DCDCAA">TinhTien</span>()</td>
-                            </tr>
-                            <tr>
-                                <td class="font-sans text-emerald-300"><span class="text-sm text-gray-400">Thực hiện Ghi đè (Ở lớp Con)</span></td>
-                                <td><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">tinh_tien</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#6A9955"># Viết lại y hệt</span></td>
-                                <td><span style="color:#569CD6">public override double</span> <span style="color:#DCDCAA">TinhTien</span>()</td>
-                            </tr>
+                                <!-- Đa hình -->
+                                <tr>
+                                    <td class="font-sans text-emerald-300"><strong>3. ĐA HÌNH</strong><br><span class="text-xs text-gray-400">Xin phép Ghi đè (Ở lớp Cha)</span></td>
+                                    <td><span style="color:#6A9955"># Mặc định Python tự cho phép</span><br><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">tinh_tien</span>(<span style="color:#9CDCFE">self</span>):</td>
+                                    <td><span style="color:#569CD6">public virtual double</span> <span style="color:#DCDCAA">TinhTien</span>()</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-sans text-emerald-300"><span class="text-xs text-gray-400">Thực hiện Ghi đè (Ở lớp Con)</span></td>
+                                    <td><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">tinh_tien</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#6A9955"># Viết lại y hệt</span></td>
+                                    <td><span style="color:#569CD6">public override double</span> <span style="color:#DCDCAA">TinhTien</span>()</td>
+                                </tr>
 
-                            <!-- Trừu tượng -->
-                            <tr class="bg-[#2a2d2e]">
-                                <td class="font-sans text-blue-300"><strong>4. TRỪU TƯỢNG</strong><br><span class="text-sm text-gray-400">Bản hợp đồng bắt buộc lớp con.</span></td>
-                                <td><span style="color:#C586C0">from</span> abc <span style="color:#C586C0">import</span> ABC, abstractmethod<br><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Hinh</span>(<span style="color:#4EC9B0">ABC</span>):<br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">@abstractmethod</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">def</span> <span style="color:#DCDCAA">d_tich</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#569CD6">pass</span></td>
-                                <td><span style="color:#569CD6">public abstract class</span> <span style="color:#4EC9B0">Hinh</span><br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">public abstract double</span> <span style="color:#DCDCAA">DTich</span>();<br>}</td>
-                            </tr>
+                                <!-- Trừu tượng -->
+                                <tr class="bg-[#2a2d2e]">
+                                    <td class="font-sans text-blue-300"><strong>4. TRỪU TƯỢNG</strong><br><span class="text-xs text-gray-400">Bản hợp đồng bắt buộc lớp con.</span></td>
+                                    <td><span style="color:#C586C0">from</span> abc <span style="color:#C586C0">import</span> ABC, abstractmethod<br><span style="color:#569CD6">class</span> <span style="color:#4EC9B0">Hinh</span>(<span style="color:#4EC9B0">ABC</span>):<br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">@abstractmethod</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">def</span> <span style="color:#DCDCAA">d_tich</span>(<span style="color:#9CDCFE">self</span>): <span style="color:#569CD6">pass</span></td>
+                                    <td><span style="color:#569CD6">public abstract class</span> <span style="color:#4EC9B0">Hinh</span><br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#569CD6">public abstract double</span> <span style="color:#DCDCAA">DTich</span>();<br>}</td>
+                                </tr>
 
-                            <!-- Nạp chồng -->
-                            <tr>
-                                <td class="font-sans text-pink-300 border-b-0"><strong>* BONUS</strong><br><span class="text-sm text-gray-400">Nạp chồng Toán tử (+, -, >)</span></td>
-                                <td class="border-b-0"><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">__gt__</span>(<span style="color:#9CDCFE">self</span>, <span style="color:#9CDCFE">other</span>):</td>
-                                <td class="border-b-0"><span style="color:#569CD6">public static bool operator</span> >(<span style="color:#4EC9B0">A</span> <span style="color:#9CDCFE">a</span>, <span style="color:#4EC9B0">A</span> <span style="color:#9CDCFE">b</span>)</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                <!-- Nạp chồng -->
+                                <tr>
+                                    <td class="font-sans text-pink-300 border-b-0"><strong>* BONUS</strong><br><span class="text-xs text-gray-400">Nạp chồng Toán tử (+, -, >)</span></td>
+                                    <td class="border-b-0"><span style="color:#569CD6">def</span> <span style="color:#DCDCAA">__gt__</span>(<span style="color:#9CDCFE">self</span>, <span style="color:#9CDCFE">other</span>):</td>
+                                    <td class="border-b-0"><span style="color:#569CD6">public static bool operator</span> >(<span style="color:#4EC9B0">A</span> <span style="color:#9CDCFE">a</span>, <span style="color:#4EC9B0">A</span> <span style="color:#9CDCFE">b</span>)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -958,7 +966,7 @@ class Program {
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
-        // Chuyển Tab (BỔ SUNG THÊM tab 'selfthis')
+        // Chuyển Tab
         function switchTab(tabId) {
             const tabIds = ['basics', 'encap', 'inherit', 'poly', 'abstract', 'selfthis', 'play', 'dict'];
             tabIds.forEach(id => {
@@ -967,6 +975,10 @@ class Program {
             });
             document.getElementById('content-' + tabId).classList.remove('hide-tab');
             document.getElementById('tab-' + tabId).classList.add('active');
+            
+            // Trượt tự động menu tab ngang tới khu vực được chọn (đặc biệt hữu ích trên mobile)
+            const activeTab = document.getElementById('tab-' + tabId);
+            activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
 
         // Cho phép bấm nút Tab trong thẻ Textarea để lùi đầu dòng (Indent)
@@ -1034,7 +1046,7 @@ class Program {
                     consoleEl.innerHTML += `<span class="text-red-300 whitespace-pre-wrap">${errOutput}</span><br>`;
                 }
             } catch (error) {
-                consoleEl.innerHTML += `<span class="text-red-500">> Tải vs code mà dùng, Đéo chạy được đâu lêu lêu :v<br>Tải vs code mà dùng, Đéo chạy được đâu lêu lêu :v</span><br>`;
+                consoleEl.innerHTML += `<span class="text-red-500">> Lỗi máy chủ hoặc mất kết nối mạng. Vui lòng thử lại sau!</span><br>`;
                 console.error(error);
             } finally {
                 // Khôi phục nút bấm sau khi chạy xong
