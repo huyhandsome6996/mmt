@@ -1,505 +1,607 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html class="dark" lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Python: Vòng Lặp</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>The Kinetic Workspace - Python Master Class</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#fcf8f9", "on-primary": "#002c66", "on-tertiary-fixed": "#3e0047",
+                        "secondary-fixed": "#c7cfff", "primary-container": "#6e9fff", "outline-variant": "#484849",
+                        "surface-variant": "#262627", "surface-dim": "#0e0e0f", "on-primary-container": "#002150",
+                        "error": "#ff716c", "surface-container": "#19191b", "surface-container-lowest": "#000000",
+                        "on-secondary-fixed-variant": "#2d48ac", "inverse-primary": "#005bc4", "on-secondary": "#00175f",
+                        "on-surface": "#ffffff", "on-error-container": "#ffa8a3", "surface-container-high": "#1f1f21",
+                        "background": "#0e0e0f", "primary-fixed": "#6e9fff", "error-container": "#9f0519",
+                        "outline": "#767576", "on-tertiary": "#691d74", "tertiary-container": "#f199f7",
+                        "secondary-fixed-dim": "#b4c1ff", "surface-container-highest": "#262627", "tertiary-fixed-dim": "#e28ce9",
+                        "on-error": "#490006", "on-secondary-fixed": "#00278f", "secondary-container": "#213da1",
+                        "surface": "#0e0e0f", "error-dim": "#d7383b", "surface-container-low": "#131314",
+                        "surface-tint": "#85adff", "primary-fixed-dim": "#5391ff", "on-background": "#ffffff",
+                        "on-surface-variant": "#adaaab", "tertiary-fixed": "#f199f7", "secondary-dim": "#8097ff",
+                        "on-primary-fixed-variant": "#002a62", "secondary": "#8097ff", "inverse-on-surface": "#565556",
+                        "tertiary": "#fbabff", "surface-bright": "#2c2c2d", "on-tertiary-container": "#5e106a",
+                        "on-tertiary-fixed-variant": "#681c73", "tertiary-dim": "#e28ce9", "on-primary-fixed": "#000000",
+                        "on-secondary-container": "#c5ceff", "primary": "#85adff", "primary-dim": "#699cff"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
-
-        body {
-            font-family: 'Google Sans', sans-serif;
-            background-color: #131314; /* Màu nền app chính */
-            color: #e3e3e3;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        /* Tùy chỉnh Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; background-color: #0e0e0f; color: #ffffff; overflow: hidden; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #444746; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #5f6368; }
+        ::-webkit-scrollbar-thumb { background: #262627; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484849; }
 
-        /* Sidebar Bài Học CSS */
-        .lesson-sidebar {
-            background-color: #1e1f20;
-            width: 280px;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #333;
+        /* Sidebar Tabs custom styles */
+        .lesson-tab {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            color: #adaaab; border-radius: 9999px; margin: 4px 8px;
+            transition: all 0.2s ease; cursor: pointer;
         }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            margin: 4px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14.5px;
-            color: #e3e3e3;
-            font-weight: 500;
+        .lesson-tab:hover { background-color: #1f1f21; color: #ffffff; }
+        .lesson-tab.active {
+            background-color: #1f1f21; color: #85adff;
+            box-shadow: inset 0 0 0 1px rgba(133, 173, 255, 0.2);
         }
+        .lesson-tab.active .material-symbols-outlined { color: #85adff; font-variation-settings: 'FILL' 1; }
 
-        .nav-item i {
-            margin-right: 12px;
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .nav-item:hover { background-color: #282a2c; transform: translateX(2px); }
-        
-        /* Trạng thái Active */
-        .nav-item.active {
-            background-color: #004a77; /* Màu xanh nước biển đậm */
-            color: #c2e7ff; /* Chữ màu xanh nhạt */
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        .section-title {
-            padding: 16px 20px 8px 20px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Simulator Styles */
-        .code-panel {
-            font-family: 'Roboto Mono', monospace;
-            background: #1e1f20;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 14px;
-            line-height: 1.6;
-            border: 1px solid #333;
-        }
-
+        /* Code Simulator Styles */
         .code-line {
-            display: flex;
-            align-items: flex-start;
-            padding: 2px 8px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
+            display: flex; align-items: flex-start; padding: 2px 8px; border-radius: 4px; transition: all 0.3s ease;
         }
-
-        /* KHẮC PHỤC LỖI KHOẢNG TRẮNG & THỤT LỀ */
-        .code-wrapper {
-            white-space: pre-wrap; /* Giữ nguyên khoảng trắng và thụt lề */
-            word-break: break-word;
-        }
-
-        .code-line.active-line {
-            background-color: rgba(250, 204, 21, 0.15); /* Vàng nhạt */
-            border-left: 3px solid #facc15;
-        }
-
-        .line-num { color: #5f6368; width: 30px; flex-shrink: 0; user-select: none; }
+        .code-wrapper { white-space: pre-wrap; word-break: break-word; }
+        .line-num { color: #484849; width: 30px; flex-shrink: 0; user-select: none; text-align: right; padding-right: 12px; }
         
-        /* Cú pháp Python */
-        .kw { color: #ff7b72; font-weight: 500; } /* Keyword */
-        .func { color: #d2a8ff; } /* Function */
-        .str { color: #a5d6ff; } /* String */
-        .num { color: #79c0ff; } /* Number */
-        .comment { color: #8b949e; font-style: italic; }
-
-        .memory-var {
-            background: #282a2c;
-            border: 1px solid #444;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-family: 'Roboto Mono', monospace;
-            color: #facc15;
-            font-weight: bold;
-            display: inline-block;
+        .code-line.active-line {
+            background-color: rgba(133, 173, 255, 0.1); 
+            border-left: 3px solid #85adff;
         }
 
-        .explanation-box {
-            background: rgba(49, 130, 206, 0.1);
-            border-left: 4px solid #3182ce;
-            padding: 12px;
-            border-radius: 0 8px 8px 0;
-            min-height: 60px;
+        /* Syntax Highlighting */
+        .kw { color: #fbabff; } /* tertiary */
+        .func { color: #85adff; } /* primary */
+        .str { color: #6e9fff; } /* primary-container */
+        .num { color: #8097ff; } /* secondary */
+        .comment { color: #767576; font-style: italic; }
+
+        /* Memory Variable Badge */
+        .memory-var {
+            background: rgba(241, 153, 247, 0.1); border: 1px solid rgba(241, 153, 247, 0.3);
+            padding: 6px 16px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace;
+            color: #f199f7; font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;
+        }
+
+        .code-textarea {
+            width: 100%; height: 100%; background-color: transparent; color: #ffffff;
+            font-family: 'JetBrains Mono', monospace; font-size: 14px; border: none;
+            resize: none; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto;
+        }
+        
+        /* Input Tùy chỉnh N */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
         }
     </style>
 </head>
-<body class="flex h-screen w-full">
+<body class="flex min-h-screen bg-surface text-body">
 
     <!-- ========================================== -->
-    <!-- SIDEBAR MÔ PHỎNG MENU BÀI HỌC              -->
+    <!-- SIDEBAR: The Kinetic Workspace Shell       -->
     <!-- ========================================== -->
-    <div class="lesson-sidebar flex-shrink-0 z-20">
-        <!-- Logo / Tiêu đề khóa học -->
-        <div class="p-6 border-b border-[#333] flex items-center gap-3">
-            <i class="fab fa-python text-3xl text-blue-400"></i>
-            <div>
-                <h2 class="text-base font-bold text-white leading-tight">Lập Trình Huyhandsome</h2>
-                <p class="text-[13px] text-gray-400 mt-0.5">Chuyên đề: Vòng lặp</p>
-            </div>
+    <aside class="fixed left-0 top-0 h-screen w-[280px] bg-surface-container-low flex flex-col py-6 transition-all duration-300 z-50 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
+        <!-- Brand Identity -->
+        <div class="px-6 mb-10">
+            <h1 class="text-[19px] font-bold tracking-tighter text-primary font-headline uppercase leading-tight">HUYHANDSOME</h1>
+            <p class="text-[10px] font-headline tracking-[0.2em] text-on-surface-variant uppercase mt-1">Chuyên đề: Vòng Lặp</p>
         </div>
-
-        <!-- Section: Danh sách bài học -->
-        <div class="flex-1 overflow-y-auto py-4">
-            <div class="section-title">Kiến thức trọng tâm</div>
-            
-            <div class="nav-item active lesson-tab" onclick="loadLesson('for')">
-                <i class="fas fa-redo-alt text-blue-400"></i> 1. Vòng lặp For
-            </div>
-            <div class="nav-item lesson-tab" onclick="loadLesson('while')">
-                <i class="fas fa-sync text-orange-400"></i> 2. Vòng lặp While
-            </div>
-            <div class="nav-item lesson-tab" onclick="loadLesson('whileTrue')">
-                <i class="fas fa-infinity text-purple-400"></i> 3. While True & Break
-            </div>
-            <div class="nav-item lesson-tab" onclick="loadLesson('whileIf')">
-                <i class="fas fa-code-branch text-pink-400"></i> 4. While kết hợp If/Else
-            </div>
-            
-            <div class="section-title mt-4">Thực hành & Đánh giá</div>
-            <div class="nav-item lesson-tab" onclick="loadLesson('quiz')">
-                <i class="fas fa-check-square text-green-400"></i> Bài tập trắc nghiệm
-            </div>
-            <div class="nav-item lesson-tab" onclick="loadLesson('practice')">
-                <i class="fas fa-keyboard text-yellow-400"></i> Thực hành Code (Tự luận)
-            </div>
-        </div>
-
-        <!-- Footer của Sidebar -->
-        <div class="p-4 border-t border-[#333] text-center">
-            <p class="text-xs text-gray-500">Giáo án Tương tác Trực quan</p>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- MAIN CONTENT (Khung hiển thị chính)        -->
-    <!-- ========================================== -->
-    <div class="flex-1 flex flex-col bg-[#131314] overflow-hidden">
         
-        <!-- Navbar phụ -->
-        <div class="px-6 py-4 flex justify-between items-center z-10 border-b border-[#333]/50">
-            <h1 id="lesson-title" class="text-xl font-medium text-[#e3e3e3]">Vòng lặp For</h1>
-            <div class="flex gap-2" id="controls">
-                <button onclick="resetSim()" class="px-4 py-2 bg-[#282a2c] hover:bg-[#333538] border border-[#444] rounded-lg text-sm text-white transition flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-undo"></i> Làm lại
-                </button>
-                <button onclick="stepSim()" id="btn-step" class="px-4 py-2 bg-[#004a77] hover:bg-[#005c91] text-[#c2e7ff] rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-step-forward"></i> Từng bước
-                </button>
-                <button onclick="autoSim()" id="btn-auto" class="px-4 py-2 bg-[#1b5e20] hover:bg-[#2e7d32] text-[#c8e6c9] rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-play"></i> Chạy tự động
-                </button>
+        <!-- Primary Navigation -->
+        <nav class="flex-1 overflow-y-auto">
+            <div class="px-6 mb-3 text-[10px] font-bold text-on-surface-variant/40 tracking-widest uppercase">Kiến thức trọng tâm</div>
+            
+            <div class="lesson-tab active" onclick="loadLesson('for')">
+                <span class="material-symbols-outlined text-[20px]" data-icon="data_array">data_array</span>
+                <span class="font-headline text-sm tracking-tight font-medium">1. Vòng lặp For</span>
+            </div>
+            <div class="lesson-tab" onclick="loadLesson('while')">
+                <span class="material-symbols-outlined text-[20px]" data-icon="all_inclusive">all_inclusive</span>
+                <span class="font-headline text-sm tracking-tight font-medium">2. Vòng lặp While</span>
+            </div>
+            <div class="lesson-tab" onclick="loadLesson('whileTrue')">
+                <span class="material-symbols-outlined text-[20px]" data-icon="emergency">emergency</span>
+                <span class="font-headline text-sm tracking-tight font-medium">3. While True & Break</span>
+            </div>
+            <div class="lesson-tab" onclick="loadLesson('whileIf')">
+                <span class="material-symbols-outlined text-[20px]" data-icon="alt_route">alt_route</span>
+                <span class="font-headline text-sm tracking-tight font-medium">4. While kết hợp If/Else</span>
+            </div>
+
+            <div class="mt-8 px-6 mb-3 text-[10px] font-bold text-on-surface-variant/40 tracking-widest uppercase">Thực hành & Đánh giá</div>
+            
+            <div class="lesson-tab" onclick="loadLesson('quiz')">
+                <span class="material-symbols-outlined text-[20px]" data-icon="quiz">quiz</span>
+                <span class="font-headline text-sm tracking-tight font-medium">Bài tập Trắc nghiệm</span>
+            </div>
+            <div class="lesson-tab" onclick="loadLesson('practice')">
+                <span class="material-symbols-outlined text-[20px]" data-icon="terminal">terminal</span>
+                <span class="font-headline text-sm tracking-tight font-medium">Thực hành Tự luận</span>
+            </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="px-4 mt-auto">
+            <div class="bg-surface-container-high p-4 rounded-2xl mb-4 relative overflow-hidden group border border-outline-variant/10">
+                <div class="relative z-10">
+                    <p class="text-xs text-on-surface-variant font-medium text-white"></p>
+                    <p class="text-[10px] text-on-surface-variant/60 mt-1"></p>
+                </div>
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-primary/20 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
+            </div>
+            <div class="flex items-center gap-4 px-4 py-2">
+                <div class="w-8 h-8 rounded-full overflow-hidden ring-1 ring-outline-variant bg-surface-container flex justify-center items-center">
+                    <span class="material-symbols-outlined text-primary text-sm">school</span>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate">HUYHANDSOME</p>
+                    <p class="text-[10px] text-on-surface-variant">Lớp Lập trình Cơ bản</p>
+                </div>
             </div>
         </div>
+    </aside>
 
-        <!-- Khung nội dung cuộn được -->
-        <div class="flex-1 overflow-y-auto px-6 py-6 pb-10" id="main-scroll-area">
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT CANVAS                        -->
+    <!-- ========================================== -->
+    <main class="ml-[280px] flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Background Decoration (Glowing blobs) -->
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tertiary/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+
+        <!-- Top Navigation Bar -->
+        <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl h-16 flex justify-between items-center px-6 lg:px-8 shadow-[0_0_20px_rgba(105,156,255,0.06)] border-b border-outline-variant/10">
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(133,173,255,0.8)]"></div>
+                <h2 id="lesson-title" class="font-headline font-semibold uppercase tracking-widest text-[13px] text-on-surface">Vòng Lặp For</h2>
+            </div>
             
-            <!-- Khu vực 1: Lý thuyết & Trình mô phỏng (Dành cho Bài Học) -->
-            <div id="learning-container" class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
-                
-                <!-- Cột trái: Lý thuyết & Code -->
-                <div class="flex-1 flex flex-col gap-6">
-                    <!-- Lý thuyết -->
-                    <div class="bg-[#1e1f20] border border-[#333] rounded-2xl p-6 shadow-md">
-                        <div class="flex items-center gap-3 mb-4 border-b border-[#333] pb-3">
-                            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><i class="fas fa-book"></i></div>
-                            <h2 class="text-lg font-medium text-white">Lý thuyết</h2>
-                        </div>
-                        <div id="theory-content" class="text-[#c4c7c5] text-[14.5px] leading-relaxed space-y-3">
-                            <!-- Nội dung JS -->
-                        </div>
-                    </div>
+            <!-- Controls Toolbar -->
+            <div class="flex items-center gap-4" id="controls">
+                <!-- Khu vực tùy chỉnh N -->
+                <div class="flex items-center gap-2 mr-2 bg-surface-container-high px-3 py-1.5 rounded-xl border border-outline-variant/30 shadow-inner">
+                    <label for="loop-limit" class="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest cursor-pointer">Lặp n =</label>
+                    <input type="number" id="loop-limit" value="5" min="1" max="50" onchange="updateLimit()" class="w-14 bg-surface-container-lowest text-primary font-mono text-sm border border-outline-variant/50 rounded px-2 py-1 focus:outline-none focus:border-primary text-center shadow-sm">
+                </div>
 
-                    <!-- Source Code -->
-                    <div class="bg-[#1e1f20] border border-[#333] rounded-2xl p-6 flex-1 flex flex-col shadow-md">
-                        <div class="flex items-center gap-3 mb-4 border-b border-[#333] pb-3">
-                            <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400"><i class="fas fa-code"></i></div>
-                            <h2 class="text-lg font-medium text-white">Mã nguồn Python</h2>
-                        </div>
-                        <div id="code-content" class="code-panel flex-1 overflow-y-auto">
-                            <!-- Nội dung JS -->
-                        </div>
+                <div class="flex items-center gap-2 border-l border-outline-variant/20 pl-4">
+                    <button onclick="resetSim()" class="flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant/40 text-on-surface-variant hover:text-white hover:bg-surface-container-high transition-all text-[10px] font-bold uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset
+                    </button>
+                    <button onclick="stepSim()" id="btn-step" class="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-container/20 border border-secondary-container/50 text-secondary hover:bg-secondary-container/40 transition-all text-[10px] font-bold uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-[16px]">step_into</span> Step
+                    </button>
+                    <button onclick="autoSim()" id="btn-auto" class="flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-on-primary hover:brightness-110 transition-all text-[10px] font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(133,173,255,0.25)]">
+                        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Auto Run
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 z-10" id="main-scroll-area">
+            
+            <!-- ========================================== -->
+            <!-- 1. KHU VỰC HỌC & MÔ PHỎNG (LEARNING)       -->
+            <!-- ========================================== -->
+            <!-- Layout Grid 2x2: Chia đều 4 ô trên 1 đường ngang và dọc -->
+            <div id="learning-container" class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 gap-5 w-full h-[calc(100vh-120px)] min-h-[500px]">
+                
+                <!-- Ô 1: Lý thuyết -->
+                <div class="bg-surface-container rounded-2xl p-5 relative border border-outline-variant/10 shadow-lg flex flex-col overflow-hidden">
+                    <div class="absolute left-0 top-5 bottom-5 w-[3px] bg-gradient-to-b from-primary to-tertiary rounded-r"></div>
+                    <div class="flex items-center gap-3 mb-3 pl-2 shrink-0">
+                        <span class="material-symbols-outlined text-primary text-[22px]">menu_book</span>
+                        <h3 class="font-headline text-lg font-semibold tracking-tight text-white">Lý thuyết trọng tâm</h3>
+                    </div>
+                    <div id="theory-content" class="space-y-4 text-on-surface-variant text-[14.5px] leading-relaxed pl-2 flex-1 overflow-y-auto pr-2">
+                        <!-- Nội dung JS inject -->
                     </div>
                 </div>
 
-                <!-- Cột phải: Memory, Giải thích, Console -->
-                <div class="flex-1 flex flex-col gap-6">
-                    <!-- Giải thích & Bộ nhớ -->
-                    <div class="bg-[#1e1f20] border border-[#333] rounded-2xl p-6 shadow-md">
-                        <div class="flex items-center gap-3 mb-4 border-b border-[#333] pb-3">
-                            <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400"><i class="fas fa-microchip"></i></div>
-                            <h2 class="text-lg font-medium text-white">Hoạt động trong RAM</h2>
+                <!-- Ô 2: Hoạt động trong RAM -->
+                <div class="bg-surface-container rounded-2xl p-5 border border-outline-variant/10 shadow-lg flex flex-col overflow-hidden">
+                    <div class="flex items-center gap-3 mb-3 shrink-0">
+                        <span class="material-symbols-outlined text-tertiary text-[22px]">memory</span>
+                        <h3 class="font-headline text-lg font-semibold tracking-tight text-white">Hoạt động trong RAM</h3>
+                    </div>
+                    <div class="flex flex-col gap-3 flex-1 overflow-hidden">
+                        <!-- Khung chứa biến -->
+                        <div class="p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/10 flex-1 flex flex-wrap gap-2 items-start content-start overflow-y-auto" id="memory-content">
+                            <!-- Variables injected here -->
                         </div>
                         
-                        <div class="flex flex-wrap gap-3 mb-4 min-h-[45px]" id="memory-content">
-                            <!-- Biến JS -->
-                        </div>
-
-                        <div class="explanation-box shadow-inner">
-                            <p id="explanation-text" class="text-[14.5px] text-[#e3e3e3] m-0">Bấm "Từng bước" để xem máy tính đọc code như thế nào.</p>
-                        </div>
-                    </div>
-
-                    <!-- Console (Terminal) -->
-                    <div class="bg-[#1e1f20] border border-[#333] rounded-2xl p-6 flex-1 flex flex-col shadow-md">
-                        <div class="flex items-center gap-3 mb-4 border-b border-[#333] pb-3">
-                            <div class="w-8 h-8 rounded-full bg-gray-500/20 flex items-center justify-center text-gray-400"><i class="fas fa-terminal"></i></div>
-                            <h2 class="text-lg font-medium text-white">Màn hình kết quả (Console)</h2>
-                        </div>
-                        <div class="bg-[#000] flex-1 rounded-xl p-4 border border-[#333] font-mono text-[14px] overflow-y-auto shadow-inner">
-                            <div class="text-green-500 mb-2">Python 3.10.0 (default)</div>
-                            <div id="console-content" class="text-[#e3e3e3] whitespace-pre-wrap leading-relaxed"></div>
+                        <!-- Box Giải thích -->
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 relative shrink-0">
+                            <span class="material-symbols-outlined text-primary/40 absolute right-4 top-4 text-4xl">lightbulb</span>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed relative z-10" id="explanation-text">
+                                Bấm "Từng bước" hoặc "Chạy tự động" để xem máy tính đọc code và lưu biến vào bộ nhớ như thế nào.
+                            </p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Ô 3: Mã nguồn Python -->
+                <div class="bg-surface-container rounded-2xl overflow-hidden border border-outline-variant/10 shadow-lg flex flex-col">
+                    <div class="flex items-center justify-between px-5 py-3 bg-surface-container-high border-b border-outline-variant/5 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">code</span>
+                            <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Mã nguồn Python</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="w-3 h-3 rounded-full bg-error/40 border border-error/20"></div>
+                            <div class="w-3 h-3 rounded-full bg-tertiary-container/40 border border-tertiary-container/20"></div>
+                            <div class="w-3 h-3 rounded-full bg-primary/40 border border-primary/20"></div>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-surface-container-lowest font-mono text-[14px] flex-1 overflow-y-auto">
+                        <div id="code-content" class="flex flex-col">
+                            <!-- Nội dung JS inject -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ô 4: Console Output -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/10 shadow-2xl flex flex-col">
+                    <div class="flex items-center gap-3 px-5 py-3 bg-surface-container-high/50 border-b border-outline-variant/5 shrink-0">
+                        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">terminal</span>
+                        <span class="text-[11px] font-headline font-semibold text-on-surface-variant uppercase tracking-widest">Màn hình kết quả (Console)</span>
+                    </div>
+                    <div class="p-5 font-mono text-[13.5px] flex-1 overflow-y-auto text-on-surface-variant">
+                        <div class="text-primary-dim mb-3 opacity-70">Python 3.10.0 (default)</div>
+                        <div id="console-content" class="space-y-1.5 whitespace-pre-wrap"></div>
+                        <div class="flex gap-2 mt-2 opacity-40">
+                            <span>></span><span class="animate-pulse">_</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Khu vực 2: Quiz (Trắc nghiệm) -->
-            <div id="quiz-container" class="hidden max-w-4xl mx-auto">
-                <div class="bg-[#1e1f20] border border-[#333] rounded-2xl p-8 shadow-lg">
-                    <h2 class="text-2xl font-bold text-green-400 mb-2 flex items-center gap-3"><i class="fas fa-tasks"></i> Bài tập củng cố</h2>
-                    <p class="text-gray-400 mb-8 pb-4 border-b border-[#333]">Kiểm tra lại kiến thức vòng lặp bạn vừa học thông qua các câu trắc nghiệm nhanh.</p>
+            <!-- ========================================== -->
+            <!-- 2. KHU VỰC QUIZ (TRẮC NGHIỆM)              -->
+            <!-- ========================================== -->
+            <div id="quiz-container" class="hidden max-w-4xl mx-auto space-y-6 pb-20">
+                <div class="bg-surface-container rounded-2xl p-8 border border-outline-variant/10 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-3xl rounded-full pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-secondary-container/20 flex justify-center items-center text-secondary">
+                            <span class="material-symbols-outlined">quiz</span>
+                        </div>
+                        <h2 class="font-headline text-2xl font-bold text-white">Bài tập củng cố</h2>
+                    </div>
+                    <p class="text-sm text-on-surface-variant mb-8 ml-14">Kiểm tra lại kiến thức vòng lặp qua các câu hỏi trắc nghiệm nhanh.</p>
                     
                     <!-- Câu 1 -->
-                    <div class="mb-8">
-                        <p class="text-[16px] mb-4 text-[#e3e3e3]"><strong>Câu 1:</strong> Vòng lặp <code class="kw bg-[#282a2c] px-2 py-0.5 rounded">while True:</code> sẽ dừng lại khi nào?</p>
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-3 p-4 bg-[#131314] rounded-xl border border-[#333] cursor-pointer hover:border-blue-500 transition" onclick="checkAnswer(1, this, false)">
-                                <input type="radio" name="q1" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-gray-500 flex-shrink-0"></div> 
-                                <span>Khi chạy hết 100 lần.</span>
+                    <div class="mb-10 pl-2">
+                        <p class="text-[16px] mb-5 text-white font-medium"><strong>Câu 1:</strong> Vòng lặp <code class="font-mono text-tertiary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">while True:</code> sẽ dừng lại khi nào?</p>
+                        <div class="space-y-3 pl-4">
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, false)">
+                                <input type="radio" name="q1" class="hidden"> 
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Khi chạy hết 100 lần.</span>
                             </label>
-                            <label class="flex items-center gap-3 p-4 bg-[#131314] rounded-xl border border-[#333] cursor-pointer hover:border-blue-500 transition" onclick="checkAnswer(1, this, true)">
-                                <input type="radio" name="q1" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-gray-500 flex-shrink-0"></div> 
-                                <span>Khi chương trình gặp lệnh <code class="kw">break</code> ở bên trong.</span>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, true)">
+                                <input type="radio" name="q1" class="hidden"> 
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Khi chương trình gặp lệnh <code class="font-mono text-tertiary">break</code> ở bên trong.</span>
                             </label>
-                            <label class="flex items-center gap-3 p-4 bg-[#131314] rounded-xl border border-[#333] cursor-pointer hover:border-blue-500 transition" onclick="checkAnswer(1, this, false)">
-                                <input type="radio" name="q1" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-gray-500 flex-shrink-0"></div> 
-                                <span>Tự động dừng sau 5 giây.</span>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, false)">
+                                <input type="radio" name="q1" class="hidden"> 
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Tự động dừng sau 5 giây.</span>
                             </label>
                         </div>
-                        <div id="res-1" class="mt-3 text-[14.5px] hidden font-medium px-4 py-2 rounded-lg"></div>
+                        <div id="res-1" class="mt-4 text-[14px] hidden font-medium px-4 py-3 rounded-xl ml-4 flex items-center gap-2"></div>
                     </div>
 
                     <!-- Câu 2 -->
-                    <div class="mb-2">
-                        <p class="text-[16px] mb-4 text-[#e3e3e3]"><strong>Câu 2:</strong> Kết quả của đoạn code <code class="text-blue-300 bg-[#282a2c] px-2 py-0.5 rounded font-mono">for i in range(1, 4): print(i)</code> là gì?</p>
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-3 p-4 bg-[#131314] rounded-xl border border-[#333] cursor-pointer hover:border-blue-500 transition" onclick="checkAnswer(2, this, false)">
-                                <input type="radio" name="q2" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-gray-500 flex-shrink-0"></div> 
-                                <span>In ra: 1, 2, 3, 4</span>
+                    <div class="mb-4 pl-2">
+                        <p class="text-[16px] mb-5 text-white font-medium"><strong>Câu 2:</strong> Kết quả của đoạn code <code class="font-mono text-primary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">for i in range(1, 4): print(i)</code> là gì?</p>
+                        <div class="space-y-3 pl-4">
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, false)">
+                                <input type="radio" name="q2" class="hidden"> 
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">In ra: 1, 2, 3, 4</span>
                             </label>
-                            <label class="flex items-center gap-3 p-4 bg-[#131314] rounded-xl border border-[#333] cursor-pointer hover:border-blue-500 transition" onclick="checkAnswer(2, this, true)">
-                                <input type="radio" name="q2" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-gray-500 flex-shrink-0"></div> 
-                                <span>In ra: 1, 2, 3</span>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, true)">
+                                <input type="radio" name="q2" class="hidden"> 
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">In ra: 1, 2, 3</span>
                             </label>
-                            <label class="flex items-center gap-3 p-4 bg-[#131314] rounded-xl border border-[#333] cursor-pointer hover:border-blue-500 transition" onclick="checkAnswer(2, this, false)">
-                                <input type="radio" name="q2" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-gray-500 flex-shrink-0"></div> 
-                                <span>Lỗi cú pháp</span>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, false)">
+                                <input type="radio" name="q2" class="hidden"> 
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Lỗi cú pháp</span>
                             </label>
                         </div>
-                        <div id="res-2" class="mt-3 text-[14.5px] hidden font-medium px-4 py-2 rounded-lg"></div>
+                        <div id="res-2" class="mt-4 text-[14px] hidden font-medium px-4 py-3 rounded-xl ml-4 flex items-center gap-2"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Khu vực 3: Thực hành Code (Tự luận) -->
-            <div id="practice-container" class="hidden flex-col gap-6 max-w-6xl mx-auto w-full h-full">
-                <!-- Đề bài -->
-                <div class="bg-[#1e1f20] border border-[#333] rounded-2xl p-6 shadow-md">
-                    <div class="flex justify-between items-center mb-4 border-b border-[#333] pb-3">
-                        <h2 class="text-xl font-bold text-yellow-400 flex items-center gap-3"><i class="fas fa-laptop-code"></i> Đề bài thực hành tự luận</h2>
-                        <span class="bg-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full border border-blue-400/30">Có thể chạy code thật</span>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="bg-[#131314] p-4 rounded-xl border border-[#333]">
-                            <h3 class="font-bold text-[#e3e3e3] mb-1">Bài 1:</h3>
-                            <p class="text-gray-300 text-[14.5px] leading-relaxed">Viết chương trình sử dụng vòng lặp <code class="text-pink-400 bg-[#282a2c] px-1.5 rounded">for</code> hoặc <code class="text-pink-400 bg-[#282a2c] px-1.5 rounded">while</code> để in ra màn hình các <strong>số chẵn</strong> từ 1 đến 10.</p>
+            <!-- ========================================== -->
+            <!-- 3. KHU VỰC THỰC HÀNH TỰ LUẬN (PRACTICE)    -->
+            <!-- ========================================== -->
+            <div id="practice-container" class="hidden flex-col gap-6 max-w-[1400px] mx-auto h-full">
+                <!-- Challenge Blade -->
+                <div class="p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-surface-container border border-primary/20 flex flex-col xl:flex-row gap-8 items-start shadow-lg relative overflow-hidden shrink-0">
+                    <div class="absolute left-0 top-0 w-1.5 h-full bg-primary"></div>
+                    
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
                         </div>
-                        <div class="bg-[#131314] p-4 rounded-xl border border-[#333]">
-                            <h3 class="font-bold text-[#e3e3e3] mb-1">Bài 2:</h3>
-                            <p class="text-gray-300 text-[14.5px] leading-relaxed">Viết chương trình tính tổng các số từ 1 đến 5 (1 + 2 + 3 + 4 + 5) và in ra kết quả cuối cùng.</p>
+                        <h4 class="font-headline text-2xl font-bold mb-1 text-white">Thử thách Lập trình</h4>
+                        <p class="text-xs text-primary-dim uppercase tracking-widest font-bold">Thực hành Code Tự luận</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full flex-1">
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#1</span> Duyệt số chẵn</h5>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Viết chương trình sử dụng <code class="font-mono text-tertiary">for</code> hoặc <code class="font-mono text-tertiary">while</code> để in ra các <strong>số chẵn</strong> từ 1 đến n (với n có thể tự chọn).</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#2</span> Tính tổng</h5>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Viết chương trình tính tổng dãy số: S = 1 + 2 + 3 + ... + n và in ra kết quả cuối cùng.</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#3</span> Bảng cửu chương</h5>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Viết đoạn code in ra Bảng cửu chương của một số nguyên bất kỳ (Ví dụ: in bảng nhân 5).</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#4</span> Vòng lặp vô tận</h5>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Dùng <code class="font-mono text-tertiary">while True</code> để tạo vòng lặp bắt nhập mật khẩu. Nếu biến mk = "1234" thì <code class="font-mono text-tertiary">break</code>.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[450px]">
+                <!-- Interactive Sandbox -->
+                <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[500px]">
                     <!-- Editor -->
-                    <div class="flex-1 bg-[#1e1f20] border border-[#333] rounded-2xl flex flex-col overflow-hidden shadow-lg">
-                        <div class="bg-[#282a2c] flex justify-between items-center px-4 py-3 border-b border-[#444]">
-                            <div class="text-[14.5px] font-medium text-gray-300 flex items-center"><i class="fab fa-python text-blue-400 mr-2 text-lg"></i> Trình soạn thảo (Python)</div>
-                            <button id="btn-run-practice" onclick="runPracticeCode()" class="bg-green-600 hover:bg-green-500 text-white px-5 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition shadow-md">
-                                <i class="fas fa-play"></i> Chạy Code
+                    <div class="flex-1 bg-surface-container-lowest rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-outline-variant/20">
+                        <div class="flex items-center justify-between px-5 py-3.5 bg-surface-container-high border-b border-outline-variant/10">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-on-surface-variant text-[18px]">integration_instructions</span>
+                                <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Sandbox Editor</h3>
+                            </div>
+                            <button id="btn-run-practice" onclick="runPracticeCode()" class="flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary text-on-primary hover:brightness-110 transition-all text-[11px] font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(133,173,255,0.2)]">
+                                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Run Code
                             </button>
                         </div>
-                        <textarea id="practice-editor" spellcheck="false" class="flex-1 bg-[#131314] text-[#e3e3e3] p-5 font-mono text-[14.5px] resize-none outline-none w-full h-full leading-relaxed" placeholder="# Viết code giải bài tập của bạn ở đây...
-# Bạn có thể dùng phím Tab để lùi đầu dòng.
+                        <textarea id="practice-editor" spellcheck="false" class="code-textarea p-6 leading-relaxed" placeholder="# Viết code giải bài tập của bạn ở đây...
+# Bạn có thể chọn 1 trong 4 bài ở trên để thử sức nhé!
 
+n = 10
+# Bắt đầu code từ dòng này:
 "></textarea>
                     </div>
 
                     <!-- Console -->
-                    <div class="flex-1 bg-[#1e1f20] border border-[#333] rounded-2xl flex flex-col overflow-hidden shadow-lg">
-                        <div class="bg-[#282a2c] px-4 py-3.5 border-b border-[#444] text-[14.5px] font-medium text-gray-300 flex items-center">
-                            <i class="fas fa-terminal text-gray-400 mr-2"></i> Kết quả chạy chương trình
+                    <div class="lg:w-[400px] xl:w-[500px] bg-surface-container-lowest rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-outline-variant/20">
+                        <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-container-high border-b border-outline-variant/10">
+                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
+                            <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Live Output</h3>
                         </div>
-                        <div id="practice-console" class="flex-1 bg-[#000] text-[#e3e3e3] p-5 font-mono text-[14.5px] overflow-y-auto whitespace-pre-wrap leading-relaxed shadow-inner">
-                            <span class="text-gray-600 italic"># Kết quả in ra sẽ hiển thị ở đây sau khi bạn bấm "Chạy Code"...</span>
+                        <div id="practice-console" class="flex-1 p-6 font-mono text-[13.5px] overflow-y-auto whitespace-pre-wrap text-on-surface-variant leading-relaxed">
+                            <span class="opacity-50 italic">Waiting for execution...</span>
                         </div>
                     </div>
                 </div>
             </div>
 
         </div>
-    </div>
+    </main>
 
-    <!-- SCRIPT ĐIỀU KHIỂN -->
+    <!-- ========================================== -->
+    <!-- SCRIPT LOGIC (Đã tối ưu CSS Class & Động hóa N) -->
+    <!-- ========================================== -->
     <script>
-        // Dữ liệu nội dung các bài học (Đã fix lỗi hiển thị thụt lề và khoảng trắng)
-        const db = {
-            for: {
-                title: "1. Vòng lặp For",
+        // Hàm sinh dữ liệu bài học động dựa vào giới hạn N do người dùng nhập
+        function getDb(limit) {
+            let db = {};
+
+            // 1. FOR LOOP
+            let forSteps = [{ line: 2, memory: {}, exp: `Đọc dòng 2: Chuẩn bị vòng lặp for. Hàm range(1, ${limit + 1}) tạo ra tập số {1, 2, ..., ${limit}}.` }];
+            for (let i = 1; i <= limit; i++) {
+                forSteps.push({ line: 2, memory: { i: i }, exp: `Lấy số ${i}, gán vào biến 'i' (i = ${i}).` });
+                forSteps.push({ line: 3, memory: { i: i }, output: `Vòng lặp thứ: ${i}`, exp: `Đi vào khối lệnh. Thực thi hàm print với i = ${i}.` });
+                if(i < limit) {
+                    forSteps.push({ line: 2, memory: { i: i }, exp: `Quay lại đầu vòng lặp. Lấy số tiếp theo là ${i+1}.` });
+                }
+            }
+            forSteps.push({ line: 2, memory: { i: limit }, exp: "Đã hết số trong hàm range. Điều kiện lặp kết thúc." });
+            forSteps.push({ line: 4, memory: { i: limit }, output: "Kết thúc!", exp: "Thoát khỏi vòng lặp, chạy câu lệnh tiếp theo." });
+
+            db.for = {
+                title: "Vòng lặp For",
                 theory: `
-                    <p>🔹 <strong>Mục đích:</strong> Dùng để lặp đi lặp lại một khối lệnh với số lần <b>đã biết trước</b>.</p>
-                    <p>🔹 Hàm <code class="func bg-[#131314] px-1 rounded border border-[#333]">range(start, stop)</code> dùng để tạo một danh sách các số từ <span class="text-yellow-400">start</span> đến <span class="text-yellow-400">stop - 1</span>.</p>
-                    <div class="p-3 bg-[#282a2c] rounded-lg mt-2 font-mono text-[13px] border border-[#444]">
-                        Ví dụ: range(1, 4) -> Máy tính sẽ sinh ra số: 1, 2, 3
+                    <p>🔹 <strong>Mục đích:</strong> Dùng để lặp đi lặp lại một khối lệnh với số lần <b class="text-white">đã biết trước</b>.</p>
+                    <p>🔹 Hàm <code class="font-mono text-primary bg-surface-container-highest px-1.5 py-0.5 rounded text-[13px]">range(start, stop)</code> dùng để tạo danh sách số từ <span class="text-tertiary">start</span> đến <span class="text-tertiary">stop - 1</span>.</p>
+                    <div class="mt-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/10 font-mono text-[13px] text-primary-dim">
+                        <span class="text-on-surface-variant">Ví dụ:</span> range(1, ${limit + 1}) <span class="text-on-surface-variant">-> Máy tính sinh ra số:</span> 1, 2, ..., ${limit}
                     </div>
                 `,
                 code: `
-<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="comment"># In các số từ 1 đến 3</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> i <span class="kw">in</span> <span class="func">range</span>(<span class="num">1</span>, <span class="num">4</span>):</span></div>
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="comment"># In các số từ 1 đến ${limit}</span></span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> i <span class="kw">in</span> <span class="func">range</span>(<span class="num">1</span>, <span class="num">${limit + 1}</span>):</span></div>
 <div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="func">print</span>(<span class="str">f"Vòng lặp thứ: {i}"</span>)</span></div>
 <div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper"><span class="func">print</span>(<span class="str">"Kết thúc!"</span>)</span></div>
                 `,
-                steps: [
-                    { line: 2, memory: {}, exp: "Đọc dòng 2: Chuẩn bị vòng lặp for. Hàm range(1, 4) tạo ra tập số {1, 2, 3}." },
-                    { line: 2, memory: { i: 1 }, exp: "Lấy số đầu tiên là 1, gán vào biến 'i' (i = 1)." },
-                    { line: 3, memory: { i: 1 }, output: "Vòng lặp thứ: 1", exp: "Đi vào khối lệnh lùi đầu dòng. Thực thi hàm print với i = 1." },
-                    { line: 2, memory: { i: 2 }, exp: "Quay lại đầu vòng lặp. Lấy số tiếp theo là 2, gán i = 2." },
-                    { line: 3, memory: { i: 2 }, output: "Vòng lặp thứ: 2", exp: "Thực thi lệnh print với i = 2." },
-                    { line: 2, memory: { i: 3 }, exp: "Quay lại đầu vòng lặp. Lấy số cuối cùng là 3, gán i = 3." },
-                    { line: 3, memory: { i: 3 }, output: "Vòng lặp thứ: 3", exp: "Thực thi lệnh print với i = 3." },
-                    { line: 2, memory: { i: 3 }, exp: "Đã hết số trong range. Điều kiện lặp kết thúc." },
-                    { line: 4, memory: { i: 3 }, output: "Kết thúc!", exp: "Thoát khỏi vòng lặp, chạy câu lệnh cuối cùng không bị thụt lề." }
-                ]
-            },
-            while: {
-                title: "2. Vòng lặp While cơ bản",
+                steps: forSteps
+            };
+
+            // 2. WHILE LOOP
+            let whileSteps = [{ line: 1, memory: { n: 1 }, exp: "Dòng 1: Khởi tạo biến n = 1 lưu vào RAM." }];
+            for (let n = 1; n <= limit; n++) {
+                whileSteps.push({ line: 2, memory: { n: n }, exp: `Kiểm điều kiện: n (${n}) <= ${limit} là Đúng (True). Máy tính cho phép đi vào vòng lặp.` });
+                whileSteps.push({ line: 3, memory: { n: n }, output: `Giá trị n = ${n}`, exp: `Thực thi lệnh print in ra giá trị hiện tại.` });
+                whileSteps.push({ line: 4, memory: { n: n + 1 }, exp: `Tăng giá trị n lên 1. Lúc này n = ${n + 1}.` });
+                if(n < limit) {
+                    whileSteps.push({ line: 2, memory: { n: n + 1 }, exp: `Quay lại kiểm tra điều kiện vòng lặp...` });
+                }
+            }
+            whileSteps.push({ line: 2, memory: { n: limit + 1 }, exp: `Quay lại kiểm tra: n (${limit + 1}) <= ${limit} là SAI (False). Vòng lặp bị chặn lại!` });
+            whileSteps.push({ line: 5, memory: { n: limit + 1 }, output: "Xong!", exp: "Máy tính thoát khỏi vòng lặp và chạy các dòng code tiếp theo." });
+
+            db.while = {
+                title: "Vòng lặp While cơ bản",
                 theory: `
-                    <p>🔹 <strong>Mục đích:</strong> Lặp lại công việc <b>miễn là (while)</b> một điều kiện nào đó vẫn còn đúng (True).</p>
-                    <p>🔹 Nó không quan tâm bạn lặp bao nhiêu lần, nó chỉ quan tâm "Điều kiện còn đúng không?".</p>
-                    <p class="text-[#ff7b72] mt-2">⚠️ <b>Lưu ý cực kỳ quan trọng:</b> Phải luôn có câu lệnh thay đổi điều kiện (ví dụ: <code class="bg-[#131314] px-1 rounded border border-[#333]">n += 1</code>) ở cuối vòng lặp. Nếu không chương trình sẽ bị <b>lặp vô tận (treo máy)</b>.</p>
+                    <p>🔹 <strong>Mục đích:</strong> Lặp lại công việc <b class="text-white">miễn là (while)</b> một điều kiện nào đó vẫn còn đúng (True).</p>
+                    <p>🔹 Khác với <code class="font-mono text-tertiary">for</code>, nó không quan tâm lặp bao nhiêu lần, chỉ quan tâm "Điều kiện còn đúng không?".</p>
+                    <div class="mt-3 p-3 bg-error-container/20 rounded-xl border border-error/20">
+                        <span class="text-error font-bold flex items-center gap-2 mb-1"><span class="material-symbols-outlined text-[16px]">warning</span> Lưu ý quan trọng:</span>
+                        <span class="text-on-surface-variant text-[13px]">Phải luôn có câu lệnh thay đổi điều kiện (ví dụ: <code class="font-mono text-error">n += 1</code>) ở cuối vòng lặp. Nếu không sẽ bị <b>lặp vô tận (treo máy)</b>.</span>
+                    </div>
                 `,
                 code: `
 <div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper">n = <span class="num">1</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while</span> n <= <span class="num">2</span>:</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while</span> n <= <span class="num">${limit}</span>:</span></div>
 <div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="func">print</span>(<span class="str">"Giá trị n ="</span>, n)</span></div>
 <div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    n += <span class="num">1</span>  <span class="comment"># Tăng n lên 1</span></span></div>
 <div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper"><span class="func">print</span>(<span class="str">"Xong!"</span>)</span></div>
                 `,
-                steps: [
-                    { line: 1, memory: { n: 1 }, exp: "Dòng 1: Khởi tạo biến n = 1 lưu vào RAM." },
-                    { line: 2, memory: { n: 1 }, exp: "Dòng 2: Kiểm tra điều kiện: n (1) <= 2 là Đúng (True). Máy tính cho phép đi vào vòng lặp." },
-                    { line: 3, memory: { n: 1 }, output: "Giá trị n = 1", exp: "Thực thi lệnh print in ra giá trị hiện tại." },
-                    { line: 4, memory: { n: 2 }, exp: "Cực kỳ quan trọng: Tăng giá trị n lên 1. Lúc này n = 2." },
-                    { line: 2, memory: { n: 2 }, exp: "Quay lại kiểm tra điều kiện: n (2) <= 2 vẫn là Đúng (True)." },
-                    { line: 3, memory: { n: 2 }, output: "Giá trị n = 2", exp: "Thực thi lệnh print lần thứ hai." },
-                    { line: 4, memory: { n: 3 }, exp: "Tăng n lên 1. Lúc này n = 3." },
-                    { line: 2, memory: { n: 3 }, exp: "Quay lại kiểm tra: n (3) <= 2 là SAI (False). Vòng lặp bị chặn lại!" },
-                    { line: 5, memory: { n: 3 }, output: "Xong!", exp: "Máy tính thoát khỏi vòng lặp và chạy các dòng code tiếp theo." }
-                ]
-            },
-            whileTrue: {
-                title: "3. While True và Lệnh Break",
+                steps: whileSteps
+            };
+
+            // 3. WHILE TRUE
+            let trueSteps = [
+                { line: 1, memory: { dem: 0 }, exp: "Khởi tạo biến đếm = 0." },
+                { line: 2, memory: { dem: 0 }, exp: "Vào vòng lặp while True. Đây là vòng lặp vô tận do điều kiện luôn đúng." }
+            ];
+            for (let dem = 1; dem <= limit; dem++) {
+                trueSteps.push({ line: 3, memory: { dem: dem }, exp: `Tăng biến dem lên ${dem}.` });
+                if (dem === limit) {
+                    trueSteps.push({ line: 4, memory: { dem: dem }, exp: `Kiểm tra lệnh if: dem (${dem}) == ${limit} là ĐÚNG. Lần này máy tính sẽ đi vào bên trong if.` });
+                    trueSteps.push({ line: 5, memory: { dem: dem }, output: `Đã đến ${limit}. Thoát!`, exp: `Thực thi lệnh print bên trong khối if.` });
+                    trueSteps.push({ line: 6, memory: { dem: dem }, exp: `ĐỤNG LỆNH BREAK! Vòng lặp vô hạn lập tức bị phá vỡ và dừng lại hoàn toàn.` });
+                } else {
+                    trueSteps.push({ line: 4, memory: { dem: dem }, exp: `Kiểm tra lệnh if: dem (${dem}) == ${limit} là Sai. Bỏ qua khối lệnh if.` });
+                    trueSteps.push({ line: 2, memory: { dem: dem }, exp: `Quay lại đầu vòng lặp.` });
+                }
+            }
+
+            db.whileTrue = {
+                title: "While True và Lệnh Break",
                 theory: `
-                    <p>🔹 <code class="kw bg-[#131314] px-1 rounded border border-[#333]">while True:</code> là một vòng lặp chạy mãi mãi, vì chữ True (Đúng) thì không bao giờ biến thành Sai được.</p>
-                    <p>🔹 Thường dùng khi ta yêu cầu người dùng nhập mật khẩu, nhập sai thì bắt nhập lại liên tục.</p>
-                    <p>🔹 <code class="kw bg-[#131314] px-1 rounded border border-[#333]">break</code>: Là chiếc "phanh khẩn cấp". Khi chạy trúng chữ này, vòng lặp sẽ bị đập vỡ ngay lập tức dù chưa xong.</p>
+                    <p>🔹 <code class="font-mono text-tertiary bg-surface-container-highest px-1.5 py-0.5 rounded text-[13px]">while True:</code> là một vòng lặp chạy mãi mãi, vì chữ True (Đúng) thì không bao giờ biến thành Sai được.</p>
+                    <p>🔹 Thường dùng khi ta yêu cầu người dùng nhập thông tin liên tục cho đến khi đúng định dạng.</p>
+                    <p class="mt-2 flex items-start gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">front_hand</span>
+                        <span><code class="font-mono text-tertiary">break</code>: Là chiếc <b>"phanh khẩn cấp"</b>. Khi chạy trúng lệnh này, vòng lặp sẽ bị đập vỡ và thoát ra ngay lập tức.</span>
+                    </p>
                 `,
                 code: `
 <div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper">dem = <span class="num">0</span></span></div>
 <div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while True</span>: <span class="comment"># Lặp vô tận</span></span></div>
 <div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    dem += <span class="num">1</span></span></div>
-<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">if</span> dem == <span class="num">3</span>:</span></div>
-<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">"Đã đến 3. Thoát!"</span>)</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">if</span> dem == <span class="num">${limit}</span>:</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">"Đã đến ${limit}. Thoát!"</span>)</span></div>
 <div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">        <span class="kw">break</span></span></div>
                 `,
-                steps: [
-                    { line: 1, memory: { dem: 0 }, exp: "Khởi tạo biến đếm = 0." },
-                    { line: 2, memory: { dem: 0 }, exp: "Vào vòng lặp while True. Đây là vòng lặp vô tận." },
-                    { line: 3, memory: { dem: 1 }, exp: "Tăng biến dem lên 1." },
-                    { line: 4, memory: { dem: 1 }, exp: "Kiểm tra lệnh if: dem (1) == 3 là Sai. Bỏ qua khối lệnh if." },
-                    { line: 2, memory: { dem: 1 }, exp: "Quay lại đầu vòng lặp." },
-                    { line: 3, memory: { dem: 2 }, exp: "Tăng biến dem lên 2." },
-                    { line: 4, memory: { dem: 2 }, exp: "Kiểm tra lệnh if: dem (2) == 3 là Sai." },
-                    { line: 2, memory: { dem: 2 }, exp: "Quay lại đầu vòng lặp." },
-                    { line: 3, memory: { dem: 3 }, exp: "Tăng biến dem lên 3." },
-                    { line: 4, memory: { dem: 3 }, exp: "Kiểm tra lệnh if: dem (3) == 3 là ĐÚNG. Lần này máy tính sẽ đi vào bên trong if." },
-                    { line: 5, memory: { dem: 3 }, output: "Đã đến 3. Thoát!", exp: "Thực thi lệnh print bên trong khối if." },
-                    { line: 6, memory: { dem: 3 }, exp: "ĐỤNG LỆNH BREAK! Vòng lặp vô hạn lập tức bị phá vỡ và dừng lại hoàn toàn." }
-                ]
-            },
-            whileIf: {
-                title: "4. While kết hợp If/Else",
+                steps: trueSteps
+            };
+
+            // 4. WHILE IF
+            let ifSteps = [{ line: 1, memory: { x: 1 }, exp: "Gán x = 1" }];
+            for (let x = 1; x <= limit; x++) {
+                ifSteps.push({ line: 2, memory: { x: x }, exp: `Kiểm tra while: ${x} <= ${limit} (Đúng). Bắt đầu vòng lặp.` });
+                if (x % 2 === 0) {
+                    ifSteps.push({ line: 3, memory: { x: x }, exp: `Kiểm tra if: ${x} chia hết cho 2. Điều kiện if ĐÚNG.` });
+                    ifSteps.push({ line: 4, memory: { x: x }, output: `${x} là số Chẵn`, exp: `Thực thi lệnh của nhánh if.` });
+                } else {
+                    ifSteps.push({ line: 3, memory: { x: x }, exp: `Kiểm tra if: ${x} không chia hết cho 2. Điều kiện if Sai.` });
+                    ifSteps.push({ line: 5, memory: { x: x }, exp: `Chuyển xuống nhánh else vì if bị Sai.` });
+                    ifSteps.push({ line: 6, memory: { x: x }, output: `${x} là số Lẻ`, exp: `Thực thi lệnh của nhánh else.` });
+                }
+                ifSteps.push({ line: 7, memory: { x: x + 1 }, exp: `Tăng x lên ${x + 1}.` });
+            }
+            ifSteps.push({ line: 2, memory: { x: limit + 1 }, exp: `Kiểm tra while: ${limit + 1} <= ${limit} (SAI). Vòng lặp kết thúc!` });
+
+            db.whileIf = {
+                title: "While kết hợp If/Else",
                 theory: `
-                    <p>🔹 Trong thực tế, các bài toán thường yêu cầu <b>vừa lặp vừa kiểm tra</b>.</p>
-                    <p>🔹 Ví dụ: Duyệt qua các số từ 1 đến 3, kiểm tra xem số nào chẵn, số nào lẻ.</p>
-                    <p>🔹 Toán tử <code class="func bg-[#131314] px-1 rounded border border-[#333]">%</code> dùng để chia lấy phần dư. <br><code class="font-mono mt-1 inline-block">x % 2 == 0</code> nghĩa là: "Nếu x chia hết cho 2 (số chẵn)".</p>
+                    <p>🔹 Trong thực tế, các bài toán thường yêu cầu <b class="text-white">vừa lặp vừa kiểm tra điều kiện</b>.</p>
+                    <p>🔹 Ví dụ: Duyệt qua các số từ 1 đến ${limit}, kiểm tra xem số nào chẵn, số nào lẻ.</p>
+                    <div class="mt-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/10">
+                        <span class="text-on-surface-variant text-[13px]">Toán tử <code class="font-mono text-primary">%</code> dùng để chia lấy phần dư.</span><br>
+                        <code class="font-mono text-tertiary text-[13px] mt-1.5 block">x % 2 == 0</code> 
+                        <span class="text-on-surface-variant text-[12.5px] italic">nghĩa là: "Nếu x chia hết cho 2 (tức là số chẵn)".</span>
+                    </div>
                 `,
                 code: `
 <div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper">x = <span class="num">1</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while</span> x <= <span class="num">3</span>:</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while</span> x <= <span class="num">${limit}</span>:</span></div>
 <div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="kw">if</span> x % <span class="num">2</span> == <span class="num">0</span>:</span></div>
 <div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">f"{x} là số Chẵn"</span>)</span></div>
 <div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    <span class="kw">else</span>:</span></div>
 <div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">f"{x} là số Lẻ"</span>)</span></div>
 <div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">    x += <span class="num">1</span></span></div>
                 `,
-                steps: [
-                    { line: 1, memory: { x: 1 }, exp: "Gán x = 1" },
-                    { line: 2, memory: { x: 1 }, exp: "Kiểm tra while: 1 <= 3 (Đúng). Bắt đầu vòng lặp." },
-                    { line: 3, memory: { x: 1 }, exp: "Kiểm tra if: 1 chia 2 dư 1 (Không bằng 0). Điều kiện if Sai." },
-                    { line: 5, memory: { x: 1 }, exp: "Chuyển xuống nhánh else vì if bị Sai." },
-                    { line: 6, memory: { x: 1 }, output: "1 là số Lẻ", exp: "Thực thi lệnh print của nhánh else." },
-                    { line: 7, memory: { x: 2 }, exp: "Chú ý: Lệnh này thụt lề bằng if, nằm NGOÀI if/else. Tăng x lên 2." },
-                    { line: 2, memory: { x: 2 }, exp: "Quay lại while: 2 <= 3 (Đúng)." },
-                    { line: 3, memory: { x: 2 }, exp: "Kiểm tra if: 2 chia 2 dư 0. Điều kiện if ĐÚNG." },
-                    { line: 4, memory: { x: 2 }, output: "2 là số Chẵn", exp: "Thực thi lệnh của nhánh if." },
-                    { line: 7, memory: { x: 3 }, exp: "Nhảy qua else, đi tới lệnh tăng biến. x = 3." },
-                    { line: 2, memory: { x: 3 }, exp: "Quay lại while: 3 <= 3 (Đúng)." },
-                    { line: 3, memory: { x: 3 }, exp: "Kiểm tra if: 3 chia 2 dư 1. Điều kiện if Sai." },
-                    { line: 6, memory: { x: 3 }, output: "3 là số Lẻ", exp: "Thực thi lệnh của nhánh else." },
-                    { line: 7, memory: { x: 4 }, exp: "Tăng x lên 4." },
-                    { line: 2, memory: { x: 4 }, exp: "Kiểm tra while: 4 <= 3 (SAI). Vòng lặp kết thúc!" },
-                ]
-            }
-        };
+                steps: ifSteps
+            };
 
-        // Trạng thái chương trình
+            return db;
+        }
+
         let currentId = 'for';
         let stepIdx = 0;
         let playInterval = null;
 
         window.onload = () => loadLesson('for');
 
+        function updateLimit() {
+            let limitInput = document.getElementById('loop-limit');
+            let val = parseInt(limitInput.value);
+            
+            // Validate để tránh số quá to gây lag bộ nhớ Simulator
+            if (isNaN(val) || val < 1) val = 1;
+            if (val > 50) val = 50; 
+            limitInput.value = val;
+
+            // Load lại bài với giới hạn mới
+            loadLesson(currentId);
+        }
+
         function loadLesson(id) {
-            // Dừng Auto play
             stopAuto();
 
-            // Đổi active sidebar
+            // Menu Active State Update
             document.querySelectorAll('.lesson-tab').forEach(el => el.classList.remove('active'));
             const activeTab = document.querySelector(`.lesson-tab[onclick*="'${id}'"]`);
-            if (activeTab) {
-                activeTab.classList.add('active');
-            }
+            if (activeTab) activeTab.classList.add('active');
 
-            // Ẩn tất cả các khu vực
+            // Hide all areas
             document.getElementById('learning-container').classList.add('hidden');
             document.getElementById('controls').classList.add('hidden');
             document.getElementById('quiz-container').classList.add('hidden');
@@ -507,25 +609,29 @@
 
             if (id === 'quiz') {
                 document.getElementById('quiz-container').classList.remove('hidden');
-                document.getElementById('lesson-title').innerText = "Bài tập trắc nghiệm";
+                document.getElementById('lesson-title').innerText = "Bài Tập Trắc Nghiệm";
                 return;
             }
 
             if (id === 'practice') {
                 document.getElementById('practice-container').classList.remove('hidden');
                 document.getElementById('practice-container').classList.add('flex');
-                document.getElementById('lesson-title').innerText = "Thực hành Code (Tự luận)";
+                document.getElementById('lesson-title').innerText = "Thực Hành Code Tự Luận";
                 return;
             }
 
-            // Trạng thái hiển thị bài học thông thường
+            // Lấy giới hạn n hiện tại từ input
+            let limit = parseInt(document.getElementById('loop-limit').value) || 5;
+
+            // Show Learning Area
             document.getElementById('learning-container').classList.remove('hidden');
+            document.getElementById('learning-container').classList.add('grid');
             document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('controls').classList.add('flex');
             
-            // Load nội dung bài học
             currentId = id;
             stepIdx = 0;
-            const data = db[id];
+            const data = getDb(limit)[id];
             
             document.getElementById('lesson-title').innerText = data.title;
             document.getElementById('theory-content').innerHTML = data.theory;
@@ -537,8 +643,8 @@
         function resetSimUI() {
             stepIdx = 0;
             document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
-            document.getElementById('memory-content').innerHTML = '<span class="text-gray-500 text-[14.5px] italic">Chưa có biến nào trong RAM...</span>';
-            document.getElementById('explanation-text').innerText = 'Bấm "Từng bước" hoặc "Chạy tự động" để xem máy tính đọc code.';
+            document.getElementById('memory-content').innerHTML = '<span class="text-on-surface-variant opacity-50 text-[13px] italic">Memory is empty...</span>';
+            document.getElementById('explanation-text').innerText = 'Bấm "Step" hoặc "Auto Run" ở góc trên bên phải để bắt đầu mô phỏng.';
             document.getElementById('console-content').innerHTML = '';
             
             document.getElementById('btn-step').disabled = false;
@@ -551,10 +657,12 @@
         }
 
         function stepSim() {
-            const data = db[currentId];
+            let limit = parseInt(document.getElementById('loop-limit').value) || 5;
+            const data = getDb(limit)[currentId];
+            
             if (stepIdx >= data.steps.length) {
                 stopAuto();
-                document.getElementById('explanation-text').innerText = "🏁 Chương trình đã kết thúc!";
+                document.getElementById('explanation-text').innerHTML = "<span class='text-primary font-bold'>🏁 Chương trình đã kết thúc!</span>";
                 document.getElementById('btn-step').disabled = true;
                 document.getElementById('btn-step').classList.add('opacity-50', 'cursor-not-allowed');
                 return;
@@ -562,31 +670,29 @@
 
             const step = data.steps[stepIdx];
 
-            // 1. Highlight Code
+            // Highlight Code
             document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
             const activeEl = document.getElementById(`l${step.line}`);
             if(activeEl) {
                 activeEl.classList.add('active-line');
-                // Cuộn tới dòng code nếu dài
                 activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            // 2. Cập nhật RAM (Memory)
+            // Update RAM
             if (step.memory && Object.keys(step.memory).length > 0) {
                 let memHTML = '';
                 for (const [key, value] of Object.entries(step.memory)) {
-                    memHTML += `<div class="memory-var">${key} = ${value}</div>`;
+                    memHTML += `<div class="memory-var"><span class="material-symbols-outlined text-[16px] opacity-70">data_object</span>${key} = ${value}</div>`;
                 }
                 document.getElementById('memory-content').innerHTML = memHTML;
             }
 
-            // 3. Hiển thị giải thích
-            document.getElementById('explanation-text').innerText = step.exp;
+            // Update Explanation
+            document.getElementById('explanation-text').innerHTML = `<span class="text-white">${step.exp}</span>`;
 
-            // 4. In ra Console
+            // Update Console
             if (step.output) {
-                document.getElementById('console-content').innerHTML += `<div>${step.output}</div>`;
-                // Tự cuộn xuống dưới cùng của console
+                document.getElementById('console-content').innerHTML += `<div class="flex gap-2"><span class="text-on-surface-variant opacity-30">></span><span class="text-on-surface">${step.output}</span></div>`;
                 const consoleDiv = document.getElementById('console-content').parentElement;
                 consoleDiv.scrollTop = consoleDiv.scrollHeight;
             }
@@ -599,21 +705,19 @@
                 stopAuto();
             } else {
                 const btnAuto = document.getElementById('btn-auto');
-                btnAuto.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
-                btnAuto.classList.replace('bg-[#1b5e20]', 'bg-orange-600');
-                btnAuto.classList.replace('hover:bg-[#2e7d32]', 'hover:bg-orange-500');
+                btnAuto.innerHTML = '<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: \'FILL\' 1;">pause</span> Pause';
+                btnAuto.classList.replace('bg-primary', 'bg-tertiary-container');
+                btnAuto.classList.replace('text-on-primary', 'text-on-tertiary-container');
                 
-                // Nếu đã chạy xong thì reset lại rồi mới auto
-                if (stepIdx >= db[currentId].steps.length) resetSimUI();
+                let limit = parseInt(document.getElementById('loop-limit').value) || 5;
+                if (stepIdx >= getDb(limit)[currentId].steps.length) resetSimUI();
                 
-                stepSim(); // Chạy ngay bước đầu
+                stepSim(); 
                 playInterval = setInterval(() => {
-                    if (stepIdx >= db[currentId].steps.length) {
-                        stopAuto();
-                    } else {
-                        stepSim();
-                    }
-                }, 1500); // 1.5 giây mỗi bước
+                    let curLimit = parseInt(document.getElementById('loop-limit').value) || 5;
+                    if (stepIdx >= getDb(curLimit)[currentId].steps.length) stopAuto();
+                    else stepSim();
+                }, 1000); // Rút ngắn còn 1 giây/bước để xem nhanh hơn nếu n lớn
             }
         }
 
@@ -622,108 +726,96 @@
                 clearInterval(playInterval);
                 playInterval = null;
                 const btnAuto = document.getElementById('btn-auto');
-                btnAuto.innerHTML = '<i class="fas fa-play"></i> Chạy tự động';
-                btnAuto.classList.replace('bg-orange-600', 'bg-[#1b5e20]');
-                btnAuto.classList.replace('hover:bg-orange-500', 'hover:bg-[#2e7d32]');
+                btnAuto.innerHTML = '<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> Auto Run';
+                btnAuto.classList.replace('bg-tertiary-container', 'bg-primary');
+                btnAuto.classList.replace('text-on-tertiary-container', 'text-on-primary');
             }
         }
 
-        // Chấm điểm Quiz đơn giản
+        // Quiz Logic
         function checkAnswer(qNum, labelElement, isCorrect) {
-            // Đặt lại style cho tất cả label trong câu hỏi này
             const allLabels = labelElement.parentElement.querySelectorAll('label');
             allLabels.forEach(lbl => {
-                lbl.classList.remove('border-green-500', 'bg-green-900/20', 'border-red-500', 'bg-red-900/20', 'border-blue-500');
-                lbl.classList.add('border-[#333]');
+                lbl.classList.remove('border-primary', 'bg-primary/5', 'border-error', 'bg-error/5');
+                lbl.classList.add('border-outline-variant/20', 'bg-surface-container-low');
                 const circle = lbl.querySelector('.rounded-full');
-                circle.classList.remove('bg-green-500', 'border-green-500', 'bg-red-500', 'border-red-500');
-                circle.classList.add('border-gray-500');
+                circle.classList.remove('bg-primary', 'border-primary', 'bg-error', 'border-error');
+                circle.classList.add('border-outline-variant');
             });
 
-            // Set màu cho lựa chọn hiện tại
             const circle = labelElement.querySelector('.rounded-full');
             const resDiv = document.getElementById(`res-${qNum}`);
-            resDiv.classList.remove('hidden', 'text-green-400', 'text-red-400', 'bg-green-900/30', 'bg-red-900/30');
+            resDiv.classList.remove('hidden', 'text-primary', 'text-error', 'bg-primary/10', 'bg-error/10');
 
             if (isCorrect) {
-                labelElement.classList.replace('border-[#333]', 'border-green-500');
-                labelElement.classList.add('bg-green-900/20');
-                circle.classList.replace('border-gray-500', 'border-green-500');
-                circle.classList.add('bg-green-500');
-                resDiv.classList.add('text-green-400', 'bg-green-900/30');
-                resDiv.innerHTML = '<i class="fas fa-check-circle mr-1.5"></i> Chính xác! Chúc mừng bạn.';
+                labelElement.classList.replace('border-outline-variant/20', 'border-primary');
+                labelElement.classList.replace('bg-surface-container-low', 'bg-primary/5');
+                circle.classList.replace('border-outline-variant', 'border-primary');
+                circle.classList.add('bg-primary');
+                resDiv.classList.add('text-primary', 'bg-primary/10');
+                resDiv.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Chính xác! Bạn đã hiểu bài.';
             } else {
-                labelElement.classList.replace('border-[#333]', 'border-red-500');
-                labelElement.classList.add('bg-red-900/20');
-                circle.classList.replace('border-gray-500', 'border-red-500');
-                circle.classList.add('bg-red-500');
-                resDiv.classList.add('text-red-400', 'bg-red-900/30');
-                resDiv.innerHTML = '<i class="fas fa-times-circle mr-1.5"></i> Sai rồi. Hãy thử đáp án khác nhé!';
+                labelElement.classList.replace('border-outline-variant/20', 'border-error');
+                labelElement.classList.replace('bg-surface-container-low', 'bg-error/5');
+                circle.classList.replace('border-outline-variant', 'border-error');
+                circle.classList.add('bg-error');
+                resDiv.classList.add('text-error', 'bg-error/10');
+                resDiv.innerHTML = '<span class="material-symbols-outlined text-[18px]">cancel</span> Sai rồi. Hãy suy nghĩ lại nhé!';
             }
         }
 
-        // Bổ sung phím Tab cho Textarea trong chế độ tự luận
+        // Practice Tab Support
         document.getElementById('practice-editor').addEventListener('keydown', function(e) {
             if (e.key == 'Tab') {
                 e.preventDefault();
                 var start = this.selectionStart;
                 var end = this.selectionEnd;
-                // Thay thế Tab bằng 4 khoảng trắng để thụt lề chuẩn Python
                 this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
                 this.selectionStart = this.selectionEnd = start + 4;
             }
         });
 
-        // Hàm gọi Piston API để chạy Bài tập tự luận
+        // Run Practice Code (Piston API)
         async function runPracticeCode() {
             const btn = document.getElementById('btn-run-practice');
             const consoleEl = document.getElementById('practice-console');
             const code = document.getElementById('practice-editor').value;
             
             if (code.trim() === '') {
-                consoleEl.innerHTML = `<span class="text-red-400">> Vui lòng nhập code giải bài tập của bạn!</span><br>`;
+                consoleEl.innerHTML = `<span class="text-error">> Lỗi: Vui lòng nhập mã nguồn trước khi chạy!</span><br>`;
                 return;
             }
 
-            // Trạng thái Đang chạy
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang chạy...';
-            btn.classList.replace('bg-green-600', 'bg-gray-600');
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Executing...';
+            btn.classList.add('opacity-70', 'cursor-wait');
             btn.disabled = true;
-            consoleEl.innerHTML = `<span class="text-gray-500">> Đang gửi mã nguồn lên máy chủ biên dịch...</span><br><br>`;
+            consoleEl.innerHTML = `<span class="text-on-surface-variant opacity-60">> Sending code to compiler...</span><br><br>`;
 
             try {
-                // Gọi API Piston để chạy mã nguồn Python (v3.10.0)
                 const response = await fetch('https://emcv.piston.rs/api/v2/execute', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        language: 'python',
-                        version: '3.10.0',
-                        files: [{ content: code }]
-                    })
+                    body: JSON.stringify({ language: 'python', version: '3.10.0', files: [{ content: code }] })
                 });
 
                 const data = await response.json();
 
-                // Kiểm tra kết quả trả về
                 if (data.run && data.run.code === 0) {
-                    consoleEl.innerHTML += `<span class="text-green-400">> Chạy thành công. Kết quả in ra:</span><br><br>`;
+                    consoleEl.innerHTML += `<span class="text-primary">> Thực thi thành công:</span><br><br>`;
                     const output = data.run.output.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
-                    consoleEl.innerHTML += `<span class="text-white">${output}</span><br>`;
+                    consoleEl.innerHTML += `<span class="text-on-surface">${output}</span><br>`;
                 } else {
-                    consoleEl.innerHTML += `<span class="text-red-400">> [LỖI] Chương trình gặp sự cố:</span><br><br>`;
-                    const errOutput = data.run ? data.run.output : (data.compile ? data.compile.output : "Lỗi không xác định");
-                    consoleEl.innerHTML += `<span class="text-red-300">${errOutput}</span><br>`;
+                    consoleEl.innerHTML += `<span class="text-error">> [LỖI RUNTIME/SYNTAX]:</span><br><br>`;
+                    const errOutput = data.run ? data.run.output : (data.compile ? data.compile.output : "Unknown error");
+                    consoleEl.innerHTML += `<span class="text-error opacity-80">${errOutput}</span><br>`;
                 }
             } catch (error) {
-                consoleEl.innerHTML += `<span class="text-red-500">> Tự tải vscode đi bố ạ, tao ko đỉnh đến thế đâu</span><br>`;
-                console.error(error);
+                consoleEl.innerHTML += `<span class="text-error">> Có phải vscode đéo đâu mà đòi chạy code</span><br>`;
             } finally {
-                // Khôi phục nút
-                btn.innerHTML = '<i class="fas fa-play"></i> Chạy Code';
-                btn.classList.replace('bg-gray-600', 'bg-green-600');
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> Run Code';
+                btn.classList.remove('opacity-70', 'cursor-wait');
                 btn.disabled = false;
-                consoleEl.scrollTop = consoleEl.scrollHeight;
+                consoleEl.parentElement.scrollTop = consoleEl.parentElement.scrollHeight;
             }
         }
     </script>
