@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng Stack - Thập phân sang Nhị phân</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Hiệu ứng mượt mà khi thêm/xóa phần tử vào stack */
+        .stack-item-enter {
+            animation: slideDown 0.5s ease-out forwards;
+        }
+        .stack-item-exit {
+            animation: slideUp 0.5s ease-in forwards;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-50px); }
+        }
+
+        /* Ống chứa Stack (Ngăn xếp) */
+        .stack-container {
+            border: 4px solid #4B5563;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            background-color: #F3F4F6;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column-reverse;
+            justify-content: flex-start;
+            padding: 8px;
+            gap: 4px;
+        }
+        
+        /* Tùy chỉnh thanh cuộn */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* Dòng code Python được highlight */
+        .code-line {
+            transition: all 0.3s ease;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+        }
+        .code-line.active {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+            font-weight: bold;
+            border-left: 3px solid #60a5fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- Đã mở rộng max-w từ 4xl lên 6xl để chứa 3 cột -->
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-blue-600 text-white p-6 text-center">
+            <h1 class="text-2xl font-bold">Mô phỏng cấu trúc Stack (Ngăn xếp)</h1>
+            <p class="mt-2 opacity-90">Chuyển đổi số Thập phân sang Nhị phân (LIFO - Vào sau ra trước)</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="p-6 border-b flex flex-col sm:flex-row items-center justify-center gap-4 bg-slate-50">
+            <label for="decInput" class="font-semibold text-lg">Nhập số thập phân:</label>
+            <input type="number" id="decInput" value="13" min="0" class="border-2 border-slate-300 rounded-lg px-4 py-2 w-32 text-center text-xl focus:border-blue-500 focus:outline-none">
+            <button id="startBtn" onclick="startSimulation()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Bắt đầu mô phỏng
+            </button>
+        </div>
+
+        <!-- Lỗi hiển thị nếu nhập sai -->
+        <div id="errorMsg" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-6 mt-4 text-center">
+            Vui lòng nhập một số nguyên dương hợp lệ!
+        </div>
+
+        <!-- Main Simulation Area - 3 Cột -->
+        <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Cột 1: Mã nguồn Python -->
+            <div class="flex flex-col">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    Code Python
+                </h2>
+                <div class="custom-scroll flex-grow bg-[#1e293b] text-slate-300 p-4 rounded-xl font-mono text-[13px] sm:text-sm overflow-auto h-[350px] shadow-inner whitespace-pre">
+<div class="code-line" id="line-1">def decimal_to_binary(dec_num):</div>
+<div class="code-line" id="line-2">    s = Stack()</div>
+<div class="code-line" id="line-3">    if dec_num == 0:</div>
+<div class="code-line" id="line-4">        return "0"</div>
+<div class="code-line" id="line-5">    while dec_num > 0:</div>
+<div class="code-line" id="line-6">        remainder = dec_num % 2</div>
+<div class="code-line" id="line-7">        s.push(remainder)</div>
+<div class="code-line" id="line-8">        dec_num = dec_num // 2</div>
+<div class="code-line" id="line-9">    bin_string = ""</div>
+<div class="code-line" id="line-10">    while not s.is_empty():</div>
+<div class="code-line" id="line-11">        bin_string += str(s.pop())</div>
+<div class="code-line" id="line-12">    return bin_string</div></div>
+            </div>
+
+            <!-- Cột 2: Quá trình chia (Log) -->
+            <div class="flex flex-col">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                    Quá trình tính toán
+                </h2>
+                <div id="calcLog" class="custom-scroll flex-grow bg-slate-800 text-green-400 p-4 rounded-xl font-mono text-sm overflow-y-auto h-[350px] shadow-inner">
+                    <div class="text-slate-400 italic">// Các bước tính toán sẽ hiển thị tại đây...</div>
+                </div>
+            </div>
+
+            <!-- Cột 3: Hình ảnh Stack -->
+            <div class="flex flex-col items-center">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="14" x2="20" y2="14"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+                    Cấu trúc Stack
+                </h2>
+                
+                <!-- Khu vực hiển thị hành động đang diễn ra -->
+                <div id="actionBadge" class="h-8 mb-2 w-full text-center">
+                    <span class="opacity-0 px-3 py-1 bg-yellow-100 text-yellow-800 font-bold rounded-full border border-yellow-300 transition-opacity inline-block" id="actionText">Đang chờ...</span>
+                </div>
+
+                <!-- Đây là ống Stack -->
+                <div class="w-48 stack-container relative mt-2" id="visualStack">
+                    <!-- Các phần tử của stack sẽ được chèn vào đây qua JS -->
+                </div>
+                <div class="mt-2 font-bold text-slate-500 uppercase tracking-widest text-sm">Đáy Stack</div>
+            </div>
+
+        </div>
+
+        <!-- Result Section -->
+        <div class="bg-slate-100 p-6 border-t flex flex-col items-center">
+            <h2 class="text-lg font-bold text-slate-600 mb-2">Kết quả chuỗi Nhị phân:</h2>
+            <div id="resultDisplay" class="bg-white border-2 border-slate-300 rounded-lg w-full max-w-lg h-16 flex items-center justify-center text-3xl font-mono font-bold text-blue-600 shadow-inner tracking-[0.2em]">
+                <!-- Kết quả hiển thị ở đây -->
+            </div>
+            <p id="explanationText" class="mt-4 text-slate-500 text-center text-sm h-6">
+                <!-- Giải thích ngắn -->
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        const btn = document.getElementById('startBtn');
+        const input = document.getElementById('decInput');
+        const logArea = document.getElementById('calcLog');
+        const stackArea = document.getElementById('visualStack');
+        const resultArea = document.getElementById('resultDisplay');
+        const actionText = document.getElementById('actionText');
+        const errorMsg = document.getElementById('errorMsg');
+        const explanationText = document.getElementById('explanationText');
+
+        let isAnimating = false;
+
+        // Hàm highlight dòng code
+        function highlightLine(lineId) {
+            // Xóa highlight cũ
+            document.querySelectorAll('.code-line').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Thêm highlight mới nếu có
+            if (lineId) {
+                const line = document.getElementById(lineId);
+                if (line) {
+                    line.classList.add('active');
+                    // Tự động cuộn đến dòng đó nếu bị che khuất
+                    line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        async function startSimulation() {
+            if (isAnimating) return;
+            
+            let numStr = input.value.trim();
+            let num = parseInt(numStr);
+
+            if (isNaN(num) || num < 0 || numStr === "") {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            errorMsg.classList.add('hidden');
+
+            isAnimating = true;
+            btn.disabled = true;
+            input.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            logArea.innerHTML = '';
+            stackArea.innerHTML = '';
+            resultArea.innerText = '';
+            explanationText.innerText = 'Bắt đầu khởi tạo...';
+            
+            // Highlight: s = Stack()
+            highlightLine('line-2');
+            await sleep(800);
+
+            // Highlight: if dec_num == 0:
+            highlightLine('line-3');
+            await sleep(600);
+
+            if (num === 0) {
+                // Highlight: return "0"
+                highlightLine('line-4');
+                appendLog("Số cần chuyển là 0.");
+                appendLog("Kết quả: 0");
+                resultArea.innerText = "0";
+                await sleep(800);
+                finishSimulation();
+                return;
+            }
+
+            let stackData = []; 
+            let currentNum = num;
+
+            // Vòng lặp chia
+            while (currentNum > 0) {
+                explanationText.innerText = 'Đang chia lấy phần dư và đẩy vào Stack...';
+                
+                // Highlight: while dec_num > 0:
+                highlightLine('line-5');
+                await sleep(600);
+
+                let remainder = currentNum % 2;
+                let nextNum = Math.floor(currentNum / 2);
+                
+                // Highlight: remainder = dec_num % 2
+                highlightLine('line-6');
+                appendLog(`${currentNum} / 2 = ${nextNum}  --- Dư: <span class="text-yellow-300 font-bold">${remainder}</span>`);
+                await sleep(800); 
+
+                // Highlight: s.push(remainder)
+                highlightLine('line-7');
+                setActionBadge(`PUSH(${remainder})`, 'bg-blue-100 text-blue-800 border-blue-300');
+                stackData.push(remainder);
+                pushToUI(remainder);
+                await sleep(1000); 
+                
+                // Highlight: dec_num = dec_num // 2
+                highlightLine('line-8');
+                currentNum = nextNum;
+                await sleep(600);
+            }
+
+            appendLog("<br>// Đã chia xong! Chuẩn bị lấy từ Stack ra (LIFO)...");
+            
+            // Highlight: bin_string = ""
+            highlightLine('line-9');
+            explanationText.innerText = 'Chuẩn bị tạo chuỗi kết quả...';
+            await sleep(800);
+
+            let binaryString = "";
+            
+            // Vòng lặp Pop
+            while (stackData.length > 0) {
+                explanationText.innerText = 'Bắt đầu Pop (rút) phần tử từ đỉnh Stack ra để tạo chuỗi nhị phân.';
+                
+                // Highlight: while not s.is_empty():
+                highlightLine('line-10');
+                await sleep(600);
+
+                // Highlight: bin_string += str(s.pop())
+                highlightLine('line-11');
+                
+                let poppedValue = stackData.pop();
+                setActionBadge(`POP() -> ${poppedValue}`, 'bg-red-100 text-red-800 border-red-300');
+                
+                popFromUI();
+                await sleep(600); // Chờ hiệu ứng UI
+
+                binaryString += poppedValue;
+                resultArea.innerText = binaryString;
+                
+                appendLog(`Rút ra: <span class="text-yellow-300 font-bold">${poppedValue}</span> -> Chuỗi: ${binaryString}`);
+                await sleep(800);
+            }
+
+            // Lần kiểm tra cuối cùng của vòng lặp while (để thoát)
+            highlightLine('line-10');
+            await sleep(400);
+
+            // Highlight: return bin_string
+            highlightLine('line-12');
+            appendLog("<br>// Hoàn tất chuyển đổi!");
+            explanationText.innerText = 'Hoàn tất! Số dư vào cuối cùng (Top) đã được lấy ra đầu tiên.';
+            hideActionBadge();
+            await sleep(1000);
+            
+            finishSimulation();
+        }
+
+        // --- CÁC HÀM HỖ TRỢ GIAO DIỆN ---
+
+        function appendLog(html) {
+            let div = document.createElement('div');
+            div.innerHTML = `> ${html}`;
+            div.className = "mb-1";
+            logArea.appendChild(div);
+            logArea.scrollTop = logArea.scrollHeight; 
+        }
+
+        function pushToUI(val) {
+            let itemDiv = document.createElement('div');
+            itemDiv.className = "bg-blue-500 text-white font-bold text-2xl h-12 flex items-center justify-center rounded border-2 border-blue-700 shadow-md stack-item-enter w-full";
+            itemDiv.innerText = val;
+            stackArea.appendChild(itemDiv);
+        }
+
+        function popFromUI() {
+            let topItem = stackArea.lastElementChild;
+            if (topItem) {
+                topItem.className = "bg-red-500 text-white font-bold text-2xl h-12 flex items-center justify-center rounded border-2 border-red-700 shadow-md stack-item-exit w-full";
+                setTimeout(() => {
+                    if(stackArea.contains(topItem)) stackArea.removeChild(topItem);
+                }, 450);
+            }
+        }
+
+        function setActionBadge(text, colorClasses) {
+            actionText.innerText = text;
+            actionText.className = `px-3 py-1 font-bold rounded-full border transition-opacity opacity-100 inline-block ${colorClasses}`;
+        }
+
+        function hideActionBadge() {
+            actionText.classList.replace('opacity-100', 'opacity-0');
+        }
+
+        function finishSimulation() {
+            isAnimating = false;
+            btn.disabled = false;
+            input.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            // Tắt highlight sau khi xong
+            setTimeout(() => highlightLine(null), 1000);
+        }
+
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                startSimulation();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>The Kinetic Workspace - Java Master Class</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#fcf8f9", "on-primary": "#002c66", "on-tertiary-fixed": "#3e0047",
+                        "secondary-fixed": "#c7cfff", "primary-container": "#6e9fff", "outline-variant": "#484849",
+                        "surface-variant": "#262627", "surface-dim": "#0e0e0f", "on-primary-container": "#002150",
+                        "error": "#ff716c", "surface-container": "#19191b", "surface-container-lowest": "#000000",
+                        "on-secondary-fixed-variant": "#2d48ac", "inverse-primary": "#005bc4", "on-secondary": "#00175f",
+                        "on-surface": "#ffffff", "on-error-container": "#ffa8a3", "surface-container-high": "#1f1f21",
+                        "background": "#0e0e0f", "primary-fixed": "#6e9fff", "error-container": "#9f0519",
+                        "outline": "#767576", "on-tertiary": "#691d74", "tertiary-container": "#f199f7",
+                        "secondary-fixed-dim": "#b4c1ff", "surface-container-highest": "#262627", "tertiary-fixed-dim": "#e28ce9",
+                        "on-error": "#490006", "on-secondary-fixed": "#00278f", "secondary-container": "#213da1",
+                        "surface": "#0e0e0f", "error-dim": "#d7383b", "surface-container-low": "#131314",
+                        "surface-tint": "#85adff", "primary-fixed-dim": "#5391ff", "on-background": "#ffffff",
+                        "on-surface-variant": "#adaaab", "tertiary-fixed": "#f199f7", "secondary-dim": "#8097ff",
+                        "on-primary-fixed-variant": "#002a62", "secondary": "#8097ff", "inverse-on-surface": "#565556",
+                        "tertiary": "#fbabff", "surface-bright": "#2c2c2d", "on-tertiary-container": "#5e106a",
+                        "on-tertiary-fixed-variant": "#681c73", "tertiary-dim": "#e28ce9", "on-primary-fixed": "#000000",
+                        "on-secondary-container": "#c5ceff", "primary": "#85adff", "primary-dim": "#699cff"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    "keyframes": {
+                        fadeInScale: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        }
+                    },
+                    "animation": {
+                        fadeInScale: 'fadeInScale 0.4s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; background-color: #0e0e0f; color: #ffffff; overflow: hidden; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #262627; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484849; }
+
+        /* Sidebar Tabs custom styles */
+        .lesson-tab {
+            display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+            color: #adaaab; border-radius: 9999px; margin: 2px 8px;
+            transition: all 0.2s ease; cursor: pointer; font-size: 13.5px;
+        }
+        .lesson-tab:hover { background-color: #1f1f21; color: #ffffff; }
+        .lesson-tab.active {
+            background-color: #1f1f21; color: #85adff;
+            box-shadow: inset 0 0 0 1px rgba(133, 173, 255, 0.2);
+            font-weight: 500;
+        }
+        .lesson-tab i.material-symbols-outlined { font-size: 18px; width: 20px; text-align: center;}
+        .lesson-tab.active i.material-symbols-outlined { color: #85adff; font-variation-settings: 'FILL' 1; }
+        
+        /* Sub-items indentation */
+        .lesson-tab.sub-item { padding-left: 42px; font-size: 13px; margin-top: 2px; margin-bottom: 2px; }
+
+        /* Code Simulator Styles */
+        .code-line { display: flex; align-items: flex-start; padding: 2px 8px; border-radius: 4px; transition: all 0.3s ease; }
+        .code-wrapper { white-space: pre-wrap; word-break: break-word; }
+        .line-num { color: #484849; width: 30px; flex-shrink: 0; user-select: none; text-align: right; padding-right: 12px; }
+        .code-line.active-line { background-color: rgba(133, 173, 255, 0.1); border-left: 3px solid #85adff; }
+
+        /* Syntax Highlighting */
+        .kw { color: #fbabff; } 
+        .func { color: #85adff; } 
+        .str { color: #6e9fff; } 
+        .num { color: #8097ff; } 
+        .comment { color: #767576; font-style: italic; }
+
+        /* Memory Variable Badge */
+        .memory-var {
+            background: rgba(241, 153, 247, 0.1); border: 1px solid rgba(241, 153, 247, 0.3);
+            padding: 6px 16px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace;
+            color: #f199f7; font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;
+        }
+
+        .code-textarea {
+            width: 100%; height: 100%; background-color: transparent; color: #ffffff;
+            font-family: 'JetBrains Mono', monospace; font-size: 14px; border: none;
+            resize: none; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto;
+        }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="flex min-h-screen bg-surface text-body">
+
+    <!-- Modal Hướng Dẫn -->
+    <div id="welcome-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 px-4">
+        <div class="bg-surface-container border border-outline-variant/20 rounded-[2rem] p-8 w-full max-w-2xl text-center shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden animate-fadeInScale">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-primary/20 blur-3xl rounded-full pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-tertiary/20 blur-3xl rounded-full pointer-events-none"></div>
+
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/30 shadow-[0_0_20px_rgba(133,173,255,0.2)]">
+                    <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">school</span>
+                </div>
+                
+                <h2 class="text-2xl md:text-3xl font-headline font-bold text-white mb-2 tracking-tight">Chào mừng đến với <span class="text-primary">Java Master!</span></h2>
+                <p class="text-on-surface-variant text-[14px] md:text-[15px] mb-8 leading-relaxed">Hệ thống mô phỏng bài tập trực quan từ Giáo trình: Lab3 - Cấu trúc lặp.</p>
+                
+                <div class="bg-surface-container-low rounded-2xl p-6 text-left mb-8 border border-outline-variant/10 shadow-inner">
+                    <ul class="space-y-4 text-[13.5px] text-on-surface-variant">
+                        <li class="flex items-start gap-3">
+                            <span class="bg-primary/20 text-primary px-2 py-0.5 rounded font-mono text-[11px] mt-0.5 border border-primary/20">1</span> 
+                            <span><b>Menu Giáo trình:</b> Thanh bên trái chứa toàn bộ các ví dụ được trích xuất từ file PDF bài giảng.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="bg-secondary/20 text-secondary px-2 py-0.5 rounded font-mono text-[11px] mt-0.5 border border-secondary/20">2</span> 
+                            <span><b>Mô phỏng Code:</b> Bấm nút <code class="text-secondary font-mono bg-surface-container-high px-1.5 py-0.5 rounded">Step</code> để chạy chậm từng dòng hoặc <code class="text-primary font-mono bg-surface-container-high px-1.5 py-0.5 rounded">Auto Run</code> để chạy tự động toàn bộ giải thuật.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="bg-tertiary/20 text-tertiary px-2 py-0.5 rounded font-mono text-[11px] mt-0.5 border border-tertiary/20">3</span> 
+                            <span><b>Lý thuyết Kép:</b> Bạn sẽ nhận được 2 luồng giải thích: Góc nhìn Hàn lâm của Sinh viên và Góc nhìn Dân dã của Học sinh cấp 2.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <button onclick="closeModal()" class="bg-primary text-on-primary font-headline text-sm font-bold py-3.5 px-10 rounded-full hover:brightness-110 transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(133,173,255,0.3)] flex items-center justify-center mx-auto gap-2 uppercase tracking-widest">
+                    Bắt đầu học ngay <span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="fixed left-0 top-0 h-screen w-[280px] bg-surface-container-low flex flex-col py-6 transition-all duration-300 z-50 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
+        <div class="px-6 mb-6">
+            <h1 class="text-[19px] font-bold tracking-tighter text-primary font-headline uppercase leading-tight">HUYHANDSOME</h1>
+            <p class="text-[10px] font-headline tracking-[0.2em] text-on-surface-variant uppercase mt-1">Lab3: Cấu trúc lặp</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto pb-4">
+            <!-- 1. Vòng lặp For -->
+            <div class="px-6 mt-2 mb-2 text-[10px] font-bold text-primary tracking-widest uppercase">1. Vòng lặp For</div>
+            <div class="lesson-tab sub-item active" onclick="loadLesson('for1')">Ví dụ 1: In số từ 1 đến N</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('for2')">Ví dụ 2: Tổng các số chẵn</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('for3')">Ví dụ 3: Duyệt mảng (for-each)</div>
+
+            <!-- 2. Vòng lặp While -->
+            <div class="px-6 mt-6 mb-2 text-[10px] font-bold text-tertiary tracking-widest uppercase">2. Vòng lặp While</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('while1')">Ví dụ 1: Tìm số đảo ngược</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('while2')">Ví dụ 2: Kiểm tra nguyên tố</div>
+
+            <!-- 3. Vòng lặp Do-While -->
+            <div class="px-6 mt-6 mb-2 text-[10px] font-bold text-secondary tracking-widest uppercase">3. Vòng lặp Do-While</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('dowhile1')">Ví dụ 1: Dữ liệu hợp lệ</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('dowhile2')">Ví dụ 2: Tổng chữ số</div>
+
+            <!-- 4. Lệnh điều khiển -->
+            <div class="px-6 mt-6 mb-2 text-[10px] font-bold text-error tracking-widest uppercase">4. Break & Continue</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('break1')">Ví dụ 1: Tìm kiếm (break)</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('continue1')">Ví dụ 2: Lọc số lẻ (continue)</div>
+
+            <!-- 5. Lặp lồng nhau -->
+            <div class="px-6 mt-6 mb-2 text-[10px] font-bold text-primary-container tracking-widest uppercase">5. Lặp lồng nhau</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('nested1')">Ví dụ 1: In tam giác sao</div>
+            <div class="lesson-tab sub-item" onclick="loadLesson('nested2')">Ví dụ 2: Bảng cửu chương</div>
+
+            <!-- Thực hành -->
+            <div class="px-6 mt-8 mb-2 text-[10px] font-bold text-on-surface-variant/40 tracking-widest uppercase">Thực hành & Đánh giá</div>
+            <div class="lesson-tab" onclick="loadLesson('quiz')">
+                <i class="material-symbols-outlined text-[20px]">quiz</i> Trắc nghiệm
+            </div>
+            <div class="lesson-tab" onclick="loadLesson('practice')">
+                <i class="material-symbols-outlined text-[20px]">terminal</i> Viết Code Giải Bài
+            </div>
+        </nav>
+    </aside>
+
+    <!-- MAIN CANVAS -->
+    <main class="ml-[280px] flex-1 flex flex-col h-screen overflow-hidden relative">
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tertiary/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+
+        <!-- Top Navigation -->
+        <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl h-16 flex justify-between items-center px-6 lg:px-8 shadow-[0_0_20px_rgba(105,156,255,0.06)] border-b border-outline-variant/10">
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(133,173,255,0.8)]"></div>
+                <h2 id="lesson-title" class="font-headline font-semibold uppercase tracking-widest text-[13px] text-on-surface">Tiêu đề bài học</h2>
+            </div>
+            
+            <div class="flex items-center gap-4" id="controls">
+                <div class="flex items-center gap-2 mr-2 bg-surface-container-high px-3 py-1.5 rounded-xl border border-outline-variant/30 shadow-inner">
+                    <label for="loop-limit" class="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest cursor-pointer">Lặp n =</label>
+                    <input type="number" id="loop-limit" value="5" min="1" max="50" onchange="updateLimit()" class="w-14 bg-surface-container-lowest text-primary font-mono text-sm border border-outline-variant/50 rounded px-2 py-1 focus:outline-none focus:border-primary text-center shadow-sm">
+                </div>
+
+                <div class="flex items-center gap-2 border-l border-outline-variant/20 pl-4">
+                    <button onclick="resetSim()" class="flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant/40 text-on-surface-variant hover:text-white hover:bg-surface-container-high transition-all text-[10px] font-bold uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset
+                    </button>
+                    <button onclick="stepSim()" id="btn-step" class="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-container/20 border border-secondary-container/50 text-secondary hover:bg-secondary-container/40 transition-all text-[10px] font-bold uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-[16px]">step_into</span> Step
+                    </button>
+                    <button onclick="autoSim()" id="btn-auto" class="flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-on-primary hover:brightness-110 transition-all text-[10px] font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(133,173,255,0.25)]">
+                        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Auto Run
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 z-10" id="main-scroll-area">
+            
+            <!-- 1. LEARNING CONTAINER (Grid 2x2) -->
+            <div id="learning-container" class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 gap-5 w-full h-[calc(100vh-120px)] min-h-[500px]">
+                
+                <!-- Theory Card -->
+                <div class="bg-surface-container rounded-2xl p-5 relative border border-outline-variant/10 shadow-lg flex flex-col overflow-hidden">
+                    <div class="absolute left-0 top-5 bottom-5 w-[3px] bg-gradient-to-b from-primary to-tertiary rounded-r"></div>
+                    <div class="flex items-center gap-3 mb-3 pl-2 shrink-0">
+                        <span class="material-symbols-outlined text-primary text-[22px]">menu_book</span>
+                        <h3 class="font-headline text-lg font-semibold tracking-tight text-white">Lý thuyết trọng tâm</h3>
+                    </div>
+                    <div id="theory-content" class="text-on-surface-variant text-[14.5px] leading-relaxed pl-2 flex-1 overflow-y-auto pr-2">
+                        <!-- JS inject -->
+                    </div>
+                </div>
+
+                <!-- Memory Card -->
+                <div class="bg-surface-container rounded-2xl p-5 border border-outline-variant/10 shadow-lg flex flex-col overflow-hidden">
+                    <div class="flex items-center gap-3 mb-3 shrink-0">
+                        <span class="material-symbols-outlined text-tertiary text-[22px]">memory</span>
+                        <h3 class="font-headline text-lg font-semibold tracking-tight text-white">Hoạt động trong RAM</h3>
+                    </div>
+                    <div class="flex flex-col gap-3 flex-1 overflow-hidden">
+                        <div class="p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/10 flex-1 flex flex-wrap gap-2 items-start content-start overflow-y-auto" id="memory-content">
+                            <!-- Variables -->
+                        </div>
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 relative shrink-0">
+                            <span class="material-symbols-outlined text-primary/40 absolute right-4 top-4 text-4xl">lightbulb</span>
+                            <p class="text-[13.5px] text-on-surface-variant leading-relaxed relative z-10" id="explanation-text"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Card -->
+                <div class="bg-surface-container rounded-2xl overflow-hidden border border-outline-variant/10 shadow-lg flex flex-col">
+                    <div class="flex items-center justify-between px-5 py-3 bg-surface-container-high border-b border-outline-variant/5 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">code</span>
+                            <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Mã Nguồn Java</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="w-3 h-3 rounded-full bg-error/40 border border-error/20"></div>
+                            <div class="w-3 h-3 rounded-full bg-tertiary-container/40 border border-tertiary-container/20"></div>
+                            <div class="w-3 h-3 rounded-full bg-primary/40 border border-primary/20"></div>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-surface-container-lowest font-mono text-[14px] flex-1 overflow-y-auto">
+                        <div id="code-content" class="flex flex-col">
+                            <!-- JS inject -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Console Card -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/10 shadow-2xl flex flex-col">
+                    <div class="flex items-center gap-3 px-5 py-3 bg-surface-container-high/50 border-b border-outline-variant/5 shrink-0">
+                        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">terminal</span>
+                        <span class="text-[11px] font-headline font-semibold text-on-surface-variant uppercase tracking-widest">Màn hình kết quả</span>
+                    </div>
+                    <div class="p-5 font-mono text-[13.5px] flex-1 overflow-y-auto text-on-surface-variant flex flex-col">
+                        <div class="text-primary-dim mb-3 opacity-70">Java 17 (kinetic-workspace)</div>
+                        <div id="console-content" class="whitespace-pre-wrap flex-1"></div>
+                        <div class="flex gap-2 mt-2 opacity-40"><span>></span><span class="animate-pulse">_</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. QUIZ CONTAINER -->
+            <div id="quiz-container" class="hidden max-w-4xl mx-auto space-y-6 pb-20">
+                <div class="bg-surface-container rounded-2xl p-8 border border-outline-variant/10 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-3xl rounded-full pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-secondary-container/20 flex justify-center items-center text-secondary">
+                            <span class="material-symbols-outlined">quiz</span>
+                        </div>
+                        <h2 class="font-headline text-2xl font-bold text-white">Bài tập củng cố</h2>
+                    </div>
+                    <p class="text-sm text-on-surface-variant mb-8 ml-14">Kiểm tra lại kiến thức vòng lặp qua các câu hỏi trắc nghiệm nhanh.</p>
+                    
+                    <!-- Câu 1 -->
+                    <div class="mb-10 pl-2">
+                        <p class="text-[16px] mb-5 text-white font-medium"><strong>Câu 1:</strong> Lệnh <code class="font-mono text-tertiary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">continue</code> trong vòng lặp dùng để làm gì?</p>
+                        <div class="space-y-3 pl-4">
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, false)">
+                                <input type="radio" name="q1" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Thoát khỏi vòng lặp hoàn toàn.</span>
+                            </label>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, true)">
+                                <input type="radio" name="q1" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Bỏ qua các lệnh bên dưới trong lần lặp hiện tại và đi tới lần lặp tiếp theo.</span>
+                            </label>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, false)">
+                                <input type="radio" name="q1" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">In ra màn hình chữ "continue".</span>
+                            </label>
+                        </div>
+                        <div id="res-1" class="mt-4 text-[14px] hidden font-medium px-4 py-3 rounded-xl ml-4 flex items-center gap-2"></div>
+                    </div>
+
+                    <!-- Câu 2 -->
+                    <div class="mb-4 pl-2">
+                        <p class="text-[16px] mb-5 text-white font-medium"><strong>Câu 2:</strong> Vòng lặp <code class="font-mono text-primary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">do-while</code> khác với <code class="font-mono text-primary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">while</code> ở điểm then chốt nào?</p>
+                        <div class="space-y-3 pl-4">
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, false)">
+                                <input type="radio" name="q2" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Chạy nhanh hơn do không có giới hạn N.</span>
+                            </label>
+                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, true)">
+                                <input type="radio" name="q2" class="hidden"> <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
+                                <span class="text-on-surface-variant text-[15px]">Kiểm tra điều kiện ở cuối, nên luôn thực thi khối lệnh ít nhất 1 lần bất chấp điều kiện sai ngay từ đầu.</span>
+                            </label>
+                        </div>
+                        <div id="res-2" class="mt-4 text-[14px] hidden font-medium px-4 py-3 rounded-xl ml-4 flex items-center gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. PRACTICE CONTAINER -->
+            <div id="practice-container" class="hidden flex-col gap-6 max-w-[1400px] mx-auto h-full pb-8">
+                <!-- Đề Bài -->
+                <div class="p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-surface-container border border-primary/20 flex flex-col xl:flex-row gap-8 items-start shadow-lg relative overflow-hidden shrink-0">
+                    <div class="absolute left-0 top-0 w-1.5 h-full bg-primary"></div>
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                        </div>
+                        <h4 class="font-headline text-2xl font-bold mb-1 text-white">Thử thách Lập trình</h4>
+                        <p class="text-xs text-primary-dim uppercase tracking-widest font-bold">Thực hành Code Java</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full flex-1">
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1"><span class="text-primary text-xs mr-1">BÀI 1</span>Bảng cửu chương</h5>
+                            <p class="text-[12.5px] text-on-surface-variant leading-relaxed">Viết chương trình in bảng cửu chương của 5.</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1"><span class="text-primary text-xs mr-1">BÀI 2</span>Bảng 1 đến 9</h5>
+                            <p class="text-[12.5px] text-on-surface-variant leading-relaxed">Dùng lặp lồng nhau in full bảng cửu chương từ 1 đến 9.</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1"><span class="text-primary text-xs mr-1">BÀI 3</span>Nhập đến khi 0</h5>
+                            <p class="text-[12.5px] text-on-surface-variant leading-relaxed">Mô phỏng nhập số đến khi biến <code>n = 0</code> thì dừng. Tính tổng.</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
+                            <h5 class="text-white font-bold mb-1"><span class="text-primary text-xs mr-1">BÀI 4</span>HCN Rỗng</h5>
+                            <p class="text-[12.5px] text-on-surface-variant leading-relaxed">In hình chữ nhật rỗng bằng dấu <code>*</code> kích thước WxH.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Sandbox -->
+                <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[500px]">
+                    <div class="flex-1 bg-surface-container-lowest rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-outline-variant/20">
+                        <div class="flex items-center justify-between px-5 py-3.5 bg-surface-container-high border-b border-outline-variant/10">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-on-surface-variant text-[18px]">integration_instructions</span>
+                                <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Java Editor</h3>
+                            </div>
+                            <button id="btn-run-practice" onclick="runPracticeCode()" class="flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary text-on-primary hover:brightness-110 transition-all text-[11px] font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(133,173,255,0.2)]">
+                                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Run Code
+                            </button>
+                        </div>
+                        <textarea id="practice-editor" spellcheck="false" class="code-textarea p-6 leading-relaxed">public class Main {
+    public static void main(String[] args) {
+        // Viết code giải 1 trong 4 bài tập trên nhé!
+        // Ví dụ Bài 1: In bảng cửu chương của 5
+        for(int i = 1; i <= 10; i++) {
+            System.out.println("5 x " + i + " = " + (5*i));
+        }
+        
+    }
+}</textarea>
+                    </div>
+
+                    <div class="lg:w-[400px] xl:w-[500px] bg-surface-container-lowest rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-outline-variant/20">
+                        <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-container-high border-b border-outline-variant/10">
+                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
+                            <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Live Output</h3>
+                        </div>
+                        <div id="practice-console" class="flex-1 p-6 font-mono text-[13.5px] overflow-y-auto whitespace-pre-wrap text-on-surface-variant leading-relaxed">
+                            <span class="opacity-50 italic">Waiting for execution...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function closeModal() {
+            const modal = document.getElementById('welcome-modal');
+            modal.style.opacity = '0';
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function generateDualTheory(uniTheory, grade6Theory) {
+            return `
+                <div class="space-y-4">
+                    <div class="p-4 bg-tertiary-container/10 rounded-xl border border-tertiary-container/20 shadow-inner">
+                        <div class="flex items-center gap-2 mb-2 text-tertiary">
+                            <span class="material-symbols-outlined text-[18px]">child_care</span>
+                            <span class="font-bold text-[13px] uppercase tracking-widest">Góc nhìn Học sinh Lớp 6</span>
+                        </div>
+                        <p class="text-[13.5px] text-tertiary-dim leading-relaxed">${grade6Theory}</p>
+                    </div>
+                    <div class="p-4 bg-surface-container-high rounded-xl border border-outline-variant/20 shadow-inner">
+                        <div class="flex items-center gap-2 mb-2 text-primary">
+                            <span class="material-symbols-outlined text-[18px]">school</span>
+                            <span class="font-bold text-[13px] uppercase tracking-widest">Góc nhìn Sinh viên IT</span>
+                        </div>
+                        <p class="text-[13.5px] text-on-surface-variant leading-relaxed">${uniTheory}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDb(limit) {
+            let db = {};
+            limit = parseInt(limit) || 10;
+
+            // ----------------------------------------------------
+            // CHƯƠNG 1. VÒNG LẶP FOR
+            // ----------------------------------------------------
+            // Ví dụ 1: In các số từ 1 đến 10 (Sử dụng N=limit)
+            let for1Steps = [{ line: 2, memory: {}, exp: `Khởi tạo vòng lặp for. Biến i chạy từ 1 đến ${limit}.` }];
+            for (let i = 1; i <= Math.min(limit, 10); i++) { // Cap visually to prevent lag
+                for1Steps.push({ line: 2, memory: { i: i }, exp: `Kiểm tra: ${i} <= ${limit} (Đúng). Gán i = ${i}.` });
+                for1Steps.push({ line: 3, memory: { i: i }, output: `${i} `, isPrintln: false, exp: `In ra giá trị ${i}.` });
+                if(i < Math.min(limit, 10)) for1Steps.push({ line: 2, memory: { i: i }, exp: `Bước nhảy i++.` });
+            }
+            if(limit > 10) for1Steps.push({ line: 2, memory: {}, exp: `... (Lặp tiếp tục đến ${limit}) ...` });
+            for1Steps.push({ line: 5, memory: {}, exp: "Thoát khỏi vòng lặp." });
+
+            db.for1 = {
+                title: "1. Vòng lặp For - Ví dụ 1: In dãy số",
+                theory: generateDualTheory(
+                    `Vòng lặp <code>for</code> thường được dùng khi biết trước số lần lặp. Bao gồm 3 phần: Khởi tạo biến đếm, Điều kiện boolean (tiếp tục lặp khi true), và Cập nhật (thường là toán tử tăng ++). Độ phức tạp duyệt tuần tự là O(N).`,
+                    `Giống như thầy giáo yêu cầu em đếm số từ 1 đến ${limit}. Em bắt đầu từ số 1 (khởi tạo), vừa đọc vừa nhẩm xem đã tới ${limit} chưa (kiểm tra điều kiện), đọc xong một số thì cộng thêm 1 để đọc tiếp (cập nhật).`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="comment">// In các số từ 1 đến ${limit}</span></span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i <= <span class="num">${limit}</span>; i++) {</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    System.out.<span class="func">print</span>(i + <span class="str">" "</span>);</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper"><span class="comment">// Output: 1 2 3 4 ...</span></span></div>
+                `,
+                steps: for1Steps
+            };
+
+            // Ví dụ 2: Tổng các số chẵn
+            let for2Steps = [{ line: 1, memory: { tong: 0 }, exp: `Khởi tạo biến tong = 0.` }];
+            let curTong = 0;
+            for (let i = 2; i <= Math.min(limit, 6); i += 2) { 
+                for2Steps.push({ line: 2, memory: { tong: curTong, i: i }, exp: `i = ${i} <= ${limit}. Thỏa mãn điều kiện.` });
+                curTong += i;
+                for2Steps.push({ line: 3, memory: { tong: curTong, i: i }, exp: `tong = ${curTong - i} + ${i} = ${curTong}.` });
+            }
+            if(limit > 6) for2Steps.push({ line: 2, memory: {}, exp: `... (Lặp cộng tiếp các số chẵn đến ${limit}) ...` });
+            for2Steps.push({ line: 5, memory: {}, output: `Tong: ...`, isPrintln: true, exp: "In ra tổng cuối cùng." });
+
+            db.for2 = {
+                title: "1. Vòng lặp For - Ví dụ 2: Tính tổng số chẵn",
+                theory: generateDualTheory(
+                    `Bước nhảy của vòng lặp không nhất thiết phải là 1. Sử dụng <code>i += 2</code> giúp thuật toán chỉ duyệt qua một nửa số phần tử (N/2), tối ưu hơn so với việc duyệt N phần tử và dùng phép chia dư (<code>i % 2 == 0</code>) để kiểm tra.`,
+                    `Thay vì bước từng bậc thang chậm chạp, em nhảy cóc 2 bậc một lúc! Em bắt đầu từ bậc 2, rồi lên bậc 4, bậc 6... Mỗi lần nhảy lên, em gom số điểm của bậc đó vào rổ của mình.`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> tong = <span class="num">0</span>;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i <= <span class="num">${limit}</span>; i += <span class="num">2</span>) {</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    tong += i;</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">System.out.<span class="func">println</span>(<span class="str">"Tong cac so chan: "</span> + tong);</span></div>
+                `,
+                steps: for2Steps
+            };
+
+            // Ví dụ 3: For-each duyệt mảng
+            let for3Steps = [{ line: 1, memory: { "diemSo": "[8,9,7,10]" }, exp: `Khởi tạo mảng điểm số.` }, { line: 2, memory: { tong: 0 }, exp: `tong = 0.` }];
+            let arr = [8, 9, 7, 10];
+            let sTong = 0;
+            for(let d of arr) {
+                for3Steps.push({ line: 3, memory: { tong: sTong, diem: d }, exp: `Lấy phần tử tiếp theo trong mảng: diem = ${d}` });
+                sTong += d;
+                for3Steps.push({ line: 4, memory: { tong: sTong, diem: d }, exp: `Cộng dồn vào tổng.` });
+            }
+            for3Steps.push({ line: 6, memory: { tong: sTong }, output: `Tong diem: 34`, isPrintln: true, exp: `In kết quả ra.` });
+
+            db.for3 = {
+                title: "1. Vòng lặp For - Ví dụ 3: For-each (Duyệt mảng)",
+                theory: generateDualTheory(
+                    `Vòng lặp <code>for-each</code> (Enhanced for loop) ẩn đi việc quản lý chỉ số mảng (index) và các nguy cơ lỗi <code>ArrayIndexOutOfBoundsException</code>. Cú pháp: <code>for (Kiểu_Dữ_Liệu tên_Biến : Mảng)</code>.`,
+                    `Em có một hộp kẹo (Mảng). Vòng lặp For-each giống như việc em cứ lần lượt thò tay bốc từng viên kẹo ra ăn, bốc cho đến khi nào trong hộp không còn viên nào nữa thì tự động dừng.`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span>[] diemSo = {<span class="num">8</span>, <span class="num">9</span>, <span class="num">7</span>, <span class="num">10</span>};</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">int</span> tong = <span class="num">0</span>;</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> diem : diemSo) {</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    tong += diem;</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">System.out.<span class="func">println</span>(<span class="str">"Tong diem: "</span> + tong);</span></div>
+                `,
+                steps: for3Steps
+            };
+
+            // ----------------------------------------------------
+            // CHƯƠNG 2. VÒNG LẶP WHILE
+            // ----------------------------------------------------
+            // Ví dụ 1: Số đảo ngược
+            let wh1Steps = [
+                { line: 1, memory: { n: 1234 }, exp: `Số ban đầu n = 1234.` },
+                { line: 2, memory: { n: 1234, dao: 0 }, exp: `Khởi tạo số đảo ngược = 0.` }
+            ];
+            let tn = 1234; let tdao = 0;
+            while(tn > 0) {
+                wh1Steps.push({ line: 3, memory: { n: tn, dao: tdao }, exp: `Kiểm tra: ${tn} != 0 (Đúng). Vào vòng lặp.` });
+                let chuso = tn % 10;
+                wh1Steps.push({ line: 4, memory: { n: tn, dao: tdao, chuso: chuso }, exp: `Lấy chữ số cuối cùng: ${tn} % 10 = ${chuso}.` });
+                tdao = tdao * 10 + chuso;
+                wh1Steps.push({ line: 5, memory: { n: tn, dao: tdao, chuso: chuso }, exp: `Ghép chữ số vào số đảo: dao = ${tdao}.` });
+                tn = Math.floor(tn / 10);
+                wh1Steps.push({ line: 6, memory: { n: tn, dao: tdao, chuso: chuso }, exp: `Xóa chữ số cuối của n bằng cách chia nguyên cho 10. n = ${tn}.` });
+            }
+            wh1Steps.push({ line: 3, memory: { n: 0, dao: 4321 }, exp: `Kiểm tra: n = 0. Điều kiện Sai. Thoát lặp.` });
+            wh1Steps.push({ line: 8, memory: { n: 0, dao: 4321 }, output: "So dao nguoc: 4321", isPrintln: true, exp: `In kết quả.` });
+
+            db.while1 = {
+                title: "2. Vòng lặp While - Ví dụ 1: Tìm số đảo ngược",
+                theory: generateDualTheory(
+                    `Vòng lặp <code>while</code> đặc biệt hữu ích khi ta không biết trước số lần lặp (ví dụ như không biết số nguyên n có bao nhiêu chữ số). Dùng phép chia lấy dư <code>% 10</code> để bóc tách chữ số hàng đơn vị và phép chia nguyên <code>/ 10</code> để loại bỏ nó.`,
+                    `Giống như em đang tháo từng toa của một đoàn tàu từ đuôi lên đầu. Tháo được toa nào ở đuôi (Toán tử % 10), em mang sang một đường ray khác ráp nối lại (Toán tử * 10 +). Khi không còn toa nào để tháo (n = 0) thì kết thúc!`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> n = <span class="num">1234</span>;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">int</span> dao = <span class="num">0</span>;</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper"><span class="kw">while</span> (n != <span class="num">0</span>) {</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">int</span> chuso = n % <span class="num">10</span>; <span class="comment">// Lấy số cuối</span></span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    dao = dao * <span class="num">10</span> + chuso;</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">    n = n / <span class="num">10</span>; <span class="comment">// Xóa số cuối</span></span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l8"><span class="line-num">8</span><span class="code-wrapper">System.out.<span class="func">println</span>(<span class="str">"So dao nguoc: "</span> + dao);</span></div>
+                `,
+                steps: wh1Steps
+            };
+
+            // Ví dụ 2: Kiểm tra nguyên tố
+            let pLimit = (limit >= 2 && limit <= 50) ? limit : 7;
+            let wh2Steps = [
+                { line: 1, memory: { n: pLimit }, exp: `Kiểm tra xem số n = ${pLimit} có phải số nguyên tố.` },
+                { line: 2, memory: { n: pLimit, laNguyenTo: true }, exp: `Mặc định giả định n là số nguyên tố.` },
+                { line: 3, memory: { n: pLimit, laNguyenTo: true, i: 2 }, exp: `Khởi tạo i = 2 (ước số nhỏ nhất cần kiểm tra).` }
+            ];
+            let isPrime = true;
+            for(let i = 2; i <= Math.sqrt(pLimit); i++) {
+                wh2Steps.push({ line: 4, memory: { n: pLimit, laNguyenTo: true, i: i }, exp: `Kiểm tra while: ${i} <= $\\sqrt{${pLimit}}$ (Đúng).` });
+                if (pLimit % i === 0) {
+                    wh2Steps.push({ line: 5, memory: { n: pLimit, laNguyenTo: true, i: i }, exp: `if (${pLimit} % ${i} == 0). ĐÚNG! Số bị chia hết.` });
+                    wh2Steps.push({ line: 6, memory: { n: pLimit, laNguyenTo: false, i: i }, exp: `Thay đổi giả định: Không phải số nguyên tố.` });
+                    wh2Steps.push({ line: 7, memory: { n: pLimit, laNguyenTo: false, i: i }, exp: `Lệnh BREAK! Đã phát hiện bị chia hết nên thoát vòng lặp ngay.` });
+                    isPrime = false;
+                    break;
+                } else {
+                    wh2Steps.push({ line: 5, memory: { n: pLimit, laNguyenTo: true, i: i }, exp: `if (${pLimit} % ${i} == 0). SAI. Chưa bị chia hết.` });
+                    wh2Steps.push({ line: 9, memory: { n: pLimit, laNguyenTo: true, i: i+1 }, exp: `Tăng biến i lên để kiểm tra số tiếp theo.` });
+                }
+            }
+            if(isPrime) wh2Steps.push({ line: 4, memory: {}, exp: `Kiểm tra while: i đã vượt quá $\\sqrt{n}$. Kết thúc vòng lặp.` });
+            
+            wh2Steps.push({ line: 11, memory: { laNguyenTo: isPrime }, output: isPrime ? `${pLimit} la so nguyen to` : `${pLimit} khong phai so nguyen to`, isPrintln: true, exp: `Sử dụng cấu trúc rẽ nhánh if để in kết quả dựa vào cờ boolean.` });
+
+            db.while2 = {
+                title: "2. Vòng lặp While - Ví dụ 2: Số nguyên tố",
+                theory: generateDualTheory(
+                    `Thuật toán kiểm tra số nguyên tố sử dụng "Cờ hiệu" (Boolean Flag). Vòng lặp <code>while</code> chỉ cần duyệt đến <code>Math.sqrt(n)</code> (Căn bậc hai của n) để tối ưu hóa độ phức tạp thời gian xuống còn O(√N). Lệnh <code>break</code> giúp tăng tốc độ xử lý (Early exit) ngay khi phát hiện n có ước số khác 1 và chính nó.`,
+                    `Để biết một bạn có bị "phát hiện nói dối" hay không, thay vì tra hỏi toàn bộ mọi người trong lớp (mất thời gian), em chỉ cần hỏi từng bạn một. Ngay khi có 1 bạn nói "Nó nói dối đấy" (phép chia hết), em lập tức kết luận luôn (cờ = false) và không cần phải hỏi thêm bất kỳ ai nữa (break).`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> n = <span class="num">${pLimit}</span>;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">boolean</span> laNguyenTo = <span class="kw">true</span>;</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper"><span class="kw">int</span> i = <span class="num">2</span>;</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper"><span class="kw">while</span> (i <= Math.<span class="func">sqrt</span>(n)) {</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    <span class="kw">if</span> (n % i == <span class="num">0</span>) {</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">        laNguyenTo = <span class="kw">false</span>;</span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">        <span class="kw">break</span>;</span></div>
+<div class="code-line" id="l8"><span class="line-num">8</span><span class="code-wrapper">    }</span></div>
+<div class="code-line" id="l9"><span class="line-num">9</span><span class="code-wrapper">    i++;</span></div>
+<div class="code-line" id="l10"><span class="line-num">10</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l11"><span class="line-num">11</span><span class="code-wrapper"><span class="comment">// In kết quả dựa vào biến cờ laNguyenTo...</span></span></div>
+                `,
+                steps: wh2Steps
+            };
+
+            // ----------------------------------------------------
+            // CHƯƠNG 3. VÒNG LẶP DO-WHILE
+            // ----------------------------------------------------
+            // Ví dụ 1: Nhập dữ liệu
+            let dw1Steps = [
+                { line: 1, memory: { tuoi: "?" }, exp: "Khởi tạo biến chứa giá trị tuổi." },
+                { line: 2, memory: {}, exp: "Đi thẳng vào khối lệnh do. KHÔNG cần kiểm tra điều kiện trước." },
+                { line: 3, memory: { tuoi: "-5" }, output: "Nhap tuoi: -5", isPrintln: true, exp: "Giả lập người dùng nhập tuổi là số âm (-5)." },
+                { line: 4, memory: { tuoi: "-5" }, exp: "Kiểm tra if: -5 < 1. ĐÚNG. Dữ liệu sai." },
+                { line: 5, memory: { tuoi: "-5" }, output: "Khong hop le!", isPrintln: true, exp: "In ra thông báo báo lỗi." },
+                { line: 7, memory: { tuoi: "-5" }, exp: "Kiểm tra điều kiện cuối: -5 < 1 (True). Yêu cầu lặp lại!" },
+                { line: 2, memory: {}, exp: "Quay lại khối lệnh do." },
+                { line: 3, memory: { tuoi: "20" }, output: "Nhap tuoi: 20", isPrintln: true, exp: "Giả lập người dùng nhập lại tuổi là 20." },
+                { line: 4, memory: { tuoi: "20" }, exp: "Kiểm tra if: 20 không < 1 và không > 120. Sai. Bỏ qua if." },
+                { line: 7, memory: { tuoi: "20" }, exp: "Kiểm tra điều kiện cuối: 20 hợp lệ -> False. Kết thúc vòng lặp." },
+                { line: 8, memory: { tuoi: "20" }, output: "Tuoi hop le: 20", isPrintln: true, exp: "Dữ liệu đã qua cổng kiểm duyệt thành công." }
+            ];
+            db.dowhile1 = {
+                title: "3. Do-While - Ví dụ 1: Ràng buộc nhập liệu",
+                theory: generateDualTheory(
+                    `Thuộc tính <b>Post-test (Kiểm tra sau)</b> của <code>do-while</code> biến nó trở thành cấu trúc lý tưởng nhất để viết các cơ chế "Validation Gate" (Lưới lọc dữ liệu). Luồng thực thi bị chặn lại cho tới khi dữ liệu input thỏa mãn yêu cầu miền giá trị (Domain Constraints).`,
+                    `Giống như đi qua Trạm soát vé ở công viên nước: Mọi người ĐỀU PHẢI trình vé ra (khối lệnh DO chạy 1 lần). Sau đó chú soát vé mới kiểm tra (kiểm tra WHILE ở cuối). Nếu vé giả thì bắt em phải đi tìm vé khác đưa lại (lặp lại), nếu vé thật thì mở cổng cho qua.`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> tuoi;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">do</span> {</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="comment">// Giả lập Scanner nhập liệu</span></span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">if</span> (tuoi < <span class="num">1</span> || tuoi > <span class="num">120</span>) {</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">        System.out.<span class="func">println</span>(<span class="str">"Khong hop le!"</span>);</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">    }</span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">} <span class="kw">while</span> (tuoi < <span class="num">1</span> || tuoi > <span class="num">120</span>);</span></div>
+<div class="code-line" id="l8"><span class="line-num">8</span><span class="code-wrapper">System.out.<span class="func">println</span>(<span class="str">"Tuoi hop le: "</span> + tuoi);</span></div>
+                `,
+                steps: dw1Steps
+            };
+
+            // Ví dụ 2: Tổng chữ số
+            let dw2Steps = [
+                { line: 1, memory: { n: 987 }, exp: "Biến n = 987." },
+                { line: 2, memory: { tong: 0, n: 987 }, exp: "Khởi tạo tổng chữ số = 0." }
+            ];
+            let tempN = 987; let tongC = 0;
+            while(tempN > 0) {
+                dw2Steps.push({ line: 3, memory: { temp: tempN, tong: tongC }, exp: "Vào thẳng vòng lặp DO." });
+                tongC += tempN % 10;
+                dw2Steps.push({ line: 4, memory: { temp: tempN, tong: tongC }, exp: `Lấy số cuối ${tempN % 10} cộng vào tổng.` });
+                tempN = Math.floor(tempN / 10);
+                dw2Steps.push({ line: 5, memory: { temp: tempN, tong: tongC }, exp: `Cắt bỏ số cuối bằng phép chia nguyên / 10.` });
+                dw2Steps.push({ line: 6, memory: { temp: tempN, tong: tongC }, exp: `Kiểm tra ĐIỀU KIỆN SAU: ${tempN} > 0 là ${tempN>0 ? 'True' : 'False'}.` });
+            }
+            dw2Steps.push({ line: 7, memory: { tong: tongC }, output: "Tong chu so = 24", isPrintln: true, exp: "In ra kết quả." });
+
+            db.dowhile2 = {
+                title: "3. Do-While - Ví dụ 2: Tính tổng chữ số",
+                theory: generateDualTheory(
+                    `Trong trường hợp biến <code>n = 0</code>, nếu dùng <code>while(n > 0)</code> thông thường, vòng lặp sẽ bị bỏ qua và chương trình không làm gì cả. Dùng <code>do-while</code> đảm bảo logic xử lý việc chia tách chữ số luôn chạy ít nhất 1 lần (trả về tổng=0) đối với số 0.`,
+                    `Giống bài toán đảo ngược số ở trên, nhưng dùng do-while giống như là nhắm mắt tháo đại một toa tàu cuối cùng trước (DO), rồi sau khi tháo xong mới ngó xem đoàn tàu còn toa nào không (WHILE) để tháo tiếp.`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> temp = <span class="num">987</span>;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">int</span> tongChuSo = <span class="num">0</span>;</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper"><span class="kw">do</span> {</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    tongChuSo += temp % <span class="num">10</span>;</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    temp /= <span class="num">10</span>;</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">} <span class="kw">while</span> (temp > <span class="num">0</span>);</span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">System.out.<span class="func">println</span>(<span class="str">"Tong = "</span> + tongChuSo);</span></div>
+                `,
+                steps: dw2Steps
+            };
+
+            // ----------------------------------------------------
+            // CHƯƠNG 4. BREAK VÀ CONTINUE
+            // ----------------------------------------------------
+            // Ví dụ 1: Tìm kiếm (Break)
+            let br1Steps = [
+                { line: 1, memory: { mang: "[15,3,8,42,7]", canTim: 42 }, exp: "Khởi tạo mảng và số cần tìm." },
+                { line: 2, memory: { viTri: -1 }, exp: "Mặc định vị trí = -1 (Tức là chưa tìm thấy)." }
+            ];
+            let arrSearch = [15, 3, 8, 42, 7];
+            for (let i = 0; i < arrSearch.length; i++) {
+                br1Steps.push({ line: 3, memory: { i: i }, exp: `Duyệt mảng, vị trí thứ i = ${i}.` });
+                if (arrSearch[i] === 42) {
+                    br1Steps.push({ line: 4, memory: { i: i }, exp: `Kiểm tra mang[${i}] == 42. ĐÚNG! Đã tìm thấy.` });
+                    br1Steps.push({ line: 5, memory: { i: i, viTri: i }, exp: `Cập nhật lại biến viTri = ${i}.` });
+                    br1Steps.push({ line: 6, memory: { i: i, viTri: i }, exp: `Lệnh BREAK! Kích hoạt để dừng việc duyệt mảng ngay lập tức, tiết kiệm thời gian.` });
+                    break;
+                } else {
+                    br1Steps.push({ line: 4, memory: { i: i }, exp: `Kiểm tra mang[${i}] (${arrSearch[i]}) == 42. SAI.` });
+                }
+            }
+            br1Steps.push({ line: 9, memory: { viTri: 3 }, output: "Tim thay 42 tai vi tri: 3", isPrintln: true, exp: "Dùng biến viTri để in kết quả ra." });
+
+            db.break1 = {
+                title: "4. Lệnh Break - Ví dụ 1: Tìm kiếm trong mảng",
+                theory: generateDualTheory(
+                    `Đây là thuật toán <b>Tìm kiếm Tuyến tính (Linear Search)</b>. Lệnh <code>break</code> giúp cắt ngắn quá trình duyệt (Early exit) khi đã tìm thấy mục tiêu. Nó đặc biệt hữu dụng đối với trường hợp Tốt nhất (Best Case O(1)) và Trung bình (Average Case O(N/2)) thay vì bắt CPU phải lặp qua toàn bộ mảng.`,
+                    `Mẹ sai em đi tìm chiếc áo màu đỏ trong tủ quần áo. Vừa mở tủ ra, thấy ngay chiếc áo đỏ treo ở ngoài cùng, em lấy luôn và <b>đóng tủ lại (break)</b>. Không rảnh đâu mà moi móc tìm kiếm thêm ở các ngăn khác nữa!`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span>[] mang = {<span class="num">15</span>, <span class="num">3</span>, <span class="num">8</span>, <span class="num">42</span>, <span class="num">7</span>};</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">int</span> viTri = <span class="num">-1</span>;</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < mang.length; i++) {</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">if</span> (mang[i] == <span class="num">42</span>) {</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">        viTri = i;</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">        <span class="kw">break</span>; <span class="comment">// Dừng ngay lập tức</span></span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">    }</span></div>
+<div class="code-line" id="l8"><span class="line-num">8</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l9"><span class="line-num">9</span><span class="code-wrapper"><span class="comment">// In kết quả ra màn hình...</span></span></div>
+                `,
+                steps: br1Steps
+            };
+
+            // Ví dụ 2: Lọc số lẻ (Continue)
+            let ct1Steps = [{ line: 1, memory: { tong: 0 }, exp: "Khởi tạo tổng = 0." }];
+            let curTongCt = 0;
+            for (let i = 1; i <= Math.min(limit, 6); i++) {
+                ct1Steps.push({ line: 2, memory: { i: i }, exp: `Vòng lặp i = ${i}.` });
+                if (i % 2 === 0) {
+                    ct1Steps.push({ line: 3, memory: { i: i }, exp: `Kiểm tra if: ${i} là số chẵn. Lệnh CONTINUE!` });
+                    ct1Steps.push({ line: 3, memory: { i: i }, exp: `CONTINUE bỏ qua toàn bộ code phía dưới (bỏ lệnh in và cộng), nhảy lên bước lặp tiếp theo.` });
+                    continue;
+                }
+                ct1Steps.push({ line: 5, memory: { i: i }, output: `${i} `, isPrintln: false, exp: `In ra số lẻ.` });
+                curTongCt += i;
+                ct1Steps.push({ line: 6, memory: { tong: curTongCt }, exp: `Cộng dồn vào tổng. tong = ${curTongCt}.` });
+            }
+            if(limit > 6) ct1Steps.push({ line: 2, memory: {}, exp: `... (Tương tự tiếp tục lọc đến ${limit}) ...` });
+            ct1Steps.push({ line: 8, memory: {}, output: `\nTong: ...`, isPrintln: true, exp: `Kết thúc vòng lặp, in ra tổng.` });
+
+            db.continue1 = {
+                title: "4. Lệnh Continue - Ví dụ 2: Lọc số lẻ",
+                theory: generateDualTheory(
+                    `Lệnh <code>continue</code> thay đổi luồng thực thi (control flow) bằng cách bỏ qua phần còn lại của <b>lần lặp hiện tại (current iteration)</b> và chuyển thẳng đến biểu thức cập nhật (như <code>i++</code>). Nó rất lý tưởng cho các bài toán xử lý Data Filtering (Lọc dữ liệu rác).`,
+                    `Em đang tập ném bóng rổ ${limit} quả. Nếu quả bóng bị xịt hơi (Đạt điều kiện), em dùng lệnh <b>Continue</b>: "bỏ qua" không ném quả này mà cầm quả tiếp theo lên ném luôn!`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> tong = <span class="num">0</span>;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i <= <span class="num">${limit}</span>; i++) {</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) <span class="kw">continue</span>;</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="comment">// Nếu chẵn, dòng dưới bị bỏ qua hoàn toàn</span></span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    System.out.<span class="func">print</span>(i + <span class="str">" "</span>);</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">    tong += i;</span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">}</span></div>
+<div class="code-line" id="l8"><span class="line-num">8</span><span class="code-wrapper">System.out.<span class="func">println</span>(<span class="str">"\\nTong: "</span> + tong);</span></div>
+                `,
+                steps: ct1Steps
+            };
+
+
+            // ----------------------------------------------------
+            // CHƯƠNG 5. LẶP LỒNG NHAU
+            // ----------------------------------------------------
+            // Ví dụ 1: In tam giác sao
+            let nNested1 = Math.min(limit, 5); // Prevent lag
+            let nt1Steps = [{ line: 1, memory: { n: nNested1 }, exp: `Gán giới hạn chiều cao tam giác n = ${nNested1}.` }];
+            for (let i = 1; i <= nNested1; i++) {
+                nt1Steps.push({ line: 2, memory: { i: i }, exp: `Vòng lặp NGOÀI (quản lý HÀNG): Đang ở hàng thứ i = ${i}.` });
+                for (let j = 1; j <= i; j++) {
+                    nt1Steps.push({ line: 3, memory: { i: i, j: j }, exp: `Vòng lặp TRONG (quản lý CỘT): j = ${j} <= i (${i}).` });
+                    nt1Steps.push({ line: 4, memory: { i: i, j: j }, output: "* ", isPrintln: false, exp: `In ra 1 dấu sao không xuống dòng.` });
+                }
+                nt1Steps.push({ line: 3, memory: { i: i, j: i + 1 }, exp: `Vòng lặp TRONG: j > i. Đã in đủ số sao trên hàng này.` });
+                nt1Steps.push({ line: 6, memory: { i: i }, output: "\\n", isPrintln: false, exp: `Xuống dòng mới để in hàng tiếp theo.` });
+            }
+
+            db.nested1 = {
+                title: "5. Lặp Lồng Nhau - Ví dụ 1: In tam giác sao",
+                theory: generateDualTheory(
+                    `Lặp lồng nhau (Nested Loops) áp dụng phổ biến khi làm việc với Hệ tọa độ 2D (Tọa độ X-Y, Mảng 2 chiều). Độ phức tạp của thuật toán này là O(N²) vì cứ 1 lần vòng lặp ngoài (hàng) thực thi, vòng lặp trong (cột) phải duyệt từ đầu đến cuối.`,
+                    `Tưởng tượng em là một người thợ đi xếp gạch xây cầu thang ${nNested1} tầng. <b>Vòng lặp NGOÀI</b> là số thứ tự Tầng. <b>Vòng lặp TRONG</b> là việc nhặt gạch. Tầng 1 thợ nhặt 1 viên, tầng 2 thợ nhặt 2 viên... Cứ hết 1 tầng lại leo xuống dòng!`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="kw">int</span> n = <span class="num">${nNested1}</span>;</span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i <= n; i++) {</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j <= i; j++) {</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">        System.out.<span class="func">print</span>(<span class="str">"* "</span>);</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    }</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">    System.out.<span class="func">println</span>(); <span class="comment">// Xuống dòng</span></span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">}</span></div>
+                `,
+                steps: nt1Steps
+            };
+
+            // Ví dụ 2: Bảng cửu chương đầy đủ
+            let nNested2 = Math.min(limit, 9); // Limit to 9 to simulate normal table
+            let nt2Steps = [{ line: 1, memory: {}, exp: `Bắt đầu chương trình in Bảng cửu chương từ 1 đến ${nNested2}.` }];
+            for (let i = 1; i <= Math.min(nNested2, 2); i++) { // Simulate max 2 tables visually
+                nt2Steps.push({ line: 2, memory: { i: i }, exp: `VÒNG LẶP NGOÀI: Chuẩn bị in Bảng nhân ${i}.` });
+                nt2Steps.push({ line: 3, memory: { i: i }, output: `=== Bang ${i} ===`, isPrintln: true, exp: `In tiêu đề bảng.` });
+                for (let j = 1; j <= 3; j++) { // Simulate max 3 multiplications per table
+                    nt2Steps.push({ line: 4, memory: { i: i, j: j }, exp: `VÒNG LẶP TRONG: Thực hiện phép tính ${i} x ${j}.` });
+                    nt2Steps.push({ line: 5, memory: { i: i, j: j }, output: `${i} x ${j} = ${i * j}`, isPrintln: true, exp: `In kết quả phép nhân.` });
+                }
+                nt2Steps.push({ line: 4, memory: { i: i }, exp: `... (Tiếp tục nhân đến 10) ...` });
+            }
+            if(nNested2 > 2) nt2Steps.push({ line: 2, memory: {}, exp: `... (Tương tự in tiếp các bảng đến ${nNested2}) ...` });
+
+            db.nested2 = {
+                title: "5. Lặp Lồng Nhau - Ví dụ 2: Bảng cửu chương",
+                theory: generateDualTheory(
+                    `Sử dụng phương pháp tổ hợp: Vòng lặp ngoài cố định một tham số (số Bảng cửu chương - vế trái phép nhân), trong khi vòng lặp trong quét qua toàn bộ không gian giá trị của tham số thứ hai (từ 1 đến 10 - vế phải phép nhân).`,
+                    `Giống như chiếc đồng hồ có kim giờ và kim phút. Kim ngoài (kim giờ) đại diện cho số của bảng nhân (Bảng 1, Bảng 2...). Nó vừa nhích 1 cái thì kim trong (kim phút) phải chạy hết một vòng tròn từ 1 đến 10!`
+                ),
+                code: `
+<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="comment">// In bảng cửu chương từ 1 đến ${nNested2}</span></span></div>
+<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i <= <span class="num">${nNested2}</span>; i++) {</span></div>
+<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    System.out.<span class="func">println</span>(<span class="str">"=== Bang "</span> + i + <span class="str">" ==="</span>);</span></div>
+<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j <= <span class="num">10</span>; j++) {</span></div>
+<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">        System.out.<span class="func">printf</span>(<span class="str">"%d x %d = %d\\n"</span>, i, j, i*j);</span></div>
+<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">    }</span></div>
+<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">}</span></div>
+                `,
+                steps: nt2Steps
+            };
+
+            return db;
+        }
+
+        let currentId = 'for1';
+        let stepIdx = 0;
+        let playInterval = null;
+
+        window.onload = () => loadLesson('for1');
+
+        function updateLimit() {
+            let limitInput = document.getElementById('loop-limit');
+            let val = parseInt(limitInput.value);
+            
+            if (isNaN(val) || val < 1) val = 1;
+            if (val > 50) val = 50; 
+            limitInput.value = val;
+
+            loadLesson(currentId);
+        }
+
+        function loadLesson(id) {
+            stopAuto();
+
+            document.querySelectorAll('.lesson-tab').forEach(el => el.classList.remove('active'));
+            const activeTab = document.querySelector(`.lesson-tab[onclick*="'${id}'"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            const learningContainer = document.getElementById('learning-container');
+            const controls = document.getElementById('controls');
+            const quizContainer = document.getElementById('quiz-container');
+            const practiceContainer = document.getElementById('practice-container');
+            const lessonTitle = document.getElementById('lesson-title');
+
+            if (!learningContainer || !controls || !quizContainer || !practiceContainer || !lessonTitle) return;
+
+            learningContainer.classList.add('hidden');
+            learningContainer.classList.remove('grid');
+            controls.classList.add('hidden');
+            controls.classList.remove('flex');
+            quizContainer.classList.add('hidden');
+            practiceContainer.classList.add('hidden');
+            practiceContainer.classList.remove('flex');
+
+            if (id === 'quiz') {
+                quizContainer.classList.remove('hidden');
+                lessonTitle.innerText = "Bài Tập Trắc Nghiệm";
+                return;
+            }
+
+            if (id === 'practice') {
+                practiceContainer.classList.remove('hidden');
+                practiceContainer.classList.add('flex');
+                lessonTitle.innerText = "Thực Hành Code Tự Luận";
+                return;
+            }
+
+            let limitInput = document.getElementById('loop-limit');
+            let limit = limitInput ? (parseInt(limitInput.value) || 5) : 5;
+
+            learningContainer.classList.remove('hidden');
+            learningContainer.classList.add('grid');
+            controls.classList.remove('hidden');
+            controls.classList.add('flex');
+            
+            currentId = id;
+            stepIdx = 0;
+            const dbObj = getDb(limit);
+            if (dbObj && dbObj[id]) {
+                const data = dbObj[id];
+                lessonTitle.innerText = data.title;
+                document.getElementById('theory-content').innerHTML = data.theory;
+                document.getElementById('code-content').innerHTML = data.code;
+            }
+            
+            resetSimUI();
+        }
+
+        function resetSimUI() {
+            stepIdx = 0;
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            document.getElementById('memory-content').innerHTML = '<span class="text-on-surface-variant opacity-50 text-[13px] italic">Memory is empty...</span>';
+            document.getElementById('explanation-text').innerText = 'Bấm "Step" hoặc "Auto Run" ở góc trên bên phải để bắt đầu mô phỏng.';
+            document.getElementById('console-content').innerHTML = '';
+            
+            const btnStep = document.getElementById('btn-step');
+            if (btnStep) {
+                btnStep.disabled = false;
+                btnStep.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function resetSim() {
+            stopAuto();
+            resetSimUI();
+        }
+
+        function stepSim() {
+            let limit = parseInt(document.getElementById('loop-limit').value) || 5;
+            const data = getDb(limit)[currentId];
+            
+            if (stepIdx >= data.steps.length) {
+                stopAuto();
+                document.getElementById('explanation-text').innerHTML = "<span class='text-primary font-bold'>🏁 Chương trình đã kết thúc!</span>";
+                const btnStep = document.getElementById('btn-step');
+                if(btnStep) {
+                    btnStep.disabled = true;
+                    btnStep.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+                return;
+            }
+
+            const step = data.steps[stepIdx];
+
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            const activeEl = document.getElementById(`l${step.line}`);
+            if(activeEl) {
+                activeEl.classList.add('active-line');
+                activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            if (step.memory && Object.keys(step.memory).length > 0) {
+                let memHTML = '';
+                for (const [key, value] of Object.entries(step.memory)) {
+                    memHTML += `<div class="memory-var"><span class="material-symbols-outlined text-[16px] opacity-70">data_object</span>${key} = ${value}</div>`;
+                }
+                document.getElementById('memory-content').innerHTML = memHTML;
+            }
+
+            document.getElementById('explanation-text').innerHTML = `<span class="text-white">${step.exp}</span>`;
+
+            if (step.output) {
+                let outEl = document.getElementById('console-content');
+                if(step.output === '\\n') {
+                    outEl.innerHTML += '<br>';
+                } else {
+                    outEl.innerHTML += step.output + (step.isPrintln ? '<br>' : '');
+                }
+                
+                const consoleDiv = outEl.parentElement;
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            }
+
+            stepIdx++;
+        }
+
+        function autoSim() {
+            if (playInterval) {
+                stopAuto();
+            } else {
+                const btnAuto = document.getElementById('btn-auto');
+                if (btnAuto) {
+                    btnAuto.innerHTML = '<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: \'FILL\' 1;">pause</span> Pause';
+                    btnAuto.classList.replace('bg-primary', 'bg-tertiary-container');
+                    btnAuto.classList.replace('text-on-primary', 'text-on-tertiary-container');
+                }
+                
+                let limit = parseInt(document.getElementById('loop-limit').value) || 5;
+                if (stepIdx >= getDb(limit)[currentId].steps.length) resetSimUI();
+                
+                stepSim(); 
+                playInterval = setInterval(() => {
+                    let curLimit = parseInt(document.getElementById('loop-limit').value) || 5;
+                    if (stepIdx >= getDb(curLimit)[currentId].steps.length) stopAuto();
+                    else stepSim();
+                }, 1000); 
+            }
+        }
+
+        function stopAuto() {
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+                const btnAuto = document.getElementById('btn-auto');
+                if (btnAuto) {
+                    btnAuto.innerHTML = '<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> Auto Run';
+                    btnAuto.classList.replace('bg-tertiary-container', 'bg-primary');
+                    btnAuto.classList.replace('text-on-tertiary-container', 'text-on-primary');
+                }
+            }
+        }
+
+        function checkAnswer(qNum, labelElement, isCorrect) {
+            const allLabels = labelElement.parentElement.querySelectorAll('label');
+            allLabels.forEach(lbl => {
+                lbl.classList.remove('border-primary', 'bg-primary/5', 'border-error', 'bg-error/5');
+                lbl.classList.add('border-outline-variant/20', 'bg-surface-container-low');
+                const circle = lbl.querySelector('.rounded-full');
+                circle.classList.remove('bg-primary', 'border-primary', 'bg-error', 'border-error');
+                circle.classList.add('border-outline-variant');
+            });
+
+            const circle = labelElement.querySelector('.rounded-full');
+            const resDiv = document.getElementById(`res-${qNum}`);
+            resDiv.classList.remove('hidden', 'text-primary', 'text-error', 'bg-primary/10', 'bg-error/10');
+
+            if (isCorrect) {
+                labelElement.classList.replace('border-outline-variant/20', 'border-primary');
+                labelElement.classList.replace('bg-surface-container-low', 'bg-primary/5');
+                circle.classList.replace('border-outline-variant', 'border-primary');
+                circle.classList.add('bg-primary');
+                resDiv.classList.add('text-primary', 'bg-primary/10');
+                resDiv.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Chính xác! Bạn đã hiểu bài.';
+            } else {
+                labelElement.classList.replace('border-outline-variant/20', 'border-error');
+                labelElement.classList.replace('bg-surface-container-low', 'bg-error/5');
+                circle.classList.replace('border-outline-variant', 'border-error');
+                circle.classList.add('bg-error');
+                resDiv.classList.add('text-error', 'bg-error/10');
+                resDiv.innerHTML = '<span class="material-symbols-outlined text-[18px]">cancel</span> Sai rồi. Hãy suy nghĩ lại nhé!';
+            }
+        }
+
+        const practiceEditor = document.getElementById('practice-editor');
+        if (practiceEditor) {
+            practiceEditor.addEventListener('keydown', function(e) {
+                if (e.key == 'Tab') {
+                    e.preventDefault();
+                    var start = this.selectionStart;
+                    var end = this.selectionEnd;
+                    this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 4;
+                }
+            });
+        }
+
+        async function runPracticeCode() {
+            const btn = document.getElementById('btn-run-practice');
+            const consoleEl = document.getElementById('practice-console');
+            const code = document.getElementById('practice-editor').value;
+            
+            if (code.trim() === '') {
+                consoleEl.innerHTML = `<span class="text-error">> Lỗi: Vui lòng nhập mã nguồn trước khi chạy!</span><br>`;
+                return;
+            }
+
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Executing...';
+            btn.classList.add('opacity-70', 'cursor-wait');
+            btn.disabled = true;
+            consoleEl.innerHTML = `<span class="text-on-surface-variant opacity-60">> Sending code to compiler...</span><br><br>`;
+
+            try {
+                const response = await fetch('https://emcv.piston.rs/api/v2/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        language: 'java', 
+                        version: '15.0.2', 
+                        files: [{ content: code }] 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.run && data.run.code === 0) {
+                    consoleEl.innerHTML += `<span class="text-primary">> Thực thi thành công:</span><br><br>`;
+                    const output = data.run.output.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+                    consoleEl.innerHTML += `<span class="text-on-surface">${output}</span><br>`;
+                } else {
+                    consoleEl.innerHTML += `<span class="text-error">> [LỖI RUNTIME/SYNTAX]:</span><br><br>`;
+                    const errOutput = data.run ? data.run.output : (data.compile ? data.compile.output : "Unknown error");
+                    consoleEl.innerHTML += `<span class="text-error opacity-80">${errOutput}</span><br>`;
+                }
+            } catch (error) {
+                consoleEl.innerHTML += `<span class="text-error">> Không thể kết nối đến máy chủ Java.</span><br>`;
+            } finally {
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> Run Code';
+                btn.classList.remove('opacity-70', 'cursor-wait');
+                btn.disabled = false;
+                consoleEl.parentElement.scrollTop = consoleEl.parentElement.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
