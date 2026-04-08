@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1: Hệ Nhị Phân - Kiến Trúc Máy Tính</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden; /* Ngăn scroll body, chỉ scroll phần nội dung */
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+        }
+
+        .bulb {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .bulb.on {
+            background-color: #fbbf24;
+            box-shadow: 0 0 15px #fbbf24;
+            color: #78350f;
+            transform: translateY(-2px);
+        }
+        .bulb.off {
+            background-color: #cbd5e1;
+            color: #475569;
+        }
+        
+        /* Hiệu ứng mượt mà khi load trang */
+        .animate-fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Scrollbar riêng cho Sidebar nền tối */
+        .dark-scroll::-webkit-scrollbar-thumb { background: #4b5563; }
+        .dark-scroll::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    </style>
+</head>
+<body class="flex h-screen w-full bg-slate-50 relative">
+
+    <!-- LEFT SIDEBAR (MENU THEO PHONG CÁCH GEMINI) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity opacity-0"></div>
+    
+    <aside id="left-sidebar" class="fixed left-0 top-0 h-full w-[300px] md:w-[320px] bg-[#131314] text-[#e3e3e3] transform -translate-x-full transition-transform duration-300 z-50 flex flex-col shadow-2xl">
+        <div class="p-4 flex justify-between items-center mb-2">
+            <span class="text-sm text-[#949ba4] font-semibold tracking-wider uppercase ml-2">Mục lục giáo trình</span>
+            <button id="close-sidebar" class="p-2 hover:bg-[#282a2c] rounded-full transition text-[#a8b3bd]">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <div class="px-3 flex-1 overflow-y-auto dark-scroll flex flex-col">
+            <div class="bg-[#282a2c] hover:bg-[#383a40] text-white rounded-full py-3.5 px-5 flex items-center justify-between cursor-pointer transition mb-6 mx-1">
+                <span class="font-medium text-sm">Chương I. Số học</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </div>
+            
+            <div class="text-xs font-semibold text-[#a8b3bd] mb-3 px-3">CÁC BÀI HỌC GẦN ĐÂY</div>
+            
+            <nav class="space-y-[2px] mb-8" id="sidebar-nav">
+                <!-- Thẻ a cho Bài 1 (Đang active) -->
+                <a href="bai1.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 bg-[#004a77] text-[#c2e7ff] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">1. Hệ Nhị Phân là gì?</span>
+                </a>
+                <a href="bai2.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">2. Đổi Số Nguyên</span>
+                </a>
+                <a href="bai3.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">3. Đổi Số Lẻ</span>
+                </a>
+                <a href="bai4.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">4. Hệ Hexa (Cơ số 16)</span>
+                </a>
+                <a href="bai5.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">5. Hexa sang Thập phân</span>
+                </a>
+                <a href="bai6.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">6. Số Âm & Số Dương</span>
+                </a>
+                <a href="bai7.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-blue-400 opacity-90"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">7. Số Bù 2 (Tuyệt chiêu trừ)</span>
+                </a>
+                <a href="bai8.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-purple-400 opacity-90"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="truncate text-sm font-medium">8. Big & Little Endian</span>
+                </a>
+                
+                <div class="mt-6 mb-2 pt-4 border-t border-[#282a2c]"></div>
+                
+                <a href="bai9.html" class="sidebar-item block py-3 px-4 rounded-full flex items-center gap-3 text-[#e3e3e3] hover:bg-[#282a2c] transition-colors">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0 text-amber-400 opacity-90"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span class="truncate text-sm font-medium">9. Thử Thách Ôn Tập</span>
+                </a>
+            </nav>
+            
+            <div class="mt-auto pb-4 pt-4 text-xs text-[#a8b3bd] flex items-center gap-2 px-4 justify-center">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Hệ thống đang hoạt động
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col h-full w-full relative transition-all duration-300">
+        
+        <!-- HEADER (Thanh điều hướng trên cùng) -->
+        <header class="flex-shrink-0 bg-white border-b border-slate-200 p-3 md:p-4 flex items-center gap-4 z-10 shadow-sm">
+            <!-- Nút Mở Sidebar -->
+            <button id="open-sidebar" class="p-2 hover:bg-slate-100 rounded-full text-slate-600 transition flex items-center justify-center" title="Danh sách bài học">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-xl shadow-md">KT</div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-lg md:text-xl leading-tight">Kiến Trúc Máy Tính</h1>
+                    <p class="text-xs text-slate-500 hidden md:block">Chương I: Số học máy tính</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- NỘI DUNG TRANG -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth text-slate-800">
+            <div class="max-w-4xl mx-auto pb-20 animate-fade-in">
+                <section id="sec-1" class="lesson-section">
+                    <header class="text-center py-10 mb-8 bg-gradient-to-br from-blue-50 to-white rounded-3xl shadow-sm border border-slate-200">
+                        <span class="text-5xl mb-4 block">💡</span>
+                        <h1 class="text-3xl md:text-4xl font-black text-slate-800 mb-3">Hệ Nhị Phân Là Gì?</h1>
+                        <p class="text-lg text-slate-500">Ngôn Ngữ Của Các Bóng Đèn & Các Phép Thuật Bên Trong</p>
+                    </header>
+                    
+                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <p class="text-slate-600 mb-8 text-lg leading-relaxed">
+                            Máy tính không có 10 ngón tay như con người để dùng hệ thập phân. Nó chỉ có các mạch điện tử hoạt động như những công tắc: <strong>Bật (1)</strong> và <strong>Tắt (0)</strong>. Mỗi chữ số 0 hoặc 1 này được gọi là một <strong>Bit</strong>. Hãy thử tương tác với dải 8 bóng đèn (1 Byte) dưới đây:
+                        </p>
+                        
+                        <div class="bg-slate-50 p-6 md:p-8 rounded-2xl text-center border border-slate-100">
+                            <div id="bulb-container" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8"></div>
+                            
+                            <div class="text-3xl font-mono font-bold text-slate-800 mb-2">
+                                Giá trị Thập phân: <span id="decimal-value" class="text-blue-600">0</span>
+                            </div>
+                            <div class="text-lg text-slate-500 mb-8 font-mono">
+                                Nhị phân: <span id="binary-value">00000000</span>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <canvas id="bitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- SCRIPT CHỈ DÀNH RIÊNG CHO BÀI 1 & SIDEBAR -->
+    <script>
+        // --- Logic Sidebar ---
+        const leftSidebar = document.getElementById('left-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        let isSidebarOpen = false;
+
+        function toggleSidebar(forceState) {
+            isSidebarOpen = forceState !== undefined ? forceState : !isSidebarOpen;
+            if(isSidebarOpen) {
+                leftSidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                leftSidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        document.getElementById('open-sidebar').addEventListener('click', () => toggleSidebar(true));
+        document.getElementById('close-sidebar').addEventListener('click', () => toggleSidebar(false));
+        overlay.addEventListener('click', () => toggleSidebar(false));
+
+        // Mở sẵn Sidebar trên màn hình lớn
+        if (window.innerWidth >= 768) {
+            toggleSidebar(true);
+        }
+
+        // --- Logic Bài 1 (Bóng đèn & Biểu đồ) ---
+        let bits = [0, 0, 0, 0, 0, 0, 0, 0];
+        const weights = [128, 64, 32, 16, 8, 4, 2, 1];
+        let chartInstance = null;
+
+        function updateUI() {
+            const container = document.getElementById('bulb-container');
+            container.innerHTML = '';
+            let sum = 0;
+            
+            bits.forEach((bit, i) => {
+                if(bit) sum += weights[i];
+                const bulb = document.createElement('div');
+                bulb.className = `bulb w-14 h-20 md:w-16 md:h-24 flex flex-col items-center justify-center rounded-2xl font-black text-2xl md:text-3xl select-none ${bit ? 'on' : 'off'}`;
+                bulb.innerHTML = `<span>${bit ? '1' : '0'}</span><span class="text-xs mt-1 opacity-60">${weights[i]}</span>`;
+                bulb.onclick = () => { 
+                    bits[i] = bit ? 0 : 1; 
+                    updateUI(); 
+                };
+                container.appendChild(bulb);
+            });
+            
+            document.getElementById('decimal-value').innerText = sum;
+            document.getElementById('binary-value').innerText = bits.join('');
+            
+            if(chartInstance){
+                chartInstance.data.datasets[0].data = weights.map((w,i) => bits[i] ? w : 0);
+                chartInstance.data.datasets[1].data = weights.map((w,i) => bits[i] ? 0 : w);
+                chartInstance.update();
+            }
+        }
+
+        window.onload = () => {
+            const ctx = document.getElementById('bitChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { 
+                    labels: ['128', '64', '32', '16', '8', '4', '2', '1'], 
+                    datasets: [
+                        { label: 'Bật', data: [], backgroundColor: '#fbbf24', borderRadius: 4 },
+                        { label: 'Tắt', data: [], backgroundColor: '#cbd5e1', borderRadius: 4 }
+                    ]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        x: { stacked: true }, 
+                        y: { stacked: true } 
+                    } 
+                }
+            });
+
+            // Khởi tạo giao diện lần đầu
+            updateUI();
+        };
+    </script>
+</body>
+</html>
