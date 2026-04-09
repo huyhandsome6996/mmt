@@ -103,21 +103,29 @@
             btn.classList.add('bounce-custom');
 
             if (clickCount < 4) {
-                // Thay đổi text của nút
+                // Thay đổi text của nút TRƯỚC để lấy đúng kích thước mới của nút sau khi chữ dài ra
                 btn.innerText = messages[clickCount];
 
-                // Đổi nút thành fixed để nhảy lung tung trên toàn bộ màn hình
+                // Đổi nút thành fixed để nhảy lung tung
                 btn.style.position = 'fixed';
                 btn.style.transition = 'left 0.3s ease, top 0.3s ease'; // Hiệu ứng bay mượt mà
                 btn.style.zIndex = '100'; // Đảm bảo nút luôn nổi lên trên cùng
+                btn.style.margin = '0'; // Xóa margin để tránh bị lệch
                 
-                // Tính toán vị trí ngẫu nhiên không lẹm ra khỏi màn hình (Thêm khoảng an toàn 30px cho điện thoại)
-                const safePadding = 30;
-                const maxX = window.innerWidth - btn.offsetWidth - safePadding;
-                const maxY = window.innerHeight - btn.offsetHeight - safePadding;
+                // --- THUẬT TOÁN MỚI: ĐẢM BẢO NÚT DI CHUYỂN TRONG PHẠM VI HẸP ---
+                const viewWidth = document.documentElement.clientWidth;
+                const viewHeight = document.documentElement.clientHeight;
                 
-                const randomX = Math.max(safePadding, Math.floor(Math.random() * maxX));
-                const randomY = Math.max(safePadding, Math.floor(Math.random() * maxY));
+                // Tìm vị trí tâm màn hình
+                const centerX = viewWidth / 2;
+                const centerY = viewHeight / 2;
+                
+                // Phạm vi cho phép nút nảy ra từ tâm (tối đa 100px)
+                const range = 70;
+                
+                // Tạo tọa độ ngẫu nhiên luôn bám sát tâm màn hình
+                const randomX = centerX - (btn.offsetWidth / 2) + (Math.random() * range * 2 - range);
+                const randomY = centerY - (btn.offsetHeight / 2) + (Math.random() * range * 2 - range);
 
                 // Cập nhật vị trí mới
                 btn.style.left = randomX + 'px';
