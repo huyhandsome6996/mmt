@@ -231,7 +231,7 @@
 
         #box-content {
             color: #2d3436;
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             line-height: 2rem;
             text-align: justify;
             transition: opacity 0.3s ease-out, background 0.2s;
@@ -307,6 +307,7 @@
         <div id="intro-overlay">
             <h1 class="text-4xl font-bold mb-6 text-yellow-400">Sẵn sàng thuyết trình!</h1>
             <p class="text-xl mb-3">Nhấn phím <span class="key-btn">K</span> để Bật/Tắt Toàn Màn Hình</p>
+            <p class="text-xl mb-3">Nhấn phím <span class="key-btn">S</span> để Bật/Tắt Xem Toàn Cảnh Slide</p>
             <p class="text-xl mb-8">Dùng <span class="key-btn">Mũi Tên</span> hoặc <span class="key-btn">Bút Thuyết
                     Trình</span> để chuyển slide</p>
             <p class="text-sm text-gray-400 animate-pulse">(Nhấn phím bất kỳ để bắt đầu)</p>
@@ -455,39 +456,10 @@
 
             // --- SLIDE 4 (noidungd.png) - ĐÁNH GIÁ ƯU ĐIỂM VÀ HẠN CHẾ ---
             {
-                // Bước 14: NHÌN TỔNG QUAN SLIDE 4
+                // Bước 14: NHÌN TỔNG QUAN SLIDE 4 (Giữ nguyên, không zoom, không có khung nội dung)
                 image: 'noidungd.png', scale: 1, origin: '50% 50%', showBox: false, boxClass: '',
                 title: "",
                 content: ""
-            },
-            {
-                // Bước 15: 3.4.1 (Ưu điểm) - Góc bên trái
-                image: 'noidungd.png', scale: 2.1, origin: '15% 50%', showBox: true, boxClass: 'pos-right',
-                title: "3.4.1. Ưu điểm",
-                content: `<ul>
-                    <li>Thông tin thực tế, sống động.</li>
-                    <li>Phát triển toàn diện các giác quan và kỹ năng mềm.</li>
-                </ul>`
-            },
-            {
-                // Bước 16: 3.4.2 (Hạn chế) - Ở giữa
-                image: 'noidungd.png', scale: 2.1, origin: '50% 50%', showBox: true, boxClass: 'pos-right',
-                title: "3.4.2. Hạn chế",
-                content: `<ul>
-                    <li>Quy trình tổ chức phức tạp.</li>
-                    <li>Phụ thuộc vào sự hợp tác của đối tác (doanh nghiệp/cơ sở).</li>
-                    <li>Khó quản lý kỷ luật tập thể ở không gian mở.</li>
-                </ul>`
-            },
-            {
-                // Bước 17: 3.4.3 (Điều kiện áp dụng) - Góc bên phải
-                image: 'noidungd.png', scale: 2.1, origin: '85% 50%', showBox: true, boxClass: 'pos-left',
-                title: "3.4.3. Điều kiện áp dụng",
-                content: `<ul>
-                    <li>Cần sự phối hợp chặt chẽ của doanh nghiệp.</li>
-                    <li>Sự đồng thuận của phụ huynh học sinh.</li>
-                    <li>Phải có kế hoạch dự phòng rủi ro chi tiết.</li>
-                </ul>`
             }
         ];
 
@@ -498,6 +470,7 @@
         const boxContent = document.getElementById('box-content');
         const introOverlay = document.getElementById('intro-overlay');
         let presentationStarted = false;
+        let isShowingFull = false; // Biến theo dõi trạng thái toàn cảnh
 
         // --- HÀM XỬ LÝ KHUNG CHỮ (Được tách riêng ra để tái sử dụng) ---
         function applyBoxChanges(stepData, isImageChanging) {
@@ -541,6 +514,7 @@
 
         // --- HÀM CẬP NHẬT GIAO DIỆN THEO BƯỚC (Bao gồm Xử lý chuyển Slide) ---
         function updatePresentation() {
+            isShowingFull = false; // Đặt lại trạng thái toàn cảnh khi chuyển bước mới
             const stepData = steps[currentStep];
 
             // Lấy tên ảnh hiện tại từ thẻ img (chỉ lấy phần tên file)
@@ -678,10 +652,26 @@
                 introOverlay.style.opacity = '0';
                 setTimeout(() => introOverlay.style.display = 'none', 500);
                 presentationStarted = true;
-                if (e.key.toLowerCase() !== 'k') return;
+                if (e.key.toLowerCase() !== 'k' && e.key.toLowerCase() !== 's') return;
             }
 
             if (e.key.toLowerCase() === 'k') { toggleFullScreen(); return; }
+
+            // Cập nhật: Phím S để xem toàn cảnh slide hiện tại (Tạm thời thu nhỏ và ẩn khung)
+            if (e.key.toLowerCase() === 's') {
+                if (!isShowingFull) {
+                    imgElement.style.transform = 'scale(1)';
+                    infoBox.classList.remove('visible');
+                    isShowingFull = true;
+                } else {
+                    imgElement.style.transform = `scale(${steps[currentStep].scale})`;
+                    if (steps[currentStep].showBox) {
+                        infoBox.classList.add('visible');
+                    }
+                    isShowingFull = false;
+                }
+                return;
+            }
 
             // Nếu đang gõ text vào khung thì bỏ qua phím mũi tên/space
             if (document.activeElement && document.activeElement.getAttribute('contenteditable') === 'true') {
