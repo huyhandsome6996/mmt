@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #2c3e50; 
+            background-color: #2c3e50;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -16,11 +17,13 @@
             height: 100vh;
             font-family: Arial, sans-serif;
         }
+
         canvas {
-            background-color: #87CEEB; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            background-color: #87CEEB;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             border-radius: 5px;
         }
+
         #ui-bar {
             width: 800px;
             display: flex;
@@ -30,7 +33,11 @@
             font-weight: bold;
             margin-bottom: 10px;
         }
-        .text-yellow { color: #f1c40f; }
+
+        .text-yellow {
+            color: #f1c40f;
+        }
+
         #instructions {
             color: white;
             text-align: center;
@@ -38,6 +45,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div id="ui-bar">
@@ -48,7 +56,8 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 
     <div id="instructions">
-        <p>Sử dụng <b>Mũi tên Trái/Phải</b> hoặc <b>A/D</b> để di chuyển. Nhấn <b>Mũi tên Lên</b>, <b>W</b> hoặc <b>Space</b> để nhảy.</p>
+        <p>Sử dụng <b>Mũi tên Trái/Phải</b> hoặc <b>A/D</b> để di chuyển. Nhấn <b>Mũi tên Lên</b>, <b>W</b> hoặc
+            <b>Space</b> để nhảy.</p>
         <p>Thu thập đồng tiền, nhảy lên đầu nấm nâu để tiêu diệt, cẩn thận đừng rơi xuống vực!</p>
     </div>
 
@@ -74,15 +83,15 @@
         // Nhân vật chính
         const player = {
             x: 50, y: 200, width: 30, height: 40,
-            speed: 5, velX: 0, velY: 0, jumpPower: -12, 
-            grounded: false, facingRight: true 
+            speed: 5, velX: 0, velY: 0, jumpPower: -12,
+            grounded: false, facingRight: true
         };
 
         let score = 0;
 
         // Bảng màu và Pixel Art
         const colors = {
-            'R': '#ff0000', 'D': '#8b4513', 'B': '#ffcc99', 'O': '#2980b9', 'Y': '#f1c40f', 
+            'R': '#ff0000', 'D': '#8b4513', 'B': '#ffcc99', 'O': '#2980b9', 'Y': '#f1c40f',
             'W': '#ffffff', 'K': '#000000', 'C': '#d2b48c', ' ': null
         };
 
@@ -110,10 +119,10 @@
             { // Màn 1
                 spawnX: 50, spawnY: 200,
                 platforms: [
-                    { x: 0, y: 350, width: 800, height: 50, type: 'ground' }, 
-                    { x: 200, y: 280, width: 100, height: 20, type: 'brick' }, 
-                    { x: 400, y: 220, width: 100, height: 20, type: 'brick' }, 
-                    { x: 600, y: 150, width: 100, height: 20, type: 'brick' }  
+                    { x: 0, y: 350, width: 800, height: 50, type: 'ground' },
+                    { x: 200, y: 280, width: 100, height: 20, type: 'brick' },
+                    { x: 400, y: 220, width: 100, height: 20, type: 'brick' },
+                    { x: 600, y: 150, width: 100, height: 20, type: 'brick' }
                 ],
                 coins: [
                     { x: 235, y: 240, width: 20, height: 24, collected: false },
@@ -129,7 +138,7 @@
             { // Màn 2
                 spawnX: 50, spawnY: 200,
                 platforms: [
-                    { x: 0, y: 350, width: 300, height: 50, type: 'ground' }, 
+                    { x: 0, y: 350, width: 300, height: 50, type: 'ground' },
                     { x: 450, y: 350, width: 350, height: 50, type: 'ground' }, // Vực ở giữa
                     { x: 150, y: 250, width: 80, height: 20, type: 'brick' },
                     { x: 320, y: 150, width: 60, height: 20, type: 'brick' }, // Bệ giữa vực
@@ -155,9 +164,9 @@
         // Hàm kiểm tra va chạm giữa 2 vật thể hình chữ nhật
         function checkCollision(rect1, rect2) {
             return rect1.x < rect2.x + rect2.width &&
-                   rect1.x + rect1.width > rect2.x &&
-                   rect1.y < rect2.y + rect2.height &&
-                   rect1.y + rect1.height > rect2.y;
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y;
         }
 
         // Tải màn chơi (Sử dụng JSON.parse/stringify để reset lại toàn bộ đồng tiền/kẻ thù)
@@ -169,21 +178,21 @@
                 setTimeout(() => alert("Tuyệt vời! Bạn đã phá đảo với số điểm: " + score), 100);
                 return;
             }
-            
+
             currentLevelIndex = index;
             // Sao chép dữ liệu sâu (Deep copy) để không làm thay đổi dữ liệu gốc khi chơi lại
-            let levelData = JSON.parse(JSON.stringify(levels[index])); 
-            
+            let levelData = JSON.parse(JSON.stringify(levels[index]));
+
             platforms = levelData.platforms;
             coins = levelData.coins;
             enemies = levelData.enemies;
             goal = levelData.goal;
-            
+
             player.x = levelData.spawnX;
             player.y = levelData.spawnY;
             player.velX = 0; player.velY = 0;
             player.facingRight = true;
-            
+
             document.getElementById('levelDisplay').innerText = (index + 1);
         }
 
@@ -276,23 +285,23 @@
             // Kiểm tra chiến thắng (chạm cột cờ)
             if (!isTransitioning && checkCollision(player, goal)) {
                 isTransitioning = true; // Khóa lại để tránh kích hoạt va chạm nhiều lần
-                
+
                 // Dừng Mario lại một chút
-                player.velX = 0; 
+                player.velX = 0;
 
                 // Đợi 0.1s rồi hiển thị thông báo và chuyển màn
                 setTimeout(() => {
                     alert("Chúc mừng! Bạn đã vượt qua Màn " + (currentLevelIndex + 1));
-                    
+
                     // CÁCH 1: Tải dữ liệu Màn 2 ngay trong file này (Khuyên dùng khi làm game)
                     loadLevel(currentLevelIndex + 1);
-                    
+
                     /* CÁCH 2: Nhảy sang file html mới như trong ảnh VS Code của bạn.
                        Nếu bạn muốn dùng cách này, hãy XÓA dòng loadLevel ở trên 
                        và BỎ DẤU gạch chéo kép (//) ở dòng bên dưới: */
-                    
+
                     // window.location.href = 'mario_man2.html';
-                    
+
                 }, 100);
             }
         }
@@ -328,7 +337,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Vẽ đích đến
-            ctx.fillStyle = '#bdc3c7'; ctx.fillRect(goal.x + 8, goal.y, 4, goal.height); 
+            ctx.fillStyle = '#bdc3c7'; ctx.fillRect(goal.x + 8, goal.y, 4, goal.height);
             ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.moveTo(goal.x + 12, goal.y + 10); ctx.lineTo(goal.x + 40, goal.y + 25); ctx.lineTo(goal.x + 12, goal.y + 40); ctx.fill();
             ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(goal.x + 10, goal.y, 8, 0, Math.PI * 2); ctx.fill();
 
@@ -355,7 +364,7 @@
             for (let i = 0; i < enemies.length; i++) {
                 if (!enemies[i].dead) {
                     // Kẻ thù có thể xoay người khi đổi hướng
-                    let flipEnemy = enemies[i].dir === 1; 
+                    let flipEnemy = enemies[i].dir === 1;
                     drawPixelArt(goombaSprite, enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height, flipEnemy);
                 }
             }
@@ -373,4 +382,5 @@
         gameLoop();
     </script>
 </body>
+
 </html>

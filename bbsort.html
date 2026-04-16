@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,51 +13,73 @@
             position: absolute;
             top: 20px;
         }
+
         /* Hiệu ứng nhấp nháy nhẹ cho khung giải thích để thu hút sự chú ý */
         @keyframes flashInfo {
-            0% { background-color: #fef9c3; } /* yellow-100 */
-            100% { background-color: #f8fafc; } /* slate-50 */
+            0% {
+                background-color: #fef9c3;
+            }
+
+            /* yellow-100 */
+            100% {
+                background-color: #f8fafc;
+            }
+
+            /* slate-50 */
         }
+
         .flash-effect {
             animation: flashInfo 0.6s ease-out;
         }
+
         /* Tuỳ chỉnh thanh cuộn cho code */
-        pre::-webkit-scrollbar, .resizable-panel::-webkit-scrollbar {
+        pre::-webkit-scrollbar,
+        .resizable-panel::-webkit-scrollbar {
             height: 8px;
             width: 8px;
         }
-        pre::-webkit-scrollbar-thumb, .resizable-panel::-webkit-scrollbar-thumb {
+
+        pre::-webkit-scrollbar-thumb,
+        .resizable-panel::-webkit-scrollbar-thumb {
             background-color: #475569;
             border-radius: 4px;
         }
+
         /* Style cho phần comment code để phân biệt */
         .code-comment {
-            color: #94a3b8; /* slate-400 */
+            color: #94a3b8;
+            /* slate-400 */
             font-style: italic;
         }
+
         /* Style cho phép tự do kéo thả kích thước khung code */
         .resizable-panel {
             resize: both;
             overflow: auto;
             min-height: 250px;
             min-width: 280px;
-            max-width: 100%; /* Đảm bảo không bị kéo tràn ra khỏi màn hình */
+            max-width: 100%;
+            /* Đảm bảo không bị kéo tràn ra khỏi màn hình */
         }
+
         /* Style cho các khối của mô phỏng Số Nguyên Tố */
         .prime-block {
             transition: all 0.3s ease;
         }
     </style>
 </head>
+
 <body class="bg-gray-100 font-sans text-gray-800 pb-20">
 
     <!-- Thanh điều hướng chuyển đổi bài học (Tabs) -->
     <div class="max-w-5xl mx-auto pt-6 px-4">
         <div class="flex border-b-2 border-gray-200 gap-4">
-            <button onclick="switchTab('bubble')" id="tab-bubble" class="py-3 px-6 text-lg font-bold border-b-4 border-blue-500 text-blue-600 transition -mb-[2px]">
+            <button onclick="switchTab('bubble')" id="tab-bubble"
+                class="py-3 px-6 text-lg font-bold border-b-4 border-blue-500 text-blue-600 transition -mb-[2px]">
                 Sắp xếp Nổi bọt
             </button>
-            <button onclick="switchTab('prime')" id="tab-prime" class="py-3 px-6 text-lg font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-500 transition -mb-[2px]">
+            <button onclick="switchTab('prime')" id="tab-prime"
+                class="py-3 px-6 text-lg font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-500 transition -mb-[2px]">
                 Kiểm tra Số Nguyên Tố
             </button>
         </div>
@@ -68,7 +91,10 @@
             <!-- Tiêu đề & Lý thuyết -->
             <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
                 <h1 class="text-3xl font-bold text-blue-600 mb-3">Học Sắp Xếp Nổi Bọt (Bubble Sort)</h1>
-                <p class="mb-2"><strong>Ý tưởng cốt lõi:</strong> Thuật toán sẽ duyệt qua mảng nhiều lần. Trong mỗi lần duyệt, nó so sánh <strong>hai phần tử đứng cạnh nhau</strong>. Nếu phần tử đứng trước lớn hơn phần tử đứng sau (sai thứ tự), nó sẽ <strong>hoán đổi</strong> hai phần tử đó. Quá trình này giúp phần tử lớn nhất "nổi" dần về phía cuối mảng sau mỗi vòng lặp.</p>
+                <p class="mb-2"><strong>Ý tưởng cốt lõi:</strong> Thuật toán sẽ duyệt qua mảng nhiều lần. Trong mỗi lần
+                    duyệt, nó so sánh <strong>hai phần tử đứng cạnh nhau</strong>. Nếu phần tử đứng trước lớn hơn phần
+                    tử đứng sau (sai thứ tự), nó sẽ <strong>hoán đổi</strong> hai phần tử đó. Quá trình này giúp phần tử
+                    lớn nhất "nổi" dần về phía cuối mảng sau mỗi vòng lặp.</p>
                 <p class="text-gray-600 text-sm italic">💡 Cứ tiếp tục như vậy, mảng sẽ được sắp xếp hoàn toàn!</p>
             </div>
 
@@ -76,14 +102,16 @@
             <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
                 <h2 class="text-xl font-semibold mb-4 text-gray-700">1. Nhập Dữ Liệu</h2>
                 <div class="flex flex-col sm:flex-row gap-4 items-center">
-                    <input type="text" id="arrayInput" value="45, 12, 89, 33, 21, 56, 9, 77, 64, 2" 
+                    <input type="text" id="arrayInput" value="45, 12, 89, 33, 21, 56, 9, 77, 64, 2"
                         class="flex-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-lg"
                         placeholder="Nhập các số cách nhau bằng dấu phẩy...">
-                    <button onclick="initSimulation()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md whitespace-nowrap">
+                    <button onclick="initSimulation()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md whitespace-nowrap">
                         Bắt đầu mô phỏng
                     </button>
                 </div>
-                <p id="errorMsg" class="text-red-500 mt-2 text-sm hidden">Vui lòng nhập danh sách các số hợp lệ, cách nhau bằng dấu phẩy.</p>
+                <p id="errorMsg" class="text-red-500 mt-2 text-sm hidden">Vui lòng nhập danh sách các số hợp lệ, cách
+                    nhau bằng dấu phẩy.</p>
             </div>
 
             <!-- Khu vực Mô phỏng Hình ảnh -->
@@ -91,51 +119,67 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-700">2. Mô phỏng Chuyển động</h2>
                     <div class="flex gap-2">
-                        <button onclick="autoPlay()" id="btnAuto" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-2 px-4 rounded-lg transition">
+                        <button onclick="autoPlay()" id="btnAuto"
+                            class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-2 px-4 rounded-lg transition">
                             ▶ Chơi tự động
                         </button>
-                        <button onclick="nextStep()" id="btnNext" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition shadow-md">
+                        <button onclick="nextStep()" id="btnNext"
+                            class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition shadow-md">
                             Bước tiếp theo ⏭
                         </button>
                     </div>
                 </div>
 
                 <!-- Khung chứa các phần tử mảng -->
-                <div id="arrayContainer" class="relative w-full h-32 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                <div id="arrayContainer"
+                    class="relative w-full h-32 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                     <!-- Các thẻ div chứa số sẽ được sinh ra ở đây qua JS -->
                 </div>
 
                 <!-- Chú thích màu sắc -->
                 <div class="flex flex-wrap justify-center gap-6 mt-4 text-sm text-gray-600">
-                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-blue-500 rounded"></div> Chưa sắp xếp</div>
-                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-yellow-400 rounded"></div> Đang so sánh</div>
-                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-red-500 rounded"></div> Hoán đổi</div>
-                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-green-500 rounded"></div> Đã đúng vị trí</div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-blue-500 rounded"></div> Chưa sắp xếp
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-yellow-400 rounded"></div> Đang so sánh
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-red-500 rounded"></div> Hoán đổi
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-green-500 rounded"></div> Đã đúng vị trí
+                    </div>
                 </div>
             </div>
 
             <!-- Khu vực Code & Giải thích (Bố cục 2 cột linh hoạt Flexbox) -->
             <div class="flex flex-col lg:flex-row gap-6 items-stretch">
-                
+
                 <!-- Cột Code -->
-                <div class="bg-slate-800 rounded-2xl shadow-sm border border-gray-700 flex flex-col resizable-panel w-full lg:w-1/2 flex-shrink-0">
-                    <div class="bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700 sticky top-0">
+                <div
+                    class="bg-slate-800 rounded-2xl shadow-sm border border-gray-700 flex flex-col resizable-panel w-full lg:w-1/2 flex-shrink-0">
+                    <div
+                        class="bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700 sticky top-0">
                         <h2 class="text-lg font-semibold text-slate-200">3. Mã nguồn</h2>
-                        <select id="langSelect" onchange="renderCode()" class="bg-slate-700 text-slate-200 border border-slate-600 rounded p-1 outline-none text-sm">
+                        <select id="langSelect" onchange="renderCode()"
+                            class="bg-slate-700 text-slate-200 border border-slate-600 rounded p-1 outline-none text-sm">
                             <option value="pseudo">Mã giả (Dễ hiểu nhất)</option>
                             <option value="python">Python</option>
                             <option value="cpp">C++</option>
                         </select>
                     </div>
-                    <div class="p-4 overflow-x-auto text-slate-300 font-mono text-sm leading-relaxed whitespace-pre" id="codeContainer">
+                    <div class="p-4 overflow-x-auto text-slate-300 font-mono text-sm leading-relaxed whitespace-pre"
+                        id="codeContainer">
                         <!-- Code lines rendered by JS -->
                     </div>
                 </div>
 
                 <!-- Cột Giải thích -->
-                <div class="bg-slate-50 rounded-2xl shadow-sm p-6 border border-gray-200 flex flex-col flex-1 min-w-[280px]" id="explanationBox">
+                <div class="bg-slate-50 rounded-2xl shadow-sm p-6 border border-gray-200 flex flex-col flex-1 min-w-[280px]"
+                    id="explanationBox">
                     <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Giải thích bước hiện tại</h2>
-                    
+
                     <div class="flex-1 flex flex-col gap-5 justify-center">
                         <!-- Giải thích chuẩn đại học -->
                         <div>
@@ -169,8 +213,13 @@
             <!-- Tiêu đề & Lý thuyết Số Nguyên Tố -->
             <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
                 <h1 class="text-3xl font-bold text-green-600 mb-3">Học Kiểm tra Số Nguyên Tố</h1>
-                <p class="mb-2"><strong>Ý tưởng cốt lõi:</strong> Số nguyên tố là số tự nhiên lớn hơn 1, chỉ có hai ước số dương duy nhất là <strong>1 và chính nó</strong>. Để kiểm tra một số <b>N</b> có phải số nguyên tố không, ta sẽ lấy <b>N</b> chia thử cho tất cả các số từ <b>2</b> đến <b>N-1</b>. Nếu <b>N</b> chia hết cho bất kỳ số nào trong khoảng này, thì nó <strong>không phải</strong> số nguyên tố.</p>
-                <p class="text-gray-600 text-sm italic">💡 Mẹo nhỏ cho Coder: Trong thực tế người ta chỉ cần thử chia đến căn bậc hai của N (<b>&radic;N</b>), nhưng ở bài học này ta sẽ thử đến <b>N-1</b> cho trực quan dễ hiểu nhất nhé!</p>
+                <p class="mb-2"><strong>Ý tưởng cốt lõi:</strong> Số nguyên tố là số tự nhiên lớn hơn 1, chỉ có hai ước
+                    số dương duy nhất là <strong>1 và chính nó</strong>. Để kiểm tra một số <b>N</b> có phải số nguyên
+                    tố không, ta sẽ lấy <b>N</b> chia thử cho tất cả các số từ <b>2</b> đến <b>N-1</b>. Nếu <b>N</b>
+                    chia hết cho bất kỳ số nào trong khoảng này, thì nó <strong>không phải</strong> số nguyên tố.</p>
+                <p class="text-gray-600 text-sm italic">💡 Mẹo nhỏ cho Coder: Trong thực tế người ta chỉ cần thử chia
+                    đến căn bậc hai của N (<b>&radic;N</b>), nhưng ở bài học này ta sẽ thử đến <b>N-1</b> cho trực quan
+                    dễ hiểu nhất nhé!</p>
             </div>
 
             <!-- Khu vực Điều khiển & Input -->
@@ -180,11 +229,13 @@
                     <input type="number" id="primeInput" value="13" min="1" max="50"
                         class="flex-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 font-mono text-lg"
                         placeholder="Nhập 1 số nguyên (ví dụ: 7, 12, 13)...">
-                    <button onclick="initPrimeSimulation()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md whitespace-nowrap">
+                    <button onclick="initPrimeSimulation()"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md whitespace-nowrap">
                         Bắt đầu mô phỏng
                     </button>
                 </div>
-                <p id="primeErrorMsg" class="text-red-500 mt-2 text-sm hidden">Vui lòng nhập một số hợp lệ từ 1 đến 50.</p>
+                <p id="primeErrorMsg" class="text-red-500 mt-2 text-sm hidden">Vui lòng nhập một số hợp lệ từ 1 đến 50.
+                </p>
             </div>
 
             <!-- Khu vực Mô phỏng Hình ảnh -->
@@ -192,24 +243,30 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-700">2. Mô phỏng Chia Thử</h2>
                     <div class="flex gap-2">
-                        <button onclick="autoPlayPrime()" id="btnPrimeAuto" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-2 px-4 rounded-lg transition">
+                        <button onclick="autoPlayPrime()" id="btnPrimeAuto"
+                            class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-2 px-4 rounded-lg transition">
                             ▶ Chơi tự động
                         </button>
-                        <button onclick="nextPrimeStep()" id="btnPrimeNext" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition shadow-md">
+                        <button onclick="nextPrimeStep()" id="btnPrimeNext"
+                            class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition shadow-md">
                             Bước tiếp theo ⏭
                         </button>
                     </div>
                 </div>
 
                 <!-- Khung mô phỏng chia thử -->
-                <div class="relative w-full min-h-[220px] bg-gray-50 rounded-lg border border-gray-200 flex flex-col items-center py-6 px-4">
+                <div
+                    class="relative w-full min-h-[220px] bg-gray-50 rounded-lg border border-gray-200 flex flex-col items-center py-6 px-4">
                     <div class="flex flex-col items-center mb-8">
-                        <span class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Số cần kiểm tra (N)</span>
-                        <div id="primeTargetBlock" class="flex items-center justify-center w-20 h-20 rounded-xl text-white font-bold text-4xl shadow-lg bg-indigo-500">
+                        <span class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Số cần kiểm tra
+                            (N)</span>
+                        <div id="primeTargetBlock"
+                            class="flex items-center justify-center w-20 h-20 rounded-xl text-white font-bold text-4xl shadow-lg bg-indigo-500">
                             ?
                         </div>
                     </div>
-                    <span class="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wide">Các số đem ra chia thử (i)</span>
+                    <span class="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wide">Các số đem ra chia thử
+                        (i)</span>
                     <div id="primeDivisorsContainer" class="flex flex-wrap justify-center gap-3">
                         <span class="text-gray-400 italic">Nhấn bắt đầu mô phỏng để sinh ra danh sách chia thử...</span>
                     </div>
@@ -218,30 +275,37 @@
 
             <!-- Khu vực Code & Giải thích -->
             <div class="flex flex-col lg:flex-row gap-6 items-stretch">
-                <div class="bg-slate-800 rounded-2xl shadow-sm border border-gray-700 flex flex-col resizable-panel w-full lg:w-1/2 flex-shrink-0">
-                    <div class="bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700 sticky top-0">
+                <div
+                    class="bg-slate-800 rounded-2xl shadow-sm border border-gray-700 flex flex-col resizable-panel w-full lg:w-1/2 flex-shrink-0">
+                    <div
+                        class="bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700 sticky top-0">
                         <h2 class="text-lg font-semibold text-slate-200">3. Mã nguồn</h2>
-                        <select id="primeLangSelect" onchange="renderPrimeCode()" class="bg-slate-700 text-slate-200 border border-slate-600 rounded p-1 outline-none text-sm">
+                        <select id="primeLangSelect" onchange="renderPrimeCode()"
+                            class="bg-slate-700 text-slate-200 border border-slate-600 rounded p-1 outline-none text-sm">
                             <option value="pseudo">Mã giả (Dễ hiểu nhất)</option>
                             <option value="python">Python</option>
                             <option value="cpp">C++</option>
                         </select>
                     </div>
-                    <div class="p-4 overflow-x-auto text-slate-300 font-mono text-sm leading-relaxed whitespace-pre" id="primeCodeContainer">
+                    <div class="p-4 overflow-x-auto text-slate-300 font-mono text-sm leading-relaxed whitespace-pre"
+                        id="primeCodeContainer">
                     </div>
                 </div>
 
-                <div class="bg-slate-50 rounded-2xl shadow-sm p-6 border border-gray-200 flex flex-col flex-1 min-w-[280px]" id="primeExplanationBox">
+                <div class="bg-slate-50 rounded-2xl shadow-sm p-6 border border-gray-200 flex flex-col flex-1 min-w-[280px]"
+                    id="primeExplanationBox">
                     <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Giải thích bước hiện tại</h2>
                     <div class="flex-1 flex flex-col gap-5 justify-center">
                         <div>
-                            <h3 class="font-bold text-green-700 mb-2 flex items-center gap-2"><span>🎓</span> Kiểu Sinh viên CNTT / Đại học:</h3>
+                            <h3 class="font-bold text-green-700 mb-2 flex items-center gap-2"><span>🎓</span> Kiểu Sinh
+                                viên CNTT / Đại học:</h3>
                             <p id="primeExplanationText" class="text-md text-gray-800 leading-relaxed font-medium">
                                 Hãy nhập số và bấm "Bắt đầu mô phỏng" để xem chi tiết.
                             </p>
                         </div>
                         <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 shadow-sm">
-                            <h3 class="font-bold text-orange-600 mb-2 flex items-center gap-2"><span>👶</span> Kiểu Học sinh lớp 6:</h3>
+                            <h3 class="font-bold text-orange-600 mb-2 flex items-center gap-2"><span>👶</span> Kiểu Học
+                                sinh lớp 6:</h3>
                             <p id="primeExplanationSimpleText" class="text-md text-gray-800 leading-relaxed">
                                 Ví dụ thực tế siêu dễ hiểu sẽ xuất hiện ở đây!
                             </p>
@@ -260,21 +324,21 @@
             // Ẩn tất cả view
             document.getElementById('view-bubble').classList.add('hidden');
             document.getElementById('view-prime').classList.add('hidden');
-            
+
             // Hiện view được chọn
             document.getElementById('view-' + tabId).classList.remove('hidden');
 
             // Reset CSS của tab
             document.getElementById('tab-bubble').classList.remove('border-blue-500', 'text-blue-600');
             document.getElementById('tab-prime').classList.remove('border-blue-500', 'text-blue-600');
-            
+
             // Active CSS cho tab hiện tại
             document.getElementById('tab-' + tabId).classList.add('border-blue-500', 'text-blue-600');
 
             // Dừng mọi mô phỏng tự động để khỏi dính lỗi
-            if(typeof stopAutoPlay === 'function') stopAutoPlay();
-            if(typeof stopPrimeAutoPlay === 'function') stopPrimeAutoPlay();
-            
+            if (typeof stopAutoPlay === 'function') stopAutoPlay();
+            if (typeof stopPrimeAutoPlay === 'function') stopPrimeAutoPlay();
+
             // Render lại code tuỳ tab
             if (tabId === 'prime') renderPrimeCode();
             if (tabId === 'bubble') renderCode();
@@ -333,13 +397,13 @@
             }
         };
 
-        let dataArray = [];    
-        let domArray = [];     
+        let dataArray = [];
+        let domArray = [];
         let stepGenerator = null;
         let autoPlayInterval = null;
         let isAutoPlaying = false;
         let currentLineKey = 'start';
-        
+
         const BLOCK_WIDTH = 50;
         const BLOCK_GAP = 12;
 
@@ -347,14 +411,14 @@
             const lang = document.getElementById('langSelect').value;
             const lines = codeData[lang].lines;
             const container = document.getElementById('codeContainer');
-            if(!container) return;
-            container.innerHTML = ''; 
-            
+            if (!container) return;
+            container.innerHTML = '';
+
             lines.forEach((line, index) => {
                 const div = document.createElement('div');
                 div.id = `code-line-${index}`;
                 div.className = 'px-2 py-1 rounded border-l-4 border-transparent';
-                div.innerHTML = line; 
+                div.innerHTML = line;
                 container.appendChild(div);
             });
 
@@ -367,7 +431,7 @@
             const lineIndex = codeData[lang].map[lineKey];
             const linesCount = codeData[lang].lines.length;
 
-            for(let i=0; i<linesCount; i++) {
+            for (let i = 0; i < linesCount; i++) {
                 const el = document.getElementById(`code-line-${i}`);
                 if (el) {
                     el.classList.remove('bg-slate-700', 'border-blue-400', 'text-white');
@@ -386,13 +450,13 @@
             const box = document.getElementById('explanationBox');
             const textEl = document.getElementById('explanationText');
             const simpleEl = document.getElementById('explanationSimpleText');
-            
-            if(textEl) textEl.innerHTML = textAcademic;
-            if(simpleEl) simpleEl.innerHTML = textSimple;
-            
-            if(box) {
+
+            if (textEl) textEl.innerHTML = textAcademic;
+            if (simpleEl) simpleEl.innerHTML = textSimple;
+
+            if (box) {
                 box.classList.remove('flash-effect');
-                void box.offsetWidth; 
+                void box.offsetWidth;
                 box.classList.add('flash-effect');
             }
         }
@@ -401,26 +465,26 @@
             stopAutoPlay();
             document.getElementById('btnNext').disabled = false;
             document.getElementById('btnAuto').disabled = false;
-            
+
             const inputVal = document.getElementById('arrayInput').value;
             const errorMsg = document.getElementById('errorMsg');
-            
+
             const parsedArray = inputVal.split(',').map(item => parseInt(item.trim())).filter(item => !isNaN(item));
-            
+
             if (parsedArray.length < 2 || parsedArray.length > 20) {
                 errorMsg.classList.remove('hidden');
                 errorMsg.innerText = "Vui lòng nhập từ 2 đến 20 số, cách nhau bằng dấu phẩy.";
                 return;
             }
             errorMsg.classList.add('hidden');
-            
+
             dataArray = [...parsedArray];
             createArrayDOM();
-            
+
             // Sửa lỗi: Truyền một bản sao của mảng vào Generator thay vì dùng chung 
             // để tránh xung đột khiến 2 phần tử bị hoán đổi qua lại 2 lần.
             stepGenerator = bubbleSortGenerator([...dataArray]);
-            
+
             highlightLine('start');
             updateExplanation(
                 'Đã nạp mảng thành công! Sẵn sàng thực hiện thuật toán Bubble Sort. Hãy bấm <b>"Bước tiếp theo"</b>.',
@@ -432,7 +496,7 @@
             const container = document.getElementById('arrayContainer');
             container.innerHTML = '';
             domArray = [];
-            
+
             const n = dataArray.length;
             const containerWidth = container.clientWidth;
             const totalWidth = n * BLOCK_WIDTH + (n - 1) * BLOCK_GAP;
@@ -442,9 +506,9 @@
                 const block = document.createElement('div');
                 block.className = 'array-block flex items-center justify-center w-12 h-16 rounded-lg text-white font-bold text-xl shadow-md bg-blue-500';
                 block.innerText = value;
-                
+
                 block.style.left = `${startX + index * (BLOCK_WIDTH + BLOCK_GAP)}px`;
-                
+
                 container.appendChild(block);
                 domArray.push(block);
             });
@@ -452,7 +516,7 @@
 
         function updateBlockPositions() {
             const container = document.getElementById('arrayContainer');
-            if(!container) return;
+            if (!container) return;
             const containerWidth = container.clientWidth;
             const n = domArray.length;
             const totalWidth = n * BLOCK_WIDTH + (n - 1) * BLOCK_GAP;
@@ -471,7 +535,7 @@
         function resetColors(excludeSorted = true) {
             domArray.forEach(block => {
                 if (excludeSorted && block.classList.contains('bg-green-500')) {
-                    return; 
+                    return;
                 }
                 block.classList.remove('bg-yellow-400', 'bg-red-500');
                 block.classList.add('bg-blue-500');
@@ -493,56 +557,56 @@
         function* bubbleSortGenerator(array) {
             let n = array.length;
             for (let i = 0; i < n - 1; i++) {
-                yield { 
-                    type: 'OUTER', line: 'outer', 
+                yield {
+                    type: 'OUTER', line: 'outer',
                     msg: `<b>Vòng lặp ngoài (i = ${i}):</b><br>Mục tiêu vòng này: Tìm phần tử lớn nhất trong đoạn chưa sắp xếp và sủi bọt nó về vị trí cuối cùng.`,
                     msgSimple: `Chúng ta bắt đầu <b>Lượt số ${i + 1}</b>. Mục tiêu là tìm ra bạn "to béo" (số lớn nhất) còn lộn xộn trong hàng và đẩy bạn ấy xuống vị trí cuối cùng.`
                 };
-                
-                yield { 
-                    type: 'INNER_START', line: 'inner', 
+
+                yield {
+                    type: 'INNER_START', line: 'inner',
                     msg: `<b>Giải mã vòng lặp trong (j < ${n} - ${i} - 1):</b><br>Tại sao phải trừ đi <b>i = ${i}</b>?<br>👉 Bởi vì ta đã hoàn thành <b>${i}</b> vòng lặp ngoài, đồng nghĩa với việc <b>${i} phần tử lớn nhất</b> đã nằm chốt ở cuối mảng một cách an toàn. Ta bỏ qua chúng không xét nữa.`,
                     msgSimple: `Tại sao lại không đi hết hàng? Vì <b>${i} bạn to béo nhất</b> đã ngoan ngoãn đứng ở cuối hàng vào các lượt trước rồi. Chỗ của các bạn ấy đã "chốt sổ", ta kệ các bạn ấy, không gọi ra đo lại nữa cho đỡ mất thời gian!`
                 };
 
                 for (let j = 0; j < n - i - 1; j++) {
-                    yield { 
-                        type: 'COMPARE', line: 'compare', j: j, 
-                        msg: `<b>Vòng lặp trong (j = ${j}):</b><br>So sánh hai số kề nhau: <b>${array[j]}</b> và <b>${array[j+1]}</b>.<br>Nếu <b>${array[j]} > ${array[j+1]}</b> thì sẽ hoán đổi.`,
-                        msgSimple: `Hai bạn đứng cạnh nhau quay sang nhìn nhau. Hai bạn mang số <b>${array[j]}</b> và <b>${array[j+1]}</b>. Sắp xếp nguyên tắc "ai to thì lùi về sau".`
+                    yield {
+                        type: 'COMPARE', line: 'compare', j: j,
+                        msg: `<b>Vòng lặp trong (j = ${j}):</b><br>So sánh hai số kề nhau: <b>${array[j]}</b> và <b>${array[j + 1]}</b>.<br>Nếu <b>${array[j]} > ${array[j + 1]}</b> thì sẽ hoán đổi.`,
+                        msgSimple: `Hai bạn đứng cạnh nhau quay sang nhìn nhau. Hai bạn mang số <b>${array[j]}</b> và <b>${array[j + 1]}</b>. Sắp xếp nguyên tắc "ai to thì lùi về sau".`
                     };
-                    
+
                     if (array[j] > array[j + 1]) {
-                        yield { 
-                            type: 'SWAP', line: 'swap', j: j, 
-                            msg: `Thấy <b>${array[j]} > ${array[j+1]}</b>, nên ta <b>hoán đổi</b> vị trí của chúng.`,
-                            msgSimple: `Ồ! Bạn <b>${array[j]}</b> lại to hơn bạn <b>${array[j+1]}</b> mất rồi (như vậy là sai thứ tự). Bắt buộc hai bạn phải <b>đổi chỗ</b> cho nhau thôi!`
+                        yield {
+                            type: 'SWAP', line: 'swap', j: j,
+                            msg: `Thấy <b>${array[j]} > ${array[j + 1]}</b>, nên ta <b>hoán đổi</b> vị trí của chúng.`,
+                            msgSimple: `Ồ! Bạn <b>${array[j]}</b> lại to hơn bạn <b>${array[j + 1]}</b> mất rồi (như vậy là sai thứ tự). Bắt buộc hai bạn phải <b>đổi chỗ</b> cho nhau thôi!`
                         };
-                        
+
                         let temp = array[j];
-                        array[j] = array[j+1];
-                        array[j+1] = temp;
+                        array[j] = array[j + 1];
+                        array[j + 1] = temp;
                     } else {
-                        yield { 
-                            type: 'NO_SWAP', line: 'compare', j: j, 
-                            msg: `Vì <b>${array[j]} ≤ ${array[j+1]}</b> (Đã đúng thứ tự), nên <b>không cần hoán đổi</b>.`,
-                            msgSimple: `Bạn <b>${array[j]}</b> nhỏ hơn (hoặc bằng) bạn <b>${array[j+1]}</b>. Vậy là bé đứng trước, to đứng sau đúng nguyên tắc rồi! <b>Không cần tráo chỗ</b>.`
+                        yield {
+                            type: 'NO_SWAP', line: 'compare', j: j,
+                            msg: `Vì <b>${array[j]} ≤ ${array[j + 1]}</b> (Đã đúng thứ tự), nên <b>không cần hoán đổi</b>.`,
+                            msgSimple: `Bạn <b>${array[j]}</b> nhỏ hơn (hoặc bằng) bạn <b>${array[j + 1]}</b>. Vậy là bé đứng trước, to đứng sau đúng nguyên tắc rồi! <b>Không cần tráo chỗ</b>.`
                         };
                     }
                 }
-                yield { 
-                    type: 'MARK_SORTED', line: 'outer', index: n - i - 1, 
+                yield {
+                    type: 'MARK_SORTED', line: 'outer', index: n - i - 1,
                     msg: `Kết thúc vòng lặp trong.<br>Phần tử lớn nhất trong đoạn vừa xét là <b>${array[n - i - 1]}</b> đã được đẩy về đúng vị trí cuối. Đánh dấu nó hoàn thành (màu xanh).`,
                     msgSimple: `Xong 1 lượt! Chúc mừng bạn số <b>${array[n - i - 1]}</b> đã bị đẩy tít về cuối hàng. Khoác cho bạn ấy cái áo màu xanh lá để "chốt sổ".`
                 };
             }
-            yield { 
-                type: 'MARK_SORTED', line: 'done', index: 0, 
+            yield {
+                type: 'MARK_SORTED', line: 'done', index: 0,
                 msg: `Chỉ còn lại phần tử đầu tiên <b>${array[0]}</b>, hiển nhiên nó đã nằm đúng vị trí.`,
                 msgSimple: `Tất cả các bạn phía sau đều đã chốt sổ, vậy bạn nhỏ nhất <b>${array[0]}</b> đầu hàng dĩ nhiên là đang đứng đúng chỗ rồi!`
             };
-            yield { 
-                type: 'DONE', line: 'done', 
+            yield {
+                type: 'DONE', line: 'done',
                 msg: `🎉 <b>Hoàn tất!</b> Mảng đã được sắp xếp tăng dần thành công.`,
                 msgSimple: `🎉 <b>Xong rồi! Hoan hô!</b> Tất cả các bạn học sinh đã xếp hàng rất thẳng tắp từ thấp đến cao!`
             };
@@ -590,7 +654,7 @@
                     domArray.forEach(block => block.style.transform = 'scale(1)');
                     break;
                 case 'DONE':
-                    resetColors(false); 
+                    resetColors(false);
                     domArray.forEach(block => block.classList.add('bg-green-500'));
                     document.getElementById('btnNext').disabled = true;
                     stopAutoPlay();
@@ -607,10 +671,10 @@
                 btnAuto.innerText = "⏸ Dừng tự động";
                 btnAuto.classList.replace('bg-purple-100', 'bg-red-100');
                 btnAuto.classList.replace('text-purple-700', 'text-red-700');
-                
+
                 autoPlayInterval = setInterval(() => {
                     nextStep();
-                }, 1800); 
+                }, 1800);
             }
         }
 
@@ -618,7 +682,7 @@
             isAutoPlaying = false;
             clearInterval(autoPlayInterval);
             const btnAuto = document.getElementById('btnAuto');
-            if(btnAuto) {
+            if (btnAuto) {
                 btnAuto.innerText = "▶ Chơi tự động";
                 btnAuto.classList.replace('bg-red-100', 'bg-purple-100');
                 btnAuto.classList.replace('text-red-700', 'text-purple-700');
@@ -679,14 +743,14 @@
             const lang = document.getElementById('primeLangSelect').value;
             const lines = primeCodeData[lang].lines;
             const container = document.getElementById('primeCodeContainer');
-            if(!container) return;
-            container.innerHTML = ''; 
-            
+            if (!container) return;
+            container.innerHTML = '';
+
             lines.forEach((line, index) => {
                 const div = document.createElement('div');
                 div.id = `prime-code-line-${index}`;
                 div.className = 'px-2 py-1 rounded border-l-4 border-transparent';
-                div.innerHTML = line; 
+                div.innerHTML = line;
                 container.appendChild(div);
             });
             highlightPrimeLine(currentPrimeLineKey);
@@ -698,7 +762,7 @@
             const lineIndex = primeCodeData[lang].map[lineKey];
             const linesCount = primeCodeData[lang].lines.length;
 
-            for(let i=0; i<linesCount; i++) {
+            for (let i = 0; i < linesCount; i++) {
                 const el = document.getElementById(`prime-code-line-${i}`);
                 if (el) {
                     el.classList.remove('bg-slate-700', 'border-green-400', 'text-white');
@@ -717,13 +781,13 @@
             const box = document.getElementById('primeExplanationBox');
             const textEl = document.getElementById('primeExplanationText');
             const simpleEl = document.getElementById('primeExplanationSimpleText');
-            
-            if(textEl) textEl.innerHTML = textAcademic;
-            if(simpleEl) simpleEl.innerHTML = textSimple;
-            
-            if(box) {
+
+            if (textEl) textEl.innerHTML = textAcademic;
+            if (simpleEl) simpleEl.innerHTML = textSimple;
+
+            if (box) {
                 box.classList.remove('flash-effect');
-                void box.offsetWidth; 
+                void box.offsetWidth;
                 box.classList.add('flash-effect');
             }
         }
@@ -732,21 +796,21 @@
             stopPrimeAutoPlay();
             document.getElementById('btnPrimeNext').disabled = false;
             document.getElementById('btnPrimeAuto').disabled = false;
-            
+
             const inputVal = document.getElementById('primeInput').value;
             const errorMsg = document.getElementById('primeErrorMsg');
-            
+
             primeN = parseInt(inputVal);
-            
+
             if (isNaN(primeN) || primeN < 1 || primeN > 50) {
                 errorMsg.classList.remove('hidden');
                 return;
             }
             errorMsg.classList.add('hidden');
-            
+
             document.getElementById('primeTargetBlock').innerText = primeN;
             document.getElementById('primeTargetBlock').className = 'flex items-center justify-center w-20 h-20 rounded-xl text-white font-bold text-4xl shadow-lg bg-indigo-500';
-            
+
             const container = document.getElementById('primeDivisorsContainer');
             container.innerHTML = '';
             primeDivisorBlocks = [];
@@ -766,7 +830,7 @@
             }
 
             primeGeneratorObj = checkPrimeGenerator(primeN);
-            
+
             highlightPrimeLine('start');
             updatePrimeExplanation(
                 `Hàm kiểm tra Số Nguyên Tố nhận đầu vào là N = <b>${primeN}</b>. Bấm "Bước tiếp theo" để bắt đầu thuật toán.`,
@@ -792,8 +856,8 @@
 
             yield {
                 type: 'LOOP_START', line: 'loop',
-                msg: `<b>Bắt đầu vòng lặp:</b><br>Thuật toán sẽ cho biến <b>i</b> chạy nghiệm từ <b>2</b> đến <b>${n-1}</b>. Nếu tồn tại bất kỳ số <b>i</b> nào chia hết <b>${n}</b>, nó sẽ không phải số nguyên tố.`,
-                msgSimple: `Bây giờ, cô giáo sẽ dắt lần lượt từng bạn mang áo từ số <b>2</b> đến số <b>${n-1}</b> (những bạn đứng giữa) ra xếp cạnh để "chia thử".`
+                msg: `<b>Bắt đầu vòng lặp:</b><br>Thuật toán sẽ cho biến <b>i</b> chạy nghiệm từ <b>2</b> đến <b>${n - 1}</b>. Nếu tồn tại bất kỳ số <b>i</b> nào chia hết <b>${n}</b>, nó sẽ không phải số nguyên tố.`,
+                msgSimple: `Bây giờ, cô giáo sẽ dắt lần lượt từng bạn mang áo từ số <b>2</b> đến số <b>${n - 1}</b> (những bạn đứng giữa) ra xếp cạnh để "chia thử".`
             };
 
             for (let i = 2; i < n; i++) {
@@ -821,7 +885,7 @@
 
             yield {
                 type: 'PRIME', line: 'return_true',
-                msg: `<b>Hoàn thành vòng lặp!</b><br>Đã kiểm tra tất cả các số từ 2 đến ${n-1} mà KHÔNG CÓ BẤT KỲ SỐ NÀO chia hết N. Trả về kết quả <b>True</b>.`,
+                msg: `<b>Hoàn thành vòng lặp!</b><br>Đã kiểm tra tất cả các số từ 2 đến ${n - 1} mà KHÔNG CÓ BẤT KỲ SỐ NÀO chia hết N. Trả về kết quả <b>True</b>.`,
                 msgSimple: `🎉 <b>Chúc mừng!</b> Đã thử hết toàn bộ các bạn trong hàng mà không có ai "bắt cặp" chia hết được cho <b>${n}</b>. Cô giáo tuyên bố: Bạn <b>${n} CHÍNH LÀ SỐ NGUYÊN TỐ!</b>`
             };
         }
@@ -846,14 +910,14 @@
 
             primeDivisorBlocks.forEach(b => {
                 if (b.el.classList.contains('bg-yellow-400')) {
-                    b.el.classList.replace('bg-yellow-400', 'bg-gray-300'); 
+                    b.el.classList.replace('bg-yellow-400', 'bg-gray-300');
                     b.el.style.transform = 'scale(1)';
                 }
             });
 
             switch (data.type) {
                 case 'CHECK_1':
-                    targetBlock.classList.add('animate-pulse'); 
+                    targetBlock.classList.add('animate-pulse');
                     break;
                 case 'LOOP_START':
                     targetBlock.classList.remove('animate-pulse');
@@ -861,12 +925,12 @@
                     break;
                 case 'TESTING':
                     const testingBlock = primeDivisorBlocks.find(b => b.val === data.val).el;
-                    testingBlock.classList.replace('bg-gray-400', 'bg-yellow-400'); 
-                    testingBlock.classList.replace('bg-gray-300', 'bg-yellow-400'); 
+                    testingBlock.classList.replace('bg-gray-400', 'bg-yellow-400');
+                    testingBlock.classList.replace('bg-gray-300', 'bg-yellow-400');
                     testingBlock.style.transform = 'scale(1.2)';
                     break;
                 case 'DIVISIBLE':
-                    targetBlock.classList.replace('bg-indigo-500', 'bg-red-500'); 
+                    targetBlock.classList.replace('bg-indigo-500', 'bg-red-500');
                     const failBlock = primeDivisorBlocks.find(b => b.val === data.val).el;
                     failBlock.classList.replace('bg-yellow-400', 'bg-red-500');
                     document.getElementById('btnPrimeNext').disabled = true;
@@ -874,7 +938,7 @@
                     break;
                 case 'NOT_DIVISIBLE':
                     const passBlock = primeDivisorBlocks.find(b => b.val === data.val).el;
-                    passBlock.classList.replace('bg-yellow-400', 'bg-blue-300'); 
+                    passBlock.classList.replace('bg-yellow-400', 'bg-blue-300');
                     passBlock.style.transform = 'scale(1)';
                     break;
                 case 'NOT_PRIME':
@@ -883,7 +947,7 @@
                     stopPrimeAutoPlay();
                     break;
                 case 'PRIME':
-                    targetBlock.classList.replace('bg-indigo-500', 'bg-green-500'); 
+                    targetBlock.classList.replace('bg-indigo-500', 'bg-green-500');
                     primeDivisorBlocks.forEach(b => {
                         b.el.classList.remove('bg-gray-400', 'bg-gray-300', 'bg-blue-300');
                         b.el.classList.add('bg-green-400');
@@ -903,10 +967,10 @@
                 btnAuto.innerText = "⏸ Dừng tự động";
                 btnAuto.classList.replace('bg-purple-100', 'bg-red-100');
                 btnAuto.classList.replace('text-purple-700', 'text-red-700');
-                
+
                 primeAutoPlayInterval = setInterval(() => {
                     nextPrimeStep();
-                }, 1800); 
+                }, 1800);
             }
         }
 
@@ -914,7 +978,7 @@
             isPrimeAutoPlaying = false;
             clearInterval(primeAutoPlayInterval);
             const btnAuto = document.getElementById('btnPrimeAuto');
-            if(btnAuto) {
+            if (btnAuto) {
                 btnAuto.innerText = "▶ Chơi tự động";
                 btnAuto.classList.replace('bg-red-100', 'bg-purple-100');
                 btnAuto.classList.replace('text-red-700', 'text-purple-700');
@@ -922,4 +986,5 @@
         }
     </script>
 </body>
+
 </html>

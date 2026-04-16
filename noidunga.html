@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thuyết Trình: Phương Thức Tham Quan</title>
+    <!-- Sử dụng Tailwind qua CDN để reset CSS cơ bản -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            overflow: hidden;
+            /* Ẩn thanh cuộn */
+            font-family: 'Nunito', sans-serif;
+        }
+
+        #presentation-area {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Vùng chứa ảnh */
+        #image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            /* Màu nền chờ để khi fade ảnh không bị chói đen */
+        }
+
+        /* Hiệu ứng Zoom và Fade mượt mà cho ảnh */
+        #infographic {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Cập nhật: Thêm transition opacity để chuyển slide êm ái */
+            transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in-out;
+            transform-origin: 50% 50%;
+            opacity: 1;
+        }
+
+        /* Khung nội dung - Phong cách Sổ tay học sinh */
+        #info-box {
+            position: absolute;
+            background-color: #fafafa;
+            background-image: linear-gradient(transparent 95%, #74b9ff 95%);
+            background-size: 100% 2rem;
+            padding: 2rem 2.5rem;
+            border: 3px solid #0984e3;
+            border-radius: 4px 16px 4px 16px;
+            box-shadow: 8px 8px 0px rgba(9, 132, 227, 0.2), 0 15px 35px rgba(0, 0, 0, 0.4);
+
+            /* Hiệu ứng bay mượt mà cho Left, Transform và Width/Height */
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.5s ease-out;
+
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            width: 480px;
+            min-width: 300px;
+            min-height: 200px;
+            max-height: 85vh;
+            overflow-y: auto;
+
+            /* Vị trí xuất phát khi ẩn (ở giữa) */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -40%) scale(0.9);
+        }
+
+        #info-box.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #info-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #info-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #info-box::-webkit-scrollbar-thumb {
+            background: #0984e3;
+            border-radius: 4px;
+        }
+
+        /* Các nút nắm kéo ở 4 góc */
+        .resizer {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #fdcb6e;
+            border: 3px solid #e17055;
+            border-radius: 50%;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.2s;
+        }
+
+        #info-box:hover .resizer {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .resizer:hover {
+            transform: scale(1.3);
+        }
+
+        .resizer.nw {
+            top: -12px;
+            left: -12px;
+            cursor: nwse-resize;
+        }
+
+        .resizer.ne {
+            top: -12px;
+            right: -12px;
+            cursor: nesw-resize;
+        }
+
+        .resizer.sw {
+            bottom: -12px;
+            left: -12px;
+            cursor: nesw-resize;
+        }
+
+        .resizer.se {
+            bottom: -12px;
+            right: -12px;
+            cursor: nwse-resize;
+        }
+
+        /* Băng dính và Icon trang trí trên sổ */
+        .tape {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 140px;
+            height: 35px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(3px);
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .student-icons {
+            position: absolute;
+            bottom: -22px;
+            right: -15px;
+            font-size: 2.5rem;
+            letter-spacing: -10px;
+            filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, 0.3));
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        /* VỊ TRÍ ĐỘNG: NÉ HÌNH ẢNH MƯỢT MÀ VÀ NÉ TIÊU ĐỀ CHẶNG */
+        /* Nằm bên Phải màn hình */
+        #info-box.pos-right.visible {
+            left: 96%;
+            top: 50%;
+            /* Hạ tâm hộp xuống một chút (-40% thay vì -50%) để không che phần tiêu đề chặng ở phía trên */
+            transform: translate(-100%, -40%) scale(1);
+        }
+
+        /* Nằm bên Trái màn hình */
+        #info-box.pos-left.visible {
+            left: 4%;
+            top: 50%;
+            transform: translate(0, -40%) scale(1);
+        }
+
+        /* Nằm góc Trên Cùng Bên Phải */
+        #info-box.pos-top-right.visible {
+            left: 96%;
+            top: 5%;
+            transform: translate(-100%, 0) scale(1);
+        }
+
+        /* Hiệu ứng focus khi click sửa text */
+        [contenteditable="true"] {
+            outline: none;
+            border-radius: 4px;
+        }
+
+        [contenteditable="true"]:hover {
+            background: rgba(116, 185, 255, 0.2);
+            cursor: text;
+        }
+
+        [contenteditable="true"]:focus {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 2px #0984e3;
+        }
+
+        #box-title {
+            color: #d63031;
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            text-align: center;
+            transition: opacity 0.3s ease-out, background 0.2s;
+            opacity: 1;
+        }
+
+        #box-content {
+            color: #2d3436;
+            font-size: 1.2rem;
+            line-height: 2rem;
+            text-align: justify;
+            transition: opacity 0.3s ease-out, background 0.2s;
+            opacity: 1;
+        }
+
+        .text-fade-out {
+            opacity: 0 !important;
+        }
+
+        #box-content ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        #box-content li {
+            position: relative;
+            padding-left: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #box-content li::before {
+            content: '📌';
+            position: absolute;
+            left: 0;
+            font-size: 1.1rem;
+            top: 0;
+        }
+
+        .edit-hint {
+            font-size: 0.85rem;
+            color: #b2bec3;
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+            user-select: none;
+        }
+
+        /* Hướng dẫn ban đầu */
+        #intro-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 50;
+            transition: opacity 0.5s;
+        }
+
+        .key-btn {
+            background: #fff;
+            color: #000;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="presentation-area">
+
+        <!-- Màn hình hướng dẫn -->
+        <div id="intro-overlay">
+            <h1 class="text-4xl font-bold mb-6 text-yellow-400">Sẵn sàng thuyết trình!</h1>
+            <p class="text-xl mb-3">Nhấn phím <span class="key-btn">K</span> để Bật/Tắt Toàn Màn Hình</p>
+            <p class="text-xl mb-8">Dùng <span class="key-btn">Mũi Tên</span> hoặc <span class="key-btn">Bút Thuyết
+                    Trình</span> để chuyển slide</p>
+            <p class="text-sm text-gray-400 animate-pulse">(Nhấn phím bất kỳ để bắt đầu)</p>
+        </div>
+
+        <!-- Ảnh Infographic -->
+        <div id="image-container">
+            <!-- Mặc định load ảnh 1 trước -->
+            <img id="infographic" src="noidunga.png" alt="Infographic Phương thức tham quan"
+                onerror="alert('Hãy đảm bảo bạn đã lưu ảnh noidunga.png, noidungb.png, noidungc.png và noidungd.png chung thư mục với file này!');">
+        </div>
+
+        <!-- Khung Nội Dung -->
+        <div id="info-box">
+            <div class="tape"></div>
+            <div class="student-icons">🎒📚✏️</div>
+
+            <!-- 4 Nút tròn nắm kéo ở 4 góc -->
+            <div class="resizer nw"></div>
+            <div class="resizer ne"></div>
+            <div class="resizer sw"></div>
+            <div class="resizer se"></div>
+
+            <h2 id="box-title" contenteditable="true">Tiêu đề</h2>
+            <div id="box-content" contenteditable="true">Nội dung...</div>
+
+            <div class="edit-hint">(Nhấp vào chữ để sửa - Nắm góc tròn để kéo giãn)</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Cấu hình các bước thuyết trình
+        const steps = [
+            // --- SLIDE 1 (noidunga.png) ---
+            {
+                // Bước 0: Nhìn tổng quan toàn bộ ảnh 1
+                image: 'noidunga.png', scale: 1, origin: '50% 50%', showBox: false, boxClass: '', title: "", content: ""
+            },
+            {
+                // Bước 1: Khái niệm (Slide 1)
+                image: 'noidunga.png', scale: 1, origin: '50% 50%', showBox: true, boxClass: 'pos-right',
+                title: "1.1. Khái niệm",
+                content: `Tham quan là phương thức tổ chức hoạt động trải nghiệm đưa học sinh ra khỏi không gian lớp học để tiếp xúc trực tiếp với các cơ quan, doanh nghiệp, di tích lịch sử hoặc các thực thể thực tế.<br><br>Mục đích cốt lõi là giúp học sinh quan sát, thu thập thông tin và đối chiếu kiến thức lý thuyết với thực tiễn đời sống, từ đó hình thành những nhận thức sinh động và khách quan.`
+            },
+            {
+                // Bước 2: Phạm vi áp dụng (Slide 1)
+                image: 'noidunga.png', scale: 1, origin: '50% 50%', showBox: true, boxClass: 'pos-left',
+                title: "1.2. Phạm vi áp dụng trong bậc THPT",
+                content: `Ở cấp THPT, phương thức này đặc biệt hiệu quả khi áp dụng vào:
+                <ul>
+                    <li><b>Hoạt động hướng nghiệp:</b> Giúp học sinh tìm hiểu về môi trường làm việc thực tế, yêu cầu của các nhóm ngành nghề (như IT, y tế, sản xuất).</li>
+                    <li><b>Nội dung giáo dục địa phương:</b> Tìm hiểu về di sản, kinh tế - xã hội tại nơi sinh sống.</li>
+                    <li><b>Các môn học thực nghiệm:</b> Quan sát các ứng dụng của Khoa học tự nhiên trong sản xuất thực tiễn.</li>
+                </ul>`
+            },
+
+            // --- SLIDE 2 (noidungb.png) - 4 CHẶNG THAM QUAN ---
+            {
+                // Bước 3: NHÌN TỔNG QUAN SLIDE 2
+                image: 'noidungb.png', scale: 1, origin: '50% 50%', showBox: false, boxClass: '',
+                title: "",
+                content: ""
+            },
+            {
+                // Bước 4: Chặng 1 (Góc trên bên trái)
+                image: 'noidungb.png', scale: 1.85, origin: '18% 25%', showBox: true, boxClass: 'pos-right',
+                title: "2.1. Chặng 1: Chuyển giao nhiệm vụ",
+                content: `Giáo viên đặt vấn đề, xác định mục đích chuyến đi và giao nhiệm vụ cụ thể cho từng nhóm học sinh.<br><br>Đây là giai đoạn kích hoạt tính chủ động, yêu cầu học sinh phải tự xây dựng kế hoạch tiền trạm và chuẩn bị các công cụ thu thập thông tin (câu hỏi phỏng vấn, máy ảnh, sổ ghi chép).`
+            },
+            {
+                // Bước 5: Chặng 2 (Góc trên bên phải)
+                image: 'noidungb.png', scale: 1.85, origin: '82% 25%', showBox: true, boxClass: 'pos-left',
+                title: "2.2. Chặng 2: Thực hiện nhiệm vụ",
+                content: `<b>(Trải nghiệm thực địa)</b><br><br>Học sinh trực tiếp thâm nhập vào bối cảnh thực tế.<br><br>Ở giai đoạn này, giáo viên đóng vai trò là người quan sát và hỗ trợ, để học sinh tự do tương tác với chuyên gia, quan sát quy trình vận hành và ghi nhận các dữ liệu thực tế.`
+            },
+            {
+                // Bước 6: Chặng 3 (Góc dưới bên trái)
+                image: 'noidungb.png', scale: 1.85, origin: '18% 75%', showBox: true, boxClass: 'pos-right',
+                title: "2.3. Chặng 3: Báo cáo và Thảo luận",
+                content: `Sau chuyến tham quan, học sinh tổng hợp dữ liệu để tạo ra sản phẩm (tập san, video, báo cáo khoa học).<br><br>Các nhóm trình bày kết quả và thảo luận về những gì đã "thấy" và "chạm", từ đó rút ra các bài học về kiến thức và thái độ.`
+            },
+            {
+                // Bước 7: Chặng 4 (Góc dưới bên phải)
+                image: 'noidungb.png', scale: 1.85, origin: '82% 75%', showBox: true, boxClass: 'pos-left',
+                title: "2.4. Đánh giá và Kết luận",
+                content: `Giáo viên và học sinh cùng đánh giá về mức độ hoàn thành mục tiêu.<br><br>Quan trọng nhất là bước đúc kết các giá trị cốt lõi, giúp học sinh nhận diện sự thay đổi trong tư duy định hướng nghề nghiệp của bản thân.`
+            },
+
+            // --- SLIDE 3 (noidungc.png) - THIẾT KẾ HOẠT ĐỘNG CỤ THỂ ---
+            {
+                // Bước 8: NHÌN TỔNG QUAN SLIDE 3
+                image: 'noidungc.png', scale: 1, origin: '50% 50%', showBox: false, boxClass: '',
+                title: "",
+                content: ""
+            },
+            {
+                // Bước 9: 3.1.1 (Về năng lực) - Zoom vào góc ngoài cùng bên trái
+                image: 'noidungc.png', scale: 2.1, origin: '12% 25%', showBox: true, boxClass: 'pos-right',
+                title: "3.1.1. Về Năng lực",
+                content: `<ul>
+                    <li><b>Thiết kế & Tổ chức:</b> Học sinh biết cách lập kế hoạch chi tiết cho buổi tham quan, phân công nhân sự và chuẩn bị đạo cụ.</li>
+                    <li><b>Thích ứng cuộc sống:</b> Học sinh điều chỉnh thái độ giao tiếp phù hợp với môi trường công sở, tôn trọng quy định chung.</li>
+                    <li><b>Định hướng nghề nghiệp:</b> Tự đánh giá mức độ phù hợp của bản thân thông qua quan sát cường độ làm việc và áp lực thực tế.</li>
+                </ul>`
+            },
+            {
+                // Bước 10: 3.1.2 (Về phẩm chất) - Đưa 3.1.2 vào trung tâm, đẩy khung chữ sang phải che 3.2
+                image: 'noidungc.png', scale: 2.1, origin: '42% 25%', showBox: true, boxClass: 'pos-right',
+                title: "3.1.2. Về Phẩm chất",
+                content: `<ul>
+                    <li><b>Trách nhiệm:</b> Ý thức được vai trò cá nhân trong việc hoàn thành các phần việc của nhóm.</li>
+                    <li><b>Chăm chỉ:</b> Sự kiên nhẫn khi theo dõi các quy trình kỹ thuật phức tạp tại hiện trường.</li>
+                </ul>`
+            },
+            {
+                // Bước 11: 3.2 (Nội dung & Cách thức) - Biến 3.2 thành trung tâm ở góc trên bên phải
+                image: 'noidungc.png', scale: 2.1, origin: '88% 25%', showBox: true, boxClass: 'pos-left',
+                title: "3.2. Nội dung và Cách thức",
+                content: `<ul>
+                    <li><b>Nội dung:</b> Tham quan phòng kỹ thuật, phỏng vấn chuyên gia về quy trình vận hành và văn hóa doanh nghiệp.</li>
+                    <li><b>Cách thức:</b> Kết hợp giữa quan sát hiện trường và phỏng vấn sâu (Deep Interview).</li>
+                </ul>`
+            },
+            {
+                // Bước 12: 3.3.1 (Khi nào nên dùng) - Góc dưới bên trái
+                image: 'noidungc.png', scale: 2.1, origin: '20% 75%', showBox: true, boxClass: 'pos-right',
+                title: "3.3.1. Khi nào nên dùng?",
+                content: `<ul>
+                    <li><b>Cụ thể hóa lý thuyết:</b> Khi nội dung trừu tượng khó hình dung tại lớp.</li>
+                    <li><b>Định hướng nghề nghiệp:</b> Cần "mắt thấy tai nghe" môi trường chuyên nghiệp.</li>
+                    <li><b>Xây dựng động lực:</b> Thay đổi không khí, tạo bùng nổ cảm xúc và hứng thú.</li>
+                    <li><b>Phát triển kỹ năng xã hội:</b> Rèn luyện giao tiếp, tác phong và sự tự tin.</li>
+                </ul>`
+            },
+            {
+                // Bước 13: 3.3.2 (Khi nào không nên dùng) - Đẩy khung chữ lên góc trên cùng bên phải
+                image: 'noidungc.png', scale: 2.1, origin: '85% 75%', showBox: true, boxClass: 'pos-top-right',
+                title: "3.3.2. Khi nào không nên dùng?",
+                content: `<ul>
+                    <li><b>Mục tiêu đơn giản:</b> Nội dung có thể mô phỏng qua video/tài liệu.</li>
+                    <li><b>Thiếu điều kiện an toàn:</b> Địa điểm có rủi ro cao, không đảm bảo sức khỏe.</li>
+                    <li><b>Kinh phí, thời gian hạn hẹp:</b> Không đủ nguồn lực, dễ dẫn đến lãng phí, hời hợt.</li>
+                </ul>`
+            },
+
+            // --- SLIDE 4 (noidungd.png) - ĐÁNH GIÁ ƯU ĐIỂM VÀ HẠN CHẾ ---
+            {
+                // Bước 14: NHÌN TỔNG QUAN SLIDE 4
+                image: 'noidungd.png', scale: 1, origin: '50% 50%', showBox: false, boxClass: '',
+                title: "",
+                content: ""
+            },
+            {
+                // Bước 15: 3.4.1 (Ưu điểm) - Góc bên trái
+                image: 'noidungd.png', scale: 2.1, origin: '15% 50%', showBox: true, boxClass: 'pos-right',
+                title: "3.4.1. Ưu điểm",
+                content: `<ul>
+                    <li>Thông tin thực tế, sống động.</li>
+                    <li>Phát triển toàn diện các giác quan và kỹ năng mềm.</li>
+                </ul>`
+            },
+            {
+                // Bước 16: 3.4.2 (Hạn chế) - Ở giữa
+                image: 'noidungd.png', scale: 2.1, origin: '50% 50%', showBox: true, boxClass: 'pos-right',
+                title: "3.4.2. Hạn chế",
+                content: `<ul>
+                    <li>Quy trình tổ chức phức tạp.</li>
+                    <li>Phụ thuộc vào sự hợp tác của đối tác (doanh nghiệp/cơ sở).</li>
+                    <li>Khó quản lý kỷ luật tập thể ở không gian mở.</li>
+                </ul>`
+            },
+            {
+                // Bước 17: 3.4.3 (Điều kiện áp dụng) - Góc bên phải
+                image: 'noidungd.png', scale: 2.1, origin: '85% 50%', showBox: true, boxClass: 'pos-left',
+                title: "3.4.3. Điều kiện áp dụng",
+                content: `<ul>
+                    <li>Cần sự phối hợp chặt chẽ của doanh nghiệp.</li>
+                    <li>Sự đồng thuận của phụ huynh học sinh.</li>
+                    <li>Phải có kế hoạch dự phòng rủi ro chi tiết.</li>
+                </ul>`
+            }
+        ];
+
+        let currentStep = 0;
+        const imgElement = document.getElementById('infographic');
+        const infoBox = document.getElementById('info-box');
+        const boxTitle = document.getElementById('box-title');
+        const boxContent = document.getElementById('box-content');
+        const introOverlay = document.getElementById('intro-overlay');
+        let presentationStarted = false;
+
+        // --- HÀM XỬ LÝ KHUNG CHỮ (Được tách riêng ra để tái sử dụng) ---
+        function applyBoxChanges(stepData, isImageChanging) {
+            // Khôi phục lại transition bay mượt nếu nó bị tắt lúc người dùng dùng chuột kéo giãn
+            infoBox.style.transition = '';
+
+            // Reset lại các thông số kích thước/vị trí do người dùng kéo giãn tay
+            infoBox.style.width = '';
+            infoBox.style.height = '';
+            infoBox.style.left = '';
+            infoBox.style.top = '';
+            infoBox.style.transform = '';
+
+            const wasVisible = infoBox.classList.contains('visible');
+
+            // Đổi class vị trí
+            infoBox.classList.remove('pos-left', 'pos-right', 'pos-top-right');
+            infoBox.classList.add(stepData.boxClass);
+
+            // Kỹ xảo mờ chữ
+            boxTitle.classList.add('text-fade-out');
+            boxContent.classList.add('text-fade-out');
+
+            // Tính toán thời gian delay
+            const textSwapDelay = (wasVisible && !isImageChanging) ? 300 : 0;
+
+            setTimeout(() => {
+                boxTitle.innerHTML = stepData.title;
+                boxContent.innerHTML = stepData.content;
+                boxTitle.classList.remove('text-fade-out');
+                boxContent.classList.remove('text-fade-out');
+            }, textSwapDelay);
+
+            // Hiện hộp lên sau một chút delay
+            if (!wasVisible || isImageChanging) {
+                setTimeout(() => {
+                    infoBox.classList.add('visible');
+                }, 50);
+            }
+        }
+
+        // --- HÀM CẬP NHẬT GIAO DIỆN THEO BƯỚC (Bao gồm Xử lý chuyển Slide) ---
+        function updatePresentation() {
+            const stepData = steps[currentStep];
+
+            // Lấy tên ảnh hiện tại từ thẻ img (chỉ lấy phần tên file)
+            let currentSrc = imgElement.getAttribute('src');
+            currentSrc = currentSrc.substring(currentSrc.lastIndexOf('/') + 1);
+
+            // 1. KIỂM TRA XEM CÓ CẦN ĐỔI ẢNH (CHUYỂN SLIDE) KHÔNG
+            if (currentSrc !== stepData.image) {
+                // Đang chuyển slide! 
+                // Bước A: Tạm ẩn hộp nội dung đi để chuẩn bị chuyển cảnh
+                infoBox.classList.remove('visible');
+
+                // Bước B: Làm mờ tấm ảnh cũ
+                imgElement.style.opacity = '0';
+
+                // Bước C: Chờ 400ms cho mờ hẳn, rồi tráo file ảnh mới vào, zoom và hiện lên
+                setTimeout(() => {
+                    imgElement.src = stepData.image; // Tráo file
+                    imgElement.style.transformOrigin = stepData.origin; // Áp dụng tọa độ zoom của chặng mới
+                    imgElement.style.transform = `scale(${stepData.scale})`; // Áp dụng độ zoom
+                    imgElement.style.opacity = '1'; // Sáng lên lại
+
+                    // Hiện hộp thoại lên (nếu có yêu cầu) sau khi ảnh mới đã hiện
+                    if (stepData.showBox) {
+                        applyBoxChanges(stepData, true);
+                    }
+                }, 400);
+
+            } else {
+                // Đang ở cùng 1 slide, chỉ cần Zoom hoặc Lướt ngang bảng thông tin
+                imgElement.style.transformOrigin = stepData.origin;
+                imgElement.style.transform = `scale(${stepData.scale})`;
+
+                if (stepData.showBox) {
+                    applyBoxChanges(stepData, false);
+                } else {
+                    infoBox.classList.remove('visible');
+                }
+            }
+        }
+
+        // --- BỘ MÁY XỬ LÝ KÉO THẢ TỪ 4 GÓC ---
+        const resizers = document.querySelectorAll('.resizer');
+        let isResizing = false;
+        let currentResizer;
+        let originalWidth, originalHeight, originalX, originalY, originalMouseX, originalMouseY;
+
+        resizers.forEach(resizer => {
+            resizer.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                isResizing = true;
+                currentResizer = resizer;
+
+                const rect = infoBox.getBoundingClientRect();
+                originalWidth = rect.width;
+                originalHeight = rect.height;
+                originalX = rect.left;
+                originalY = rect.top;
+                originalMouseX = e.pageX;
+                originalMouseY = e.pageY;
+
+                infoBox.style.transition = 'none';
+                infoBox.style.left = originalX + 'px';
+                infoBox.style.top = originalY + 'px';
+                infoBox.style.transform = 'none';
+                infoBox.classList.remove('pos-left', 'pos-right', 'pos-top-right');
+
+                window.addEventListener('mousemove', resizeBox);
+                window.addEventListener('mouseup', stopResizeBox);
+            });
+        });
+
+        function resizeBox(e) {
+            if (!isResizing) return;
+            let width = originalWidth; let height = originalHeight; let left = originalX; let top = originalY;
+
+            if (currentResizer.classList.contains('se')) {
+                width = originalWidth + (e.pageX - originalMouseX);
+                height = originalHeight + (e.pageY - originalMouseY);
+            } else if (currentResizer.classList.contains('sw')) {
+                width = originalWidth - (e.pageX - originalMouseX);
+                height = originalHeight + (e.pageY - originalMouseY);
+                left = originalX + (e.pageX - originalMouseX);
+            } else if (currentResizer.classList.contains('ne')) {
+                width = originalWidth + (e.pageX - originalMouseX);
+                height = originalHeight - (e.pageY - originalMouseY);
+                top = originalY + (e.pageY - originalMouseY);
+            } else if (currentResizer.classList.contains('nw')) {
+                width = originalWidth - (e.pageX - originalMouseX);
+                height = originalHeight - (e.pageY - originalMouseY);
+                top = originalY + (e.pageY - originalMouseY);
+                left = originalX + (e.pageX - originalMouseX);
+            }
+
+            if (width > 250) { infoBox.style.width = width + 'px'; infoBox.style.left = left + 'px'; }
+            if (height > 150) { infoBox.style.height = height + 'px'; infoBox.style.top = top + 'px'; }
+        }
+
+        function stopResizeBox() {
+            isResizing = false;
+            window.removeEventListener('mousemove', resizeBox);
+            window.removeEventListener('mouseup', stopResizeBox);
+        }
+
+        // Chuyển bước tiếp theo
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updatePresentation();
+            }
+        }
+
+        // Lùi lại
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updatePresentation();
+            }
+        }
+
+        // Bật/Tắt Fullscreen
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) { document.exitFullscreen(); }
+            }
+        }
+
+        // Bắt sự kiện bàn phím
+        document.addEventListener('keydown', (e) => {
+            if (!presentationStarted) {
+                introOverlay.style.opacity = '0';
+                setTimeout(() => introOverlay.style.display = 'none', 500);
+                presentationStarted = true;
+                if (e.key.toLowerCase() !== 'k') return;
+            }
+
+            if (e.key.toLowerCase() === 'k') { toggleFullScreen(); return; }
+
+            // Nếu đang gõ text vào khung thì bỏ qua phím mũi tên/space
+            if (document.activeElement && document.activeElement.getAttribute('contenteditable') === 'true') {
+                return;
+            }
+
+            // Cập nhật: Thêm ArrowDown và ArrowUp để hỗ trợ dùng bút thuyết trình clicker
+            if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) {
+                nextStep();
+                e.preventDefault();
+            }
+            if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) {
+                prevStep();
+                e.preventDefault();
+            }
+        });
+
+        // Click chuột trái để next
+        document.getElementById('presentation-area').addEventListener('click', (e) => {
+            if (!presentationStarted) {
+                introOverlay.style.opacity = '0';
+                setTimeout(() => introOverlay.style.display = 'none', 500);
+                presentationStarted = true;
+                return;
+            }
+
+            if (!infoBox.contains(e.target) && !e.target.classList.contains('resizer')) {
+                nextStep();
+            }
+        });
+
+    </script>
+</body>
+
+</html>
