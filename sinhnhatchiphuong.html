@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chúc Mừng Sinh Nhật Chị Phương!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0f172a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none;
+            /* Tránh vuốt màn hình khi chơi game trên điện thoại */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Lớp chung cho các màn hình */
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        /* Nút bấm hiệu ứng nổi bật */
+        .btn-custom {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .btn-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-custom:active {
+            transform: scale(0.95);
+        }
+
+        /* Hoạt ảnh lung linh cho text */
+        .glow-text {
+            text-shadow: 0 0 8px #ff00ff, 0 0 15px #ff00ff;
+        }
+
+        /* Canvas Game */
+        #gameCanvas {
+            background-image: url('anh2.png');
+            background-size: cover;
+            background-position: center;
+            border: 3px solid white;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            aspect-ratio: 2 / 1;
+            display: block;
+        }
+
+        /* Nút điều khiển game mobile - Tối ưu cho ngón tay cái */
+        .control-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 75px;
+            height: 75px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .control-btn:active,
+        .control-btn.active-touch {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.9);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Màn hình kết thúc Polaroid style */
+        .polaroid {
+            background: white;
+            padding: 12px 12px 25px 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: rotate(-2deg);
+            max-width: 90%;
+            margin: 0 auto;
+            display: inline-block;
+            /* Ôm sát vừa đúng chiều rộng ảnh */
+        }
+
+        .polaroid img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 45vh;
+            /* Giới hạn chiều cao để không bị che khuất / tràn màn hình trên PC */
+            border: 1px solid #ddd;
+            object-fit: contain;
+            /* Đảm bảo KHÔNG BỊ CẮT XÉN ẢNH (mất đầu) */
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Hướng dẫn phím K cho PC */
+        .hint-k {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            z-index: 50;
+        }
+    </style>
+</head>
+
+<body class="text-white relative">
+
+    <div class="hint-k hidden md:block">Bấm phím [K] để Bật/Tắt Toàn Màn Hình</div>
+
+    <!-- ÂM THANH -->
+    <audio id="birthdayMusic" src="nhac.mp3" loop></audio>
+
+    <!-- MÀN HÌNH 1: OMNI-MAN CHÀO ĐÓN -->
+    <div id="screen-1" class="screen active flex-col items-center justify-center relative bg-cover bg-center"
+        style="background-image: url('anh1.png');">
+        <!-- Overlay tối nhẹ để dễ đọc chữ trên đt -->
+        <div class="absolute inset-0 bg-black bg-opacity-40 md:bg-opacity-20"></div>
+
+        <div class="absolute top-8 md:top-10 w-full text-center z-10 pointer-events-none px-2">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black drop-shadow-lg text-yellow-300"></h1>
+        </div>
+
+        <div
+            class="z-10 w-full max-w-5xl h-full relative flex flex-col md:flex-row items-center justify-center md:justify-between px-6 sm:px-12 gap-6 mt-16 md:mt-0">
+            <!-- Nút 1 (Tay phải Omni-man / Trái màn hình) -->
+            <button onclick="goToGame()"
+                class="btn-custom bg-pink-500 bg-opacity-90 border-2 border-white text-white font-bold py-4 px-6 rounded-2xl text-lg sm:text-xl w-full md:w-2/5 max-w-[320px] md:mb-20 animate-pulse">
+                Chị Phương siêu xinh gái bấm vào đây
+            </button>
+
+            <!-- Nút 2 (Tay trái Omni-man / Phải màn hình) -->
+            <button onclick="goToTrap()"
+                class="btn-custom bg-blue-600 bg-opacity-90 border-2 border-white text-white font-bold py-4 px-6 rounded-2xl text-lg sm:text-xl w-full md:w-2/5 max-w-[320px] md:mb-20">
+                Chị Phương bấm vào đây
+            </button>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH 2: TRICK/TROLL MÀN HÌNH -->
+    <div id="screen-2" class="screen flex-col items-center justify-center relative bg-cover bg-center"
+        style="background-image: url('anh2.png');">
+        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+
+        <div
+            class="z-10 text-center bg-white bg-opacity-10 backdrop-blur-md border border-white p-6 md:p-12 rounded-3xl shadow-2xl max-w-2xl mx-4 w-11/12">
+            <h2 class="text-2xl md:text-4xl lg:text-5xl font-black text-red-400 mb-6 drop-shadow-md leading-tight">
+                Chị Phương Xinh Gái cơ mà, Bấm quay trở lại đi! 😡
+            </h2>
+            <button onclick="goToHome()"
+                class="btn-custom bg-yellow-400 text-gray-900 border-2 border-white font-bold text-lg md:text-xl py-3 px-8 rounded-full">
+                Quay trở lại ↩️
+            </button>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH 3: GAME MARIO VŨ TRỤ -->
+    <div id="screen-3"
+        class="screen flex-col items-center justify-center relative bg-cover bg-center bg-gray-900 overflow-hidden">
+        <div class="z-10 w-full flex flex-col items-center px-2 h-full justify-center max-w-4xl mx-auto">
+            <h2 class="text-lg md:text-2xl font-bold mb-4 text-yellow-300 glow-text text-center px-2">
+                Đưa Chị Phương Xinh Gái tới chiếc Bánh Sinh Nhật! 🎂
+            </h2>
+
+            <!-- Khu vực Game (Tự co giãn tỷ lệ) -->
+            <div class="w-full px-2 flex justify-center">
+                <canvas id="gameCanvas" width="800" height="400"></canvas>
+            </div>
+
+            <!-- Nút điều khiển cho Điện thoại (Gamepad UI) -->
+            <div class="flex justify-between items-center w-full max-w-[800px] mt-6 px-4 md:hidden">
+                <div class="flex space-x-3">
+                    <button id="btn-left" class="control-btn">⬅️</button>
+                    <button id="btn-right" class="control-btn">➡️</button>
+                </div>
+                <div>
+                    <button id="btn-jump" class="control-btn bg-blue-500 bg-opacity-30 border-blue-300">⬆️</button>
+                </div>
+            </div>
+
+            <p class="mt-6 text-gray-300 text-sm hidden md:block">
+                Sử dụng phím mũi tên ⬅️ ➡️ để di chuyển, ⬆️ hoặc SPACE để nhảy.
+            </p>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH 4: LỜI CHÚC & NHẠC -->
+    <div id="screen-4" class="screen flex-col items-center justify-start relative bg-cover bg-center"
+        style="background-image: url('anh2.png'); overflow-y: auto;">
+        <div class="absolute inset-0 bg-black bg-opacity-70 fixed"></div>
+
+        <!-- Hiệu ứng pháo hoa -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden fixed" id="confetti-container"></div>
+
+        <div class="z-10 flex flex-col items-center text-center px-4 w-full h-full py-8 relative">
+            <div class="polaroid mb-6 mt-4 shrink-0">
+                <img src="anh3.png" alt="Chị Phương Xinh Gái"
+                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NjYiPkNo4buLIFBoxrDGoW5nPC90ZXh0Pjwvc3ZnPg=='">
+                <div class="text-gray-800 text-lg md:text-xl font-bold mt-3 font-serif">Chị Phương Siêu Xinh Gái! ✨
+                </div>
+            </div>
+
+            <div
+                class="bg-white bg-opacity-10 backdrop-blur-lg border border-pink-300 p-5 md:p-6 rounded-2xl shadow-2xl w-full max-w-xl shrink-0 mb-10">
+                <h1 class="text-3xl md:text-4xl lg:text-5xl font-black text-pink-400 mb-3 glow-text">🎉 HAPPY BIRTHDAY
+                    🎉</h1>
+                <p class="text-base md:text-lg lg:text-xl text-white leading-relaxed">
+                    Chúc mừng sinh nhật người chị siêu xinh gái của em! 💖<br><br>
+                    Tuổi mới chúc chị luôn vui vẻ, hạnh phúc, ngày càng xinh đẹp rạng rỡ như những vì sao trong vũ trụ
+                    này. Luôn mạnh khoẻ, thành công và đạt được mọi điều chị mong muốn nhé!<br><br>
+                    <span class="block mt-2 text-yellow-300 font-bold text-lg md:text-xl">Mãi đỉnh nha chị yêu!
+                        🚀✨</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC JAVASCRIPT -->
+    <script>
+        // --- CHUYỂN ĐỔI MÀN HÌNH ---
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToHome() { switchScreen('screen-1'); }
+        function goToTrap() { switchScreen('screen-2'); }
+        function goToGame() {
+            switchScreen('screen-3');
+            initGame(); // Khởi tạo và bắt đầu game
+        }
+        function goToEnd() {
+            switchScreen('screen-4');
+            // Bật nhạc
+            const audio = document.getElementById('birthdayMusic');
+            audio.play().catch(e => console.log("Trình duyệt chặn tự động phát âm thanh."));
+            createConfetti();
+        }
+
+        // --- FULLSCREEN (Bấm K) ---
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'k' || e.key === 'K') {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log("Lỗi bật Toàn Màn Hình:", err);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            }
+        });
+
+        // --- LOGIC GAME MARIO ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gameLoopReq;
+
+        // Trạng thái nút bấm
+        const keys = { right: false, left: false, up: false };
+
+        // Các biến game
+        let player, platforms, goal, stars;
+        let isGameOver = false;
+
+        function initGame() {
+            // Khởi tạo lại thông số người chơi
+            player = {
+                x: 50, y: 300,
+                width: 30, height: 40,
+                dx: 0, dy: 0,
+                speed: 6, // Tăng nhẹ tốc độ để dễ chơi trên đt
+                jumpPower: -13,
+                grounded: false
+            };
+            isGameOver = false;
+
+            // Khởi tạo các bệ đỡ (platforms)
+            platforms = [
+                { x: 0, y: 350, w: 800, h: 50 }, // Mặt đất
+                { x: 250, y: 270, w: 100, h: 20 },
+                { x: 450, y: 200, w: 100, h: 20 },
+                { x: 600, y: 120, w: 100, h: 20 },
+                { x: 100, y: 150, w: 80, h: 20 }, // Bệ lừa
+            ];
+
+            // Đích đến (Bánh sinh nhật)
+            goal = { x: 630, y: 70, w: 40, h: 50 };
+
+            // Hiệu ứng ngôi sao
+            stars = [];
+            for (let i = 0; i < 50; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2,
+                    alpha: Math.random()
+                });
+            }
+
+            cancelAnimationFrame(gameLoopReq);
+            gameLoop();
+        }
+
+        function updateGame() {
+            if (isGameOver) return;
+
+            // Xử lý di chuyển
+            if (keys.right) player.dx = player.speed;
+            else if (keys.left) player.dx = -player.speed;
+            else player.dx = 0;
+
+            // Xử lý nhảy
+            if (keys.up && player.grounded) {
+                player.dy = player.jumpPower;
+                player.grounded = false;
+            }
+
+            // Trọng lực
+            player.dy += 0.6;
+
+            // Va chạm trục X
+            player.x += player.dx;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Va chạm trục Y
+            player.y += player.dy;
+            player.grounded = false;
+
+            for (let i = 0; i < platforms.length; i++) {
+                let p = platforms[i];
+                if (player.x < p.x + p.w &&
+                    player.x + player.width > p.x &&
+                    player.y < p.y + p.h &&
+                    player.y + player.height > p.y) {
+
+                    if (player.dy > 0 && player.y + player.height - player.dy <= p.y) {
+                        player.grounded = true;
+                        player.dy = 0;
+                        player.y = p.y - player.height;
+                    }
+                    else if (player.dy < 0 && player.y - player.dy >= p.y + p.h) {
+                        player.dy = 0;
+                        player.y = p.y + p.h;
+                    }
+                }
+            }
+
+            // Rơi xuống vực
+            if (player.y > canvas.height) {
+                initGame();
+            }
+
+            // Ăn điểm tới đích
+            if (player.x < goal.x + goal.w &&
+                player.x + player.width > goal.x &&
+                player.y < goal.y + goal.h &&
+                player.y + player.height > goal.y) {
+                isGameOver = true;
+                setTimeout(goToEnd, 500);
+            }
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Sao
+            for (let i = 0; i < stars.length; i++) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(Date.now() * 0.001 + i))})`;
+                ctx.beginPath();
+                ctx.arc(stars[i].x, stars[i].y, stars[i].r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Nền tảng
+            ctx.fillStyle = "rgba(75, 85, 99, 0.8)";
+            for (let i = 0; i < platforms.length; i++) {
+                let p = platforms[i];
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.strokeStyle = "#4ade80";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
+            }
+
+            // Bánh
+            ctx.font = "45px Arial";
+            ctx.fillText("🎂", goal.x - 5, goal.y + 40);
+
+            // Nữ chính
+            ctx.font = "40px Arial";
+            ctx.fillText("👩🏻", player.x - 5, player.y + 35);
+        }
+
+        function gameLoop() {
+            updateGame();
+            drawGame();
+            if (!isGameOver) {
+                gameLoopReq = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // --- ĐIỀU KHIỂN BÀN PHÍM ---
+        window.addEventListener('keydown', function (e) {
+            if (e.code === 'ArrowRight') keys.right = true;
+            if (e.code === 'ArrowLeft') keys.left = true;
+            if (e.code === 'ArrowUp' || e.code === 'Space') keys.up = true;
+        });
+        window.addEventListener('keyup', function (e) {
+            if (e.code === 'ArrowRight') keys.right = false;
+            if (e.code === 'ArrowLeft') keys.left = false;
+            if (e.code === 'ArrowUp' || e.code === 'Space') keys.up = false;
+        });
+
+        // --- ĐIỀU KHIỂN ĐIỆN THOẠI (TỐI ƯU CẢM ỨNG) ---
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        const btnJump = document.getElementById('btn-jump');
+
+        const addTouchEvents = (btn, keyName) => {
+            const handleStart = (e) => {
+                e.preventDefault();
+                keys[keyName] = true;
+                btn.classList.add('active-touch');
+            };
+            const handleEnd = (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+                btn.classList.remove('active-touch');
+            };
+
+            // Xử lý touch đa điểm
+            btn.addEventListener('touchstart', handleStart, { passive: false });
+            btn.addEventListener('touchend', handleEnd, { passive: false });
+            btn.addEventListener('touchcancel', handleEnd, { passive: false });
+
+            // Dự phòng cho chuột
+            btn.addEventListener('mousedown', handleStart);
+            btn.addEventListener('mouseup', handleEnd);
+            btn.addEventListener('mouseleave', handleEnd);
+        };
+
+        addTouchEvents(btnLeft, 'left');
+        addTouchEvents(btnRight, 'right');
+        addTouchEvents(btnJump, 'up');
+
+        // --- PHÁO HOA ---
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            container.innerHTML = ''; // Clear old if any
+            const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#4ade80'];
+            for (let i = 0; i < 80; i++) {
+                const confetto = document.createElement('div');
+                confetto.style.position = 'absolute';
+                confetto.style.width = Math.random() * 8 + 6 + 'px';
+                confetto.style.height = Math.random() * 15 + 10 + 'px';
+                confetto.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetto.style.left = Math.random() * 100 + '%';
+                confetto.style.top = '-20px';
+                confetto.style.opacity = Math.random() + 0.5;
+                confetto.style.borderRadius = (Math.random() > 0.5) ? '50%' : '0';
+
+                const duration = Math.random() * 3 + 2;
+                confetto.animate([
+                    { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate3d(${Math.random() * 100 - 50}px, 100vh, 0) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: duration * 1000,
+                    easing: 'linear',
+                    iterations: Infinity,
+                    delay: Math.random() * 2000
+                });
+
+                container.appendChild(confetto);
+            }
+        }
+    </script>
+</body>
+
+</html>
