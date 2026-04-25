@@ -1,823 +1,514 @@
 <!DOCTYPE html>
-<html class="dark" lang="vi">
+<html lang="vi">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>The Kinetic Workspace - Python Master Class</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "inverse-surface": "#fcf8f9", "on-primary": "#002c66", "on-tertiary-fixed": "#3e0047",
-                        "secondary-fixed": "#c7cfff", "primary-container": "#6e9fff", "outline-variant": "#484849",
-                        "surface-variant": "#262627", "surface-dim": "#0e0e0f", "on-primary-container": "#002150",
-                        "error": "#ff716c", "surface-container": "#19191b", "surface-container-lowest": "#000000",
-                        "on-secondary-fixed-variant": "#2d48ac", "inverse-primary": "#005bc4", "on-secondary": "#00175f",
-                        "on-surface": "#ffffff", "on-error-container": "#ffa8a3", "surface-container-high": "#1f1f21",
-                        "background": "#0e0e0f", "primary-fixed": "#6e9fff", "error-container": "#9f0519",
-                        "outline": "#767576", "on-tertiary": "#691d74", "tertiary-container": "#f199f7",
-                        "secondary-fixed-dim": "#b4c1ff", "surface-container-highest": "#262627", "tertiary-fixed-dim": "#e28ce9",
-                        "on-error": "#490006", "on-secondary-fixed": "#00278f", "secondary-container": "#213da1",
-                        "surface": "#0e0e0f", "error-dim": "#d7383b", "surface-container-low": "#131314",
-                        "surface-tint": "#85adff", "primary-fixed-dim": "#5391ff", "on-background": "#ffffff",
-                        "on-surface-variant": "#adaaab", "tertiary-fixed": "#f199f7", "secondary-dim": "#8097ff",
-                        "on-primary-fixed-variant": "#002a62", "secondary": "#8097ff", "inverse-on-surface": "#565556",
-                        "tertiary": "#fbabff", "surface-bright": "#2c2c2d", "on-tertiary-container": "#5e106a",
-                        "on-tertiary-fixed-variant": "#681c73", "tertiary-dim": "#e28ce9", "on-primary-fixed": "#000000",
-                        "on-secondary-container": "#c5ceff", "primary": "#85adff", "primary-dim": "#699cff"
-                    },
-                    "fontFamily": {
-                        "headline": ["Space Grotesk", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                        "mono": ["JetBrains Mono", "monospace"]
-                    }
-                }
-            }
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Thuật Toán Merge Sort</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        body { font-family: 'Inter', sans-serif; background-color: #0e0e0f; color: #ffffff; overflow: hidden; }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #262627; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #484849; }
-
-        /* Sidebar Tabs custom styles */
-        .lesson-tab {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-            color: #adaaab; border-radius: 9999px; margin: 4px 8px;
-            transition: all 0.2s ease; cursor: pointer;
+        body {
+            background-color: #0f172a;
+            /* Tailwind slate-900 */
+            color: #f8fafc;
+            /* Tailwind slate-50 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .lesson-tab:hover { background-color: #1f1f21; color: #ffffff; }
-        .lesson-tab.active {
-            background-color: #1f1f21; color: #85adff;
-            box-shadow: inset 0 0 0 1px rgba(133, 173, 255, 0.2);
-        }
-        .lesson-tab.active .material-symbols-outlined { color: #85adff; font-variation-settings: 'FILL' 1; }
 
-        /* Code Simulator Styles */
+        .block-el {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+            border-radius: 0.5rem;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            /* Transition set dynamically by JS for speed control */
+        }
+
         .code-line {
-            display: flex; align-items: flex-start; padding: 2px 8px; border-radius: 4px; transition: all 0.3s ease;
+            padding: 0.1rem 0.5rem;
+            border-radius: 0.25rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: pre;
+            /* Giữ nguyên khoảng trắng lùi đầu dòng */
+            font-family: 'Consolas', 'Courier New', monospace;
+            /* Font chuẩn code */
+            color: #d4d4d4;
+            /* Màu chữ trắng xám mặc định của VS Code */
         }
-        .code-wrapper { white-space: pre-wrap; word-break: break-word; }
-        .line-num { color: #484849; width: 30px; flex-shrink: 0; user-select: none; text-align: right; padding-right: 12px; }
-        
+
         .code-line.active-line {
-            background-color: rgba(133, 173, 255, 0.1); 
-            border-left: 3px solid #85adff;
+            background-color: rgba(253, 224, 71, 0.15);
+            /* Nền highlight nhạt, tinh tế hơn */
+            border-left: 3px solid #fde047;
+            /* Viền vàng */
         }
 
-        /* Syntax Highlighting */
-        .kw { color: #fbabff; } /* tertiary */
-        .func { color: #85adff; } /* primary */
-        .str { color: #6e9fff; } /* primary-container */
-        .num { color: #8097ff; } /* secondary */
-        .comment { color: #767576; font-style: italic; }
-
-        /* Memory Variable Badge */
-        .memory-var {
-            background: rgba(241, 153, 247, 0.1); border: 1px solid rgba(241, 153, 247, 0.3);
-            padding: 6px 16px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace;
-            color: #f199f7; font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;
+        /* Custom scrollbar for code area */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .code-textarea {
-            width: 100%; height: 100%; background-color: transparent; color: #ffffff;
-            font-family: 'JetBrains Mono', monospace; font-size: 14px; border: none;
-            resize: none; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto;
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
         }
-        
-        /* Input Tùy chỉnh N */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
         }
     </style>
 </head>
-<body class="flex min-h-screen bg-surface text-body">
 
-    <!-- ========================================== -->
-    <!-- SIDEBAR: The Kinetic Workspace Shell       -->
-    <!-- ========================================== -->
-    <aside class="fixed left-0 top-0 h-screen w-[280px] bg-surface-container-low flex flex-col py-6 transition-all duration-300 z-50 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
-        <!-- Brand Identity -->
-        <div class="px-6 mb-10">
-            <h1 class="text-[19px] font-bold tracking-tighter text-primary font-headline uppercase leading-tight">HUYHANDSOME</h1>
-            <p class="text-[10px] font-headline tracking-[0.2em] text-on-surface-variant uppercase mt-1">Chuyên đề: Vòng Lặp</p>
+<body class="min-h-screen p-4 lg:p-8">
+
+    <div class="max-w-7xl mx-auto flex flex-col gap-6">
+
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-blue-400 mb-2">Trình Mô Phỏng Merge Sort</h1>
+            <p class="text-slate-400">Quan sát chiến lược "Chia để trị" và cách từng dòng code Python hoạt động</p>
         </div>
-        
-        <!-- Primary Navigation -->
-        <nav class="flex-1 overflow-y-auto">
-            <div class="px-6 mb-3 text-[10px] font-bold text-on-surface-variant/40 tracking-widest uppercase">Kiến thức trọng tâm</div>
-            
-            <div class="lesson-tab active" onclick="loadLesson('for')">
-                <span class="material-symbols-outlined text-[20px]" data-icon="data_array">data_array</span>
-                <span class="font-headline text-sm tracking-tight font-medium">1. Vòng lặp For</span>
-            </div>
-            <div class="lesson-tab" onclick="loadLesson('while')">
-                <span class="material-symbols-outlined text-[20px]" data-icon="all_inclusive">all_inclusive</span>
-                <span class="font-headline text-sm tracking-tight font-medium">2. Vòng lặp While</span>
-            </div>
-            <div class="lesson-tab" onclick="loadLesson('whileTrue')">
-                <span class="material-symbols-outlined text-[20px]" data-icon="emergency">emergency</span>
-                <span class="font-headline text-sm tracking-tight font-medium">3. While True & Break</span>
-            </div>
-            <div class="lesson-tab" onclick="loadLesson('whileIf')">
-                <span class="material-symbols-outlined text-[20px]" data-icon="alt_route">alt_route</span>
-                <span class="font-headline text-sm tracking-tight font-medium">4. While kết hợp If/Else</span>
-            </div>
 
-            <div class="mt-8 px-6 mb-3 text-[10px] font-bold text-on-surface-variant/40 tracking-widest uppercase">Thực hành & Đánh giá</div>
-            
-            <div class="lesson-tab" onclick="loadLesson('quiz')">
-                <span class="material-symbols-outlined text-[20px]" data-icon="quiz">quiz</span>
-                <span class="font-headline text-sm tracking-tight font-medium">Bài tập Trắc nghiệm</span>
-            </div>
-            <div class="lesson-tab" onclick="loadLesson('practice')">
-                <span class="material-symbols-outlined text-[20px]" data-icon="terminal">terminal</span>
-                <span class="font-headline text-sm tracking-tight font-medium">Thực hành Tự luận</span>
-            </div>
-        </nav>
+        <!-- Main Layout -->
+        <div
+            class="flex flex-col lg:flex-row gap-6 bg-slate-800 rounded-xl shadow-2xl overflow-hidden border border-slate-700">
 
-        <!-- Sidebar Footer -->
-        <div class="px-4 mt-auto">
-            <div class="bg-surface-container-high p-4 rounded-2xl mb-4 relative overflow-hidden group border border-outline-variant/10">
-                <div class="relative z-10">
-                    <p class="text-xs text-on-surface-variant font-medium text-white"></p>
-                    <p class="text-[10px] text-on-surface-variant/60 mt-1"></p>
-                </div>
-                <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-primary/20 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
-            </div>
-            <div class="flex items-center gap-4 px-4 py-2">
-                <div class="w-8 h-8 rounded-full overflow-hidden ring-1 ring-outline-variant bg-surface-container flex justify-center items-center">
-                    <span class="material-symbols-outlined text-primary text-sm">school</span>
-                </div>
-                <div class="overflow-hidden">
-                    <p class="text-xs font-bold truncate">HUYHANDSOME</p>
-                    <p class="text-[10px] text-on-surface-variant">Lớp Lập trình Cơ bản</p>
-                </div>
-            </div>
-        </div>
-    </aside>
+            <!-- Left Panel: Visualization & Controls -->
+            <div class="w-full lg:w-2/3 p-6 flex flex-col justify-between">
 
-    <!-- ========================================== -->
-    <!-- MAIN CONTENT CANVAS                        -->
-    <!-- ========================================== -->
-    <main class="ml-[280px] flex-1 flex flex-col h-screen overflow-hidden relative">
-        
-        <!-- Background Decoration (Glowing blobs) -->
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tertiary/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
-
-        <!-- Top Navigation Bar -->
-        <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl h-16 flex justify-between items-center px-6 lg:px-8 shadow-[0_0_20px_rgba(105,156,255,0.06)] border-b border-outline-variant/10">
-            <div class="flex items-center gap-4">
-                <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(133,173,255,0.8)]"></div>
-                <h2 id="lesson-title" class="font-headline font-semibold uppercase tracking-widest text-[13px] text-on-surface">Vòng Lặp For</h2>
-            </div>
-            
-            <!-- Controls Toolbar -->
-            <div class="flex items-center gap-4" id="controls">
-                <!-- Khu vực tùy chỉnh N -->
-                <div class="flex items-center gap-2 mr-2 bg-surface-container-high px-3 py-1.5 rounded-xl border border-outline-variant/30 shadow-inner">
-                    <label for="loop-limit" class="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest cursor-pointer">Lặp n =</label>
-                    <input type="number" id="loop-limit" value="5" min="1" max="50" onchange="updateLimit()" class="w-14 bg-surface-container-lowest text-primary font-mono text-sm border border-outline-variant/50 rounded px-2 py-1 focus:outline-none focus:border-primary text-center shadow-sm">
-                </div>
-
-                <div class="flex items-center gap-2 border-l border-outline-variant/20 pl-4">
-                    <button onclick="resetSim()" class="flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant/40 text-on-surface-variant hover:text-white hover:bg-surface-container-high transition-all text-[10px] font-bold uppercase tracking-widest">
-                        <span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset
-                    </button>
-                    <button onclick="stepSim()" id="btn-step" class="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-container/20 border border-secondary-container/50 text-secondary hover:bg-secondary-container/40 transition-all text-[10px] font-bold uppercase tracking-widest">
-                        <span class="material-symbols-outlined text-[16px]">step_into</span> Step
-                    </button>
-                    <button onclick="autoSim()" id="btn-auto" class="flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-on-primary hover:brightness-110 transition-all text-[10px] font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(133,173,255,0.25)]">
-                        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Auto Run
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Content Area -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 z-10" id="main-scroll-area">
-            
-            <!-- ========================================== -->
-            <!-- 1. KHU VỰC HỌC & MÔ PHỎNG (LEARNING)       -->
-            <!-- ========================================== -->
-            <!-- Layout Grid 2x2: Chia đều 4 ô trên 1 đường ngang và dọc -->
-            <div id="learning-container" class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 gap-5 w-full h-[calc(100vh-120px)] min-h-[500px]">
-                
-                <!-- Ô 1: Lý thuyết -->
-                <div class="bg-surface-container rounded-2xl p-5 relative border border-outline-variant/10 shadow-lg flex flex-col overflow-hidden">
-                    <div class="absolute left-0 top-5 bottom-5 w-[3px] bg-gradient-to-b from-primary to-tertiary rounded-r"></div>
-                    <div class="flex items-center gap-3 mb-3 pl-2 shrink-0">
-                        <span class="material-symbols-outlined text-primary text-[22px]">menu_book</span>
-                        <h3 class="font-headline text-lg font-semibold tracking-tight text-white">Lý thuyết trọng tâm</h3>
+                <!-- Control Panel -->
+                <div
+                    class="bg-slate-900 p-4 rounded-lg flex flex-wrap gap-4 items-center justify-between mb-8 border border-slate-700">
+                    <div class="flex gap-2">
+                        <button onclick="generateRandomArray()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-medium transition-colors">
+                            🎲 Tạo mảng mới
+                        </button>
+                        <button onclick="resetToInitial()"
+                            class="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded font-medium transition-colors">
+                            🔄 Khôi phục
+                        </button>
                     </div>
-                    <div id="theory-content" class="space-y-4 text-on-surface-variant text-[14.5px] leading-relaxed pl-2 flex-1 overflow-y-auto pr-2">
-                        <!-- Nội dung JS inject -->
+
+                    <div class="flex items-center gap-4 border-l border-slate-700 pl-4">
+                        <button id="play-btn" onclick="togglePlay()"
+                            class="bg-green-600 hover:bg-green-500 text-white w-36 py-2 rounded font-medium transition-colors">
+                            ▶️ Chạy tự động
+                        </button>
+                        <button id="step-btn" onclick="stepNext()"
+                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-medium transition-colors">
+                            ⏭️ Chạy 1 bước
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2 border-l border-slate-700 pl-4">
+                        <label class="text-sm text-slate-300">Tốc độ:</label>
+                        <input type="range" id="speed-slider" min="100" max="1500" value="600" dir="rtl"
+                            class="w-24 cursor-pointer">
                     </div>
                 </div>
 
-                <!-- Ô 2: Hoạt động trong RAM -->
-                <div class="bg-surface-container rounded-2xl p-5 border border-outline-variant/10 shadow-lg flex flex-col overflow-hidden">
-                    <div class="flex items-center gap-3 mb-3 shrink-0">
-                        <span class="material-symbols-outlined text-tertiary text-[22px]">memory</span>
-                        <h3 class="font-headline text-lg font-semibold tracking-tight text-white">Hoạt động trong RAM</h3>
-                    </div>
-                    <div class="flex flex-col gap-3 flex-1 overflow-hidden">
-                        <!-- Khung chứa biến -->
-                        <div class="p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/10 flex-1 flex flex-wrap gap-2 items-start content-start overflow-y-auto" id="memory-content">
-                            <!-- Variables injected here -->
-                        </div>
-                        
-                        <!-- Box Giải thích -->
-                        <div class="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 relative shrink-0">
-                            <span class="material-symbols-outlined text-primary/40 absolute right-4 top-4 text-4xl">lightbulb</span>
-                            <p class="text-[13px] text-on-surface-variant leading-relaxed relative z-10" id="explanation-text">
-                                Bấm "Từng bước" hoặc "Chạy tự động" để xem máy tính đọc code và lưu biến vào bộ nhớ như thế nào.
-                            </p>
-                        </div>
+                <!-- Explanation Box (Thêm mới) -->
+                <div id="explanation-box"
+                    class="bg-indigo-900/50 text-indigo-100 p-4 rounded-lg border border-indigo-700/50 font-medium mb-6 min-h-[72px] flex items-center shadow-inner transition-all duration-300">
+                    Bấm "Chạy tự động" hoặc "Chạy 1 bước" để bắt đầu mô phỏng thuật toán.
+                </div>
+
+                <!-- Visualization Area (Nâng chiều cao để chứa cây đệ quy) -->
+                <div class="flex-grow flex items-center justify-center min-h-[400px]">
+                    <div id="array-container" class="relative w-full max-w-[600px] h-[350px]">
+                        <!-- DOM Blocks will be injected here -->
                     </div>
                 </div>
 
-                <!-- Ô 3: Mã nguồn Python -->
-                <div class="bg-surface-container rounded-2xl overflow-hidden border border-outline-variant/10 shadow-lg flex flex-col">
-                    <div class="flex items-center justify-between px-5 py-3 bg-surface-container-high border-b border-outline-variant/5 shrink-0">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">code</span>
-                            <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Mã nguồn Python</h3>
-                        </div>
-                        <div class="flex gap-2">
-                            <div class="w-3 h-3 rounded-full bg-error/40 border border-error/20"></div>
-                            <div class="w-3 h-3 rounded-full bg-tertiary-container/40 border border-tertiary-container/20"></div>
-                            <div class="w-3 h-3 rounded-full bg-primary/40 border border-primary/20"></div>
-                        </div>
-                    </div>
-                    <div class="p-5 bg-surface-container-lowest font-mono text-[14px] flex-1 overflow-y-auto">
-                        <div id="code-content" class="flex flex-col">
-                            <!-- Nội dung JS inject -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ô 4: Console Output -->
-                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/10 shadow-2xl flex flex-col">
-                    <div class="flex items-center gap-3 px-5 py-3 bg-surface-container-high/50 border-b border-outline-variant/5 shrink-0">
-                        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">terminal</span>
-                        <span class="text-[11px] font-headline font-semibold text-on-surface-variant uppercase tracking-widest">Màn hình kết quả (Console)</span>
-                    </div>
-                    <div class="p-5 font-mono text-[13.5px] flex-1 overflow-y-auto text-on-surface-variant">
-                        <div class="text-primary-dim mb-3 opacity-70">Python 3.10.0 (default)</div>
-                        <div id="console-content" class="space-y-1.5 whitespace-pre-wrap"></div>
-                        <div class="flex gap-2 mt-2 opacity-40">
-                            <span>></span><span class="animate-pulse">_</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ========================================== -->
-            <!-- 2. KHU VỰC QUIZ (TRẮC NGHIỆM)              -->
-            <!-- ========================================== -->
-            <div id="quiz-container" class="hidden max-w-4xl mx-auto space-y-6 pb-20">
-                <div class="bg-surface-container rounded-2xl p-8 border border-outline-variant/10 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-3xl rounded-full pointer-events-none"></div>
-                    <div class="flex items-center gap-4 mb-2">
-                        <div class="w-10 h-10 rounded-full bg-secondary-container/20 flex justify-center items-center text-secondary">
-                            <span class="material-symbols-outlined">quiz</span>
-                        </div>
-                        <h2 class="font-headline text-2xl font-bold text-white">Bài tập củng cố</h2>
-                    </div>
-                    <p class="text-sm text-on-surface-variant mb-8 ml-14">Kiểm tra lại kiến thức vòng lặp qua các câu hỏi trắc nghiệm nhanh.</p>
-                    
-                    <!-- Câu 1 -->
-                    <div class="mb-10 pl-2">
-                        <p class="text-[16px] mb-5 text-white font-medium"><strong>Câu 1:</strong> Vòng lặp <code class="font-mono text-tertiary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">while True:</code> sẽ dừng lại khi nào?</p>
-                        <div class="space-y-3 pl-4">
-                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, false)">
-                                <input type="radio" name="q1" class="hidden"> 
-                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
-                                <span class="text-on-surface-variant text-[15px]">Khi chạy hết 100 lần.</span>
-                            </label>
-                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, true)">
-                                <input type="radio" name="q1" class="hidden"> 
-                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
-                                <span class="text-on-surface-variant text-[15px]">Khi chương trình gặp lệnh <code class="font-mono text-tertiary">break</code> ở bên trong.</span>
-                            </label>
-                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(1, this, false)">
-                                <input type="radio" name="q1" class="hidden"> 
-                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
-                                <span class="text-on-surface-variant text-[15px]">Tự động dừng sau 5 giây.</span>
-                            </label>
-                        </div>
-                        <div id="res-1" class="mt-4 text-[14px] hidden font-medium px-4 py-3 rounded-xl ml-4 flex items-center gap-2"></div>
-                    </div>
-
-                    <!-- Câu 2 -->
-                    <div class="mb-4 pl-2">
-                        <p class="text-[16px] mb-5 text-white font-medium"><strong>Câu 2:</strong> Kết quả của đoạn code <code class="font-mono text-primary bg-surface-container-highest px-2 py-0.5 rounded text-[14px]">for i in range(1, 4): print(i)</code> là gì?</p>
-                        <div class="space-y-3 pl-4">
-                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, false)">
-                                <input type="radio" name="q2" class="hidden"> 
-                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
-                                <span class="text-on-surface-variant text-[15px]">In ra: 1, 2, 3, 4</span>
-                            </label>
-                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, true)">
-                                <input type="radio" name="q2" class="hidden"> 
-                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
-                                <span class="text-on-surface-variant text-[15px]">In ra: 1, 2, 3</span>
-                            </label>
-                            <label class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all group" onclick="checkAnswer(2, this, false)">
-                                <input type="radio" name="q2" class="hidden"> 
-                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary/50 flex-shrink-0 transition-colors"></div> 
-                                <span class="text-on-surface-variant text-[15px]">Lỗi cú pháp</span>
-                            </label>
-                        </div>
-                        <div id="res-2" class="mt-4 text-[14px] hidden font-medium px-4 py-3 rounded-xl ml-4 flex items-center gap-2"></div>
-                    </div>
+                <!-- Legend -->
+                <div class="flex flex-wrap justify-center gap-4 mt-6 text-sm text-slate-300">
+                    <div class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-blue-500 inline-block"></span>
+                        Chưa sắp xếp</div>
+                    <div class="flex items-center gap-2"><span
+                            class="w-4 h-4 rounded bg-yellow-400 inline-block"></span> Đang so sánh</div>
+                    <div class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-green-500 inline-block"></span>
+                        Đưa vào mảng tạm</div>
+                    <div class="flex items-center gap-2"><span
+                            class="w-4 h-4 rounded bg-purple-600 inline-block"></span> Đã hợp nhất</div>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- 3. KHU VỰC THỰC HÀNH TỰ LUẬN (PRACTICE)    -->
-            <!-- ========================================== -->
-            <div id="practice-container" class="hidden flex-col gap-6 max-w-[1400px] mx-auto h-full">
-                <!-- Challenge Blade -->
-                <div class="p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-surface-container border border-primary/20 flex flex-col xl:flex-row gap-8 items-start shadow-lg relative overflow-hidden shrink-0">
-                    <div class="absolute left-0 top-0 w-1.5 h-full bg-primary"></div>
-                    
-                    <div class="flex-shrink-0">
-                        <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                            <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
-                        </div>
-                        <h4 class="font-headline text-2xl font-bold mb-1 text-white">Thử thách Lập trình</h4>
-                        <p class="text-xs text-primary-dim uppercase tracking-widest font-bold">Thực hành Code Tự luận</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full flex-1">
-                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
-                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#1</span> Duyệt số chẵn</h5>
-                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Viết chương trình sử dụng <code class="font-mono text-tertiary">for</code> hoặc <code class="font-mono text-tertiary">while</code> để in ra các <strong>số chẵn</strong> từ 1 đến n (với n có thể tự chọn).</p>
-                        </div>
-                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
-                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#2</span> Tính tổng</h5>
-                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Viết chương trình tính tổng dãy số: S = 1 + 2 + 3 + ... + n và in ra kết quả cuối cùng.</p>
-                        </div>
-                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
-                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#3</span> Bảng cửu chương</h5>
-                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Viết đoạn code in ra Bảng cửu chương của một số nguyên bất kỳ (Ví dụ: in bảng nhân 5).</p>
-                        </div>
-                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 shadow-inner hover:border-primary/30 transition-colors">
-                            <h5 class="text-white font-bold mb-1 flex items-center gap-2"><span class="text-primary">#4</span> Vòng lặp vô tận</h5>
-                            <p class="text-[13px] text-on-surface-variant leading-relaxed">Dùng <code class="font-mono text-tertiary">while True</code> để tạo vòng lặp bắt nhập mật khẩu. Nếu biến mk = "1234" thì <code class="font-mono text-tertiary">break</code>.</p>
-                        </div>
-                    </div>
+            <!-- Right Panel: Code Tracer -->
+            <div class="w-full lg:w-1/3 bg-slate-900 border-l border-slate-700 flex flex-col max-h-[600px]">
+                <div class="bg-slate-950 p-3 border-b border-slate-800 flex justify-between items-center">
+                    <h2 class="font-bold text-slate-200">Mã nguồn Python</h2>
+                    <span class="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">Code Tracer</span>
                 </div>
-
-                <!-- Interactive Sandbox -->
-                <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[500px]">
-                    <!-- Editor -->
-                    <div class="flex-1 bg-surface-container-lowest rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-outline-variant/20">
-                        <div class="flex items-center justify-between px-5 py-3.5 bg-surface-container-high border-b border-outline-variant/10">
-                            <div class="flex items-center gap-3">
-                                <span class="material-symbols-outlined text-on-surface-variant text-[18px]">integration_instructions</span>
-                                <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Sandbox Editor</h3>
-                            </div>
-                            <button id="btn-run-practice" onclick="runPracticeCode()" class="flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary text-on-primary hover:brightness-110 transition-all text-[11px] font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(133,173,255,0.2)]">
-                                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Run Code
-                            </button>
-                        </div>
-                        <textarea id="practice-editor" spellcheck="false" class="code-textarea p-6 leading-relaxed" placeholder="# Viết code giải bài tập của bạn ở đây...
-# Bạn có thể chọn 1 trong 4 bài ở trên để thử sức nhé!
-
-n = 10
-# Bắt đầu code từ dòng này:
-"></textarea>
-                    </div>
-
-                    <!-- Console -->
-                    <div class="lg:w-[400px] xl:w-[500px] bg-surface-container-lowest rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-outline-variant/20">
-                        <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-container-high border-b border-outline-variant/10">
-                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
-                            <h3 class="font-headline text-sm font-medium tracking-wide uppercase text-on-surface-variant">Live Output</h3>
-                        </div>
-                        <div id="practice-console" class="flex-1 p-6 font-mono text-[13.5px] overflow-y-auto whitespace-pre-wrap text-on-surface-variant leading-relaxed">
-                            <span class="opacity-50 italic">Waiting for execution...</span>
-                        </div>
-                    </div>
+                <div id="code-container" class="p-4 font-mono text-[13px] leading-6 overflow-y-auto flex-grow">
+                    <!-- Python code lines will be injected here -->
                 </div>
             </div>
 
         </div>
-    </main>
+    </div>
 
-    <!-- ========================================== -->
-    <!-- SCRIPT LOGIC (Đã tối ưu CSS Class & Động hóa N) -->
-    <!-- ========================================== -->
     <script>
-        // Hàm sinh dữ liệu bài học động dựa vào giới hạn N do người dùng nhập
-        function getDb(limit) {
-            let db = {};
+        // --- CẤU HÌNH VÀ DỮ LIỆU ---
+        const pythonCode = [
+            'def merge_sort(arr):',
+            '    if len(arr) <= 1:',
+            '        return arr',
+            '    mid = len(arr) // 2',
+            '    left = arr[:mid]',
+            '    right = arr[mid:]',
+            '    left_sorted = merge_sort(left)',
+            '    right_sorted = merge_sort(right)',
+            '    return merge(left_sorted, right_sorted)',
+            '',
+            'def merge(left, right):',
+            '    result = []',
+            '    i = j = 0',
+            '    while i < len(left) and j < len(right):',
+            '        if left[i] < right[j]:',
+            '            result.append(left[i])',
+            '            i += 1',
+            '        else:',
+            '            result.append(right[j])',
+            '            j += 1',
+            '    result.extend(left[i:])',
+            '    result.extend(right[j:])',
+            '    return result'
+        ];
 
-            // 1. FOR LOOP
-            let forSteps = [{ line: 2, memory: {}, exp: `Đọc dòng 2: Chuẩn bị vòng lặp for. Hàm range(1, ${limit + 1}) tạo ra tập số {1, 2, ..., ${limit}}.` }];
-            for (let i = 1; i <= limit; i++) {
-                forSteps.push({ line: 2, memory: { i: i }, exp: `Lấy số ${i}, gán vào biến 'i' (i = ${i}).` });
-                forSteps.push({ line: 3, memory: { i: i }, output: `Vòng lặp thứ: ${i}`, exp: `Đi vào khối lệnh. Thực thi hàm print với i = ${i}.` });
-                if(i < limit) {
-                    forSteps.push({ line: 2, memory: { i: i }, exp: `Quay lại đầu vòng lặp. Lấy số tiếp theo là ${i+1}.` });
-                }
-            }
-            forSteps.push({ line: 2, memory: { i: limit }, exp: "Đã hết số trong hàm range. Điều kiện lặp kết thúc." });
-            forSteps.push({ line: 4, memory: { i: limit }, output: "Kết thúc!", exp: "Thoát khỏi vòng lặp, chạy câu lệnh tiếp theo." });
+        let initialArray = [];
+        let domBlocks = [];
+        let actions = [];           // Lưu trữ lịch sử từng thao tác (line code, animation)
+        let currentActionIdx = 0;
+        let isPlaying = false;
+        let timer = null;
+        const blockSpacing = 55;    // Khoảng cách chiều ngang giữa các khối
+        const verticalSpacing = 75; // Khoảng cách chiều dọc giữa các cấp (Tree level)
+        const ARRAY_SIZE = 10;
 
-            db.for = {
-                title: "Vòng lặp For",
-                theory: `
-                    <p>🔹 <strong>Mục đích:</strong> Dùng để lặp đi lặp lại một khối lệnh với số lần <b class="text-white">đã biết trước</b>.</p>
-                    <p>🔹 Hàm <code class="font-mono text-primary bg-surface-container-highest px-1.5 py-0.5 rounded text-[13px]">range(start, stop)</code> dùng để tạo danh sách số từ <span class="text-tertiary">start</span> đến <span class="text-tertiary">stop - 1</span>.</p>
-                    <div class="mt-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/10 font-mono text-[13px] text-primary-dim">
-                        <span class="text-on-surface-variant">Ví dụ:</span> range(1, ${limit + 1}) <span class="text-on-surface-variant">-> Máy tính sinh ra số:</span> 1, 2, ..., ${limit}
-                    </div>
-                `,
-                code: `
-<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper"><span class="comment"># In các số từ 1 đến ${limit}</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">for</span> i <span class="kw">in</span> <span class="func">range</span>(<span class="num">1</span>, <span class="num">${limit + 1}</span>):</span></div>
-<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="func">print</span>(<span class="str">f"Vòng lặp thứ: {i}"</span>)</span></div>
-<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper"><span class="func">print</span>(<span class="str">"Kết thúc!"</span>)</span></div>
-                `,
-                steps: forSteps
-            };
+        // --- KHỞI TẠO GIAO DIỆN ---
+        function initUI() {
+            // Render Code
+            const codeDiv = document.getElementById('code-container');
+            codeDiv.innerHTML = '';
+            pythonCode.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.id = `line-${index}`;
+                div.className = 'code-line';
 
-            // 2. WHILE LOOP
-            let whileSteps = [{ line: 1, memory: { n: 1 }, exp: "Dòng 1: Khởi tạo biến n = 1 lưu vào RAM." }];
-            for (let n = 1; n <= limit; n++) {
-                whileSteps.push({ line: 2, memory: { n: n }, exp: `Kiểm điều kiện: n (${n}) <= ${limit} là Đúng (True). Máy tính cho phép đi vào vòng lặp.` });
-                whileSteps.push({ line: 3, memory: { n: n }, output: `Giá trị n = ${n}`, exp: `Thực thi lệnh print in ra giá trị hiện tại.` });
-                whileSteps.push({ line: 4, memory: { n: n + 1 }, exp: `Tăng giá trị n lên 1. Lúc này n = ${n + 1}.` });
-                if(n < limit) {
-                    whileSteps.push({ line: 2, memory: { n: n + 1 }, exp: `Quay lại kiểm tra điều kiện vòng lặp...` });
-                }
-            }
-            whileSteps.push({ line: 2, memory: { n: limit + 1 }, exp: `Quay lại kiểm tra: n (${limit + 1}) <= ${limit} là SAI (False). Vòng lặp bị chặn lại!` });
-            whileSteps.push({ line: 5, memory: { n: limit + 1 }, output: "Xong!", exp: "Máy tính thoát khỏi vòng lặp và chạy các dòng code tiếp theo." });
+                let htmlLine = line;
 
-            db.while = {
-                title: "Vòng lặp While cơ bản",
-                theory: `
-                    <p>🔹 <strong>Mục đích:</strong> Lặp lại công việc <b class="text-white">miễn là (while)</b> một điều kiện nào đó vẫn còn đúng (True).</p>
-                    <p>🔹 Khác với <code class="font-mono text-tertiary">for</code>, nó không quan tâm lặp bao nhiêu lần, chỉ quan tâm "Điều kiện còn đúng không?".</p>
-                    <div class="mt-3 p-3 bg-error-container/20 rounded-xl border border-error/20">
-                        <span class="text-error font-bold flex items-center gap-2 mb-1"><span class="material-symbols-outlined text-[16px]">warning</span> Lưu ý quan trọng:</span>
-                        <span class="text-on-surface-variant text-[13px]">Phải luôn có câu lệnh thay đổi điều kiện (ví dụ: <code class="font-mono text-error">n += 1</code>) ở cuối vòng lặp. Nếu không sẽ bị <b>lặp vô tận (treo máy)</b>.</span>
-                    </div>
-                `,
-                code: `
-<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper">n = <span class="num">1</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while</span> n <= <span class="num">${limit}</span>:</span></div>
-<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="func">print</span>(<span class="str">"Giá trị n ="</span>, n)</span></div>
-<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    n += <span class="num">1</span>  <span class="comment"># Tăng n lên 1</span></span></div>
-<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper"><span class="func">print</span>(<span class="str">"Xong!"</span>)</span></div>
-                `,
-                steps: whileSteps
-            };
+                // 1. Highlight Số (Màu xanh lá nhạt) - Cần chạy TRƯỚC để không dính vào HTML tags tạo ra ở dưới
+                htmlLine = htmlLine.replace(/\b(\d+)\b/g, '<span class="text-[#b5cea8]">$1</span>');
 
-            // 3. WHILE TRUE
-            let trueSteps = [
-                { line: 1, memory: { dem: 0 }, exp: "Khởi tạo biến đếm = 0." },
-                { line: 2, memory: { dem: 0 }, exp: "Vào vòng lặp while True. Đây là vòng lặp vô tận do điều kiện luôn đúng." }
-            ];
-            for (let dem = 1; dem <= limit; dem++) {
-                trueSteps.push({ line: 3, memory: { dem: dem }, exp: `Tăng biến dem lên ${dem}.` });
-                if (dem === limit) {
-                    trueSteps.push({ line: 4, memory: { dem: dem }, exp: `Kiểm tra lệnh if: dem (${dem}) == ${limit} là ĐÚNG. Lần này máy tính sẽ đi vào bên trong if.` });
-                    trueSteps.push({ line: 5, memory: { dem: dem }, output: `Đã đến ${limit}. Thoát!`, exp: `Thực thi lệnh print bên trong khối if.` });
-                    trueSteps.push({ line: 6, memory: { dem: dem }, exp: `ĐỤNG LỆNH BREAK! Vòng lặp vô hạn lập tức bị phá vỡ và dừng lại hoàn toàn.` });
-                } else {
-                    trueSteps.push({ line: 4, memory: { dem: dem }, exp: `Kiểm tra lệnh if: dem (${dem}) == ${limit} là Sai. Bỏ qua khối lệnh if.` });
-                    trueSteps.push({ line: 2, memory: { dem: dem }, exp: `Quay lại đầu vòng lặp.` });
-                }
-            }
+                // 2. Highlight Từ khóa điều khiển (Màu hồng tím)
+                htmlLine = htmlLine.replace(/\b(def|if|return|while|else|and)\b/g, '<span class="text-[#c586c0]">$1</span>');
 
-            db.whileTrue = {
-                title: "While True và Lệnh Break",
-                theory: `
-                    <p>🔹 <code class="font-mono text-tertiary bg-surface-container-highest px-1.5 py-0.5 rounded text-[13px]">while True:</code> là một vòng lặp chạy mãi mãi, vì chữ True (Đúng) thì không bao giờ biến thành Sai được.</p>
-                    <p>🔹 Thường dùng khi ta yêu cầu người dùng nhập thông tin liên tục cho đến khi đúng định dạng.</p>
-                    <p class="mt-2 flex items-start gap-2">
-                        <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">front_hand</span>
-                        <span><code class="font-mono text-tertiary">break</code>: Là chiếc <b>"phanh khẩn cấp"</b>. Khi chạy trúng lệnh này, vòng lặp sẽ bị đập vỡ và thoát ra ngay lập tức.</span>
-                    </p>
-                `,
-                code: `
-<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper">dem = <span class="num">0</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while True</span>: <span class="comment"># Lặp vô tận</span></span></div>
-<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    dem += <span class="num">1</span></span></div>
-<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">    <span class="kw">if</span> dem == <span class="num">${limit}</span>:</span></div>
-<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">"Đã đến ${limit}. Thoát!"</span>)</span></div>
-<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">        <span class="kw">break</span></span></div>
-                `,
-                steps: trueSteps
-            };
+                // 3. Highlight Tên hàm & phương thức (Màu vàng sáng)
+                htmlLine = htmlLine.replace(/\b(merge_sort|merge|len|append|extend)\b/g, '<span class="text-[#dcdcaa]">$1</span>');
 
-            // 4. WHILE IF
-            let ifSteps = [{ line: 1, memory: { x: 1 }, exp: "Gán x = 1" }];
-            for (let x = 1; x <= limit; x++) {
-                ifSteps.push({ line: 2, memory: { x: x }, exp: `Kiểm tra while: ${x} <= ${limit} (Đúng). Bắt đầu vòng lặp.` });
-                if (x % 2 === 0) {
-                    ifSteps.push({ line: 3, memory: { x: x }, exp: `Kiểm tra if: ${x} chia hết cho 2. Điều kiện if ĐÚNG.` });
-                    ifSteps.push({ line: 4, memory: { x: x }, output: `${x} là số Chẵn`, exp: `Thực thi lệnh của nhánh if.` });
-                } else {
-                    ifSteps.push({ line: 3, memory: { x: x }, exp: `Kiểm tra if: ${x} không chia hết cho 2. Điều kiện if Sai.` });
-                    ifSteps.push({ line: 5, memory: { x: x }, exp: `Chuyển xuống nhánh else vì if bị Sai.` });
-                    ifSteps.push({ line: 6, memory: { x: x }, output: `${x} là số Lẻ`, exp: `Thực thi lệnh của nhánh else.` });
-                }
-                ifSteps.push({ line: 7, memory: { x: x + 1 }, exp: `Tăng x lên ${x + 1}.` });
-            }
-            ifSteps.push({ line: 2, memory: { x: limit + 1 }, exp: `Kiểm tra while: ${limit + 1} <= ${limit} (SAI). Vòng lặp kết thúc!` });
-
-            db.whileIf = {
-                title: "While kết hợp If/Else",
-                theory: `
-                    <p>🔹 Trong thực tế, các bài toán thường yêu cầu <b class="text-white">vừa lặp vừa kiểm tra điều kiện</b>.</p>
-                    <p>🔹 Ví dụ: Duyệt qua các số từ 1 đến ${limit}, kiểm tra xem số nào chẵn, số nào lẻ.</p>
-                    <div class="mt-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/10">
-                        <span class="text-on-surface-variant text-[13px]">Toán tử <code class="font-mono text-primary">%</code> dùng để chia lấy phần dư.</span><br>
-                        <code class="font-mono text-tertiary text-[13px] mt-1.5 block">x % 2 == 0</code> 
-                        <span class="text-on-surface-variant text-[12.5px] italic">nghĩa là: "Nếu x chia hết cho 2 (tức là số chẵn)".</span>
-                    </div>
-                `,
-                code: `
-<div class="code-line" id="l1"><span class="line-num">1</span><span class="code-wrapper">x = <span class="num">1</span></span></div>
-<div class="code-line" id="l2"><span class="line-num">2</span><span class="code-wrapper"><span class="kw">while</span> x <= <span class="num">${limit}</span>:</span></div>
-<div class="code-line" id="l3"><span class="line-num">3</span><span class="code-wrapper">    <span class="kw">if</span> x % <span class="num">2</span> == <span class="num">0</span>:</span></div>
-<div class="code-line" id="l4"><span class="line-num">4</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">f"{x} là số Chẵn"</span>)</span></div>
-<div class="code-line" id="l5"><span class="line-num">5</span><span class="code-wrapper">    <span class="kw">else</span>:</span></div>
-<div class="code-line" id="l6"><span class="line-num">6</span><span class="code-wrapper">        <span class="func">print</span>(<span class="str">f"{x} là số Lẻ"</span>)</span></div>
-<div class="code-line" id="l7"><span class="line-num">7</span><span class="code-wrapper">    x += <span class="num">1</span></span></div>
-                `,
-                steps: ifSteps
-            };
-
-            return db;
-        }
-
-        let currentId = 'for';
-        let stepIdx = 0;
-        let playInterval = null;
-
-        window.onload = () => loadLesson('for');
-
-        function updateLimit() {
-            let limitInput = document.getElementById('loop-limit');
-            let val = parseInt(limitInput.value);
-            
-            // Validate để tránh số quá to gây lag bộ nhớ Simulator
-            if (isNaN(val) || val < 1) val = 1;
-            if (val > 50) val = 50; 
-            limitInput.value = val;
-
-            // Load lại bài với giới hạn mới
-            loadLesson(currentId);
-        }
-
-        function loadLesson(id) {
-            stopAuto();
-
-            // Menu Active State Update
-            document.querySelectorAll('.lesson-tab').forEach(el => el.classList.remove('active'));
-            const activeTab = document.querySelector(`.lesson-tab[onclick*="'${id}'"]`);
-            if (activeTab) activeTab.classList.add('active');
-
-            // Hide all areas
-            document.getElementById('learning-container').classList.add('hidden');
-            document.getElementById('controls').classList.add('hidden');
-            document.getElementById('quiz-container').classList.add('hidden');
-            document.getElementById('practice-container').classList.add('hidden');
-
-            if (id === 'quiz') {
-                document.getElementById('quiz-container').classList.remove('hidden');
-                document.getElementById('lesson-title').innerText = "Bài Tập Trắc Nghiệm";
-                return;
-            }
-
-            if (id === 'practice') {
-                document.getElementById('practice-container').classList.remove('hidden');
-                document.getElementById('practice-container').classList.add('flex');
-                document.getElementById('lesson-title').innerText = "Thực Hành Code Tự Luận";
-                return;
-            }
-
-            // Lấy giới hạn n hiện tại từ input
-            let limit = parseInt(document.getElementById('loop-limit').value) || 5;
-
-            // Show Learning Area
-            document.getElementById('learning-container').classList.remove('hidden');
-            document.getElementById('learning-container').classList.add('grid');
-            document.getElementById('controls').classList.remove('hidden');
-            document.getElementById('controls').classList.add('flex');
-            
-            currentId = id;
-            stepIdx = 0;
-            const data = getDb(limit)[id];
-            
-            document.getElementById('lesson-title').innerText = data.title;
-            document.getElementById('theory-content').innerHTML = data.theory;
-            document.getElementById('code-content').innerHTML = data.code;
-            
-            resetSimUI();
-        }
-
-        function resetSimUI() {
-            stepIdx = 0;
-            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
-            document.getElementById('memory-content').innerHTML = '<span class="text-on-surface-variant opacity-50 text-[13px] italic">Memory is empty...</span>';
-            document.getElementById('explanation-text').innerText = 'Bấm "Step" hoặc "Auto Run" ở góc trên bên phải để bắt đầu mô phỏng.';
-            document.getElementById('console-content').innerHTML = '';
-            
-            document.getElementById('btn-step').disabled = false;
-            document.getElementById('btn-step').classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-
-        function resetSim() {
-            stopAuto();
-            resetSimUI();
-        }
-
-        function stepSim() {
-            let limit = parseInt(document.getElementById('loop-limit').value) || 5;
-            const data = getDb(limit)[currentId];
-            
-            if (stepIdx >= data.steps.length) {
-                stopAuto();
-                document.getElementById('explanation-text').innerHTML = "<span class='text-primary font-bold'>🏁 Chương trình đã kết thúc!</span>";
-                document.getElementById('btn-step').disabled = true;
-                document.getElementById('btn-step').classList.add('opacity-50', 'cursor-not-allowed');
-                return;
-            }
-
-            const step = data.steps[stepIdx];
-
-            // Highlight Code
-            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
-            const activeEl = document.getElementById(`l${step.line}`);
-            if(activeEl) {
-                activeEl.classList.add('active-line');
-                activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            // Update RAM
-            if (step.memory && Object.keys(step.memory).length > 0) {
-                let memHTML = '';
-                for (const [key, value] of Object.entries(step.memory)) {
-                    memHTML += `<div class="memory-var"><span class="material-symbols-outlined text-[16px] opacity-70">data_object</span>${key} = ${value}</div>`;
-                }
-                document.getElementById('memory-content').innerHTML = memHTML;
-            }
-
-            // Update Explanation
-            document.getElementById('explanation-text').innerHTML = `<span class="text-white">${step.exp}</span>`;
-
-            // Update Console
-            if (step.output) {
-                document.getElementById('console-content').innerHTML += `<div class="flex gap-2"><span class="text-on-surface-variant opacity-30">></span><span class="text-on-surface">${step.output}</span></div>`;
-                const consoleDiv = document.getElementById('console-content').parentElement;
-                consoleDiv.scrollTop = consoleDiv.scrollHeight;
-            }
-
-            stepIdx++;
-        }
-
-        function autoSim() {
-            if (playInterval) {
-                stopAuto();
-            } else {
-                const btnAuto = document.getElementById('btn-auto');
-                btnAuto.innerHTML = '<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: \'FILL\' 1;">pause</span> Pause';
-                btnAuto.classList.replace('bg-primary', 'bg-tertiary-container');
-                btnAuto.classList.replace('text-on-primary', 'text-on-tertiary-container');
-                
-                let limit = parseInt(document.getElementById('loop-limit').value) || 5;
-                if (stepIdx >= getDb(limit)[currentId].steps.length) resetSimUI();
-                
-                stepSim(); 
-                playInterval = setInterval(() => {
-                    let curLimit = parseInt(document.getElementById('loop-limit').value) || 5;
-                    if (stepIdx >= getDb(curLimit)[currentId].steps.length) stopAuto();
-                    else stepSim();
-                }, 1000); // Rút ngắn còn 1 giây/bước để xem nhanh hơn nếu n lớn
-            }
-        }
-
-        function stopAuto() {
-            if (playInterval) {
-                clearInterval(playInterval);
-                playInterval = null;
-                const btnAuto = document.getElementById('btn-auto');
-                btnAuto.innerHTML = '<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> Auto Run';
-                btnAuto.classList.replace('bg-tertiary-container', 'bg-primary');
-                btnAuto.classList.replace('text-on-tertiary-container', 'text-on-primary');
-            }
-        }
-
-        // Quiz Logic
-        function checkAnswer(qNum, labelElement, isCorrect) {
-            const allLabels = labelElement.parentElement.querySelectorAll('label');
-            allLabels.forEach(lbl => {
-                lbl.classList.remove('border-primary', 'bg-primary/5', 'border-error', 'bg-error/5');
-                lbl.classList.add('border-outline-variant/20', 'bg-surface-container-low');
-                const circle = lbl.querySelector('.rounded-full');
-                circle.classList.remove('bg-primary', 'border-primary', 'bg-error', 'border-error');
-                circle.classList.add('border-outline-variant');
+                div.innerHTML = htmlLine || ' '; // Giữ dòng trống
+                codeDiv.appendChild(div);
             });
 
-            const circle = labelElement.querySelector('.rounded-full');
-            const resDiv = document.getElementById(`res-${qNum}`);
-            resDiv.classList.remove('hidden', 'text-primary', 'text-error', 'bg-primary/10', 'bg-error/10');
+            generateRandomArray();
+        }
 
-            if (isCorrect) {
-                labelElement.classList.replace('border-outline-variant/20', 'border-primary');
-                labelElement.classList.replace('bg-surface-container-low', 'bg-primary/5');
-                circle.classList.replace('border-outline-variant', 'border-primary');
-                circle.classList.add('bg-primary');
-                resDiv.classList.add('text-primary', 'bg-primary/10');
-                resDiv.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Chính xác! Bạn đã hiểu bài.';
-            } else {
-                labelElement.classList.replace('border-outline-variant/20', 'border-error');
-                labelElement.classList.replace('bg-surface-container-low', 'bg-error/5');
-                circle.classList.replace('border-outline-variant', 'border-error');
-                circle.classList.add('bg-error');
-                resDiv.classList.add('text-error', 'bg-error/10');
-                resDiv.innerHTML = '<span class="material-symbols-outlined text-[18px]">cancel</span> Sai rồi. Hãy suy nghĩ lại nhé!';
+        // --- LOGIC SINH MẢNG & DỰNG HÌNH ĐỒ HỌA ---
+        function generateRandomArray() {
+            pause();
+            initialArray = [];
+            for (let i = 0; i < ARRAY_SIZE; i++) {
+                initialArray.push({
+                    id: i,
+                    value: Math.floor(Math.random() * 89) + 10 // Số từ 10-99
+                });
+            }
+            resetToInitial();
+        }
+
+        function resetToInitial() {
+            pause();
+            currentActionIdx = 0;
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            domBlocks = [];
+
+            // Căn giữa mảng
+            const totalWidth = ARRAY_SIZE * blockSpacing;
+            const offsetLeft = (container.clientWidth - totalWidth) / 2 + 10;
+
+            initialArray.forEach((item, i) => {
+                const block = document.createElement('div');
+                block.className = 'block-el bg-blue-500';
+                block.innerText = item.value;
+                block.id = `block-${item.id}`;
+
+                // Đặt vị trí
+                block.style.left = `${offsetLeft + i * blockSpacing}px`;
+                block.style.top = `0px`;
+
+                container.appendChild(block);
+                domBlocks.push(block);
+            });
+
+            document.getElementById('explanation-box').innerHTML = 'Đã tạo mảng mới. Bấm "Chạy tự động" hoặc "Chạy 1 bước" để bắt đầu.';
+
+            // Xóa highlight code
+            document.querySelectorAll('.code-line').forEach(el => {
+                el.classList.remove('active-line');
+            });
+
+            updateSpeed(); // Đặt lại transition css
+
+            // Biên dịch lại các bước mô phỏng (Thêm tham số cấp độ level = 0)
+            actions = [];
+            let tempArray = JSON.parse(JSON.stringify(initialArray));
+            mergeSortTrace(tempArray, 0, 0);
+        }
+
+        // --- TRÌNH GHI LẠI CÁC BƯỚC (GENERATOR TRACE) ---
+        function mergeSortTrace(arrParam, startIdxOffset, level) {
+            let arrVals = arrParam.map(x => x.value).join(', ');
+            actions.push({ type: 'EXPLAIN', message: `Đang xử lý mảng: [${arrVals}] tại cấp đệ quy ${level}.`, line: 0 });
+            actions.push({ type: 'LINE', line: 1 });
+
+            if (arrParam.length <= 1) {
+                actions.push({ type: 'EXPLAIN', message: `Mảng [${arrVals}] chỉ có 1 phần tử nên hiển nhiên đã được sắp xếp.`, line: 2 });
+                return arrParam;
+            }
+
+            actions.push({ type: 'LINE', line: 3 });
+            let mid = Math.floor(arrParam.length / 2);
+
+            actions.push({ type: 'LINE', line: 4 });
+            let left = arrParam.slice(0, mid);
+
+            actions.push({ type: 'LINE', line: 5 });
+            let right = arrParam.slice(mid);
+
+            actions.push({
+                type: 'DIVIDE',
+                leftElements: left.map(x => x.id),
+                rightElements: right.map(x => x.id),
+                level: level + 1,
+                message: `Chia [${arrVals}] thành nửa trái [${left.map(x => x.value).join(', ')}] và nửa phải [${right.map(x => x.value).join(', ')}] và đẩy xuống nhánh cấp ${level + 1}.`,
+                line: 6
+            });
+
+            let leftSorted = mergeSortTrace(left, startIdxOffset, level + 1);
+
+            actions.push({ type: 'EXPLAIN', message: `Đã xử lý xong nửa trái. Tiếp tục với nửa phải [${right.map(x => x.value).join(', ')}].`, line: 7 });
+            let rightSorted = mergeSortTrace(right, startIdxOffset + mid, level + 1);
+
+            actions.push({ type: 'LINE', line: 8 });
+            return mergeTrace(leftSorted, rightSorted, startIdxOffset, level);
+        }
+
+        function mergeTrace(leftArr, rightArr, startOffset, level) {
+            actions.push({ type: 'EXPLAIN', message: `Chuẩn bị gộp hai mảng con: [${leftArr.map(x => x.value).join(', ')}] và [${rightArr.map(x => x.value).join(', ')}] đưa ngược lên cấp ${level}.`, line: 10 });
+            actions.push({ type: 'LINE', line: 11 });
+            let result = [];
+
+            actions.push({ type: 'LINE', line: 12 });
+            let i = 0, j = 0;
+
+            while (i < leftArr.length && j < rightArr.length) {
+                actions.push({ type: 'LINE', line: 13 });
+                actions.push({ type: 'COMPARE', idx1: leftArr[i].id, idx2: rightArr[j].id, message: `So sánh ${leftArr[i].value} và ${rightArr[j].value}...`, line: 14 });
+
+                if (leftArr[i].value < rightArr[j].value) {
+                    actions.push({ type: 'MOVE_UP', id: leftArr[i].id, newVisualIdx: startOffset + result.length, level: level, message: `${leftArr[i].value} nhỏ hơn, được ưu tiên đưa vào mảng kết quả ở trên.`, line: 15 });
+                    result.push(leftArr[i]);
+                    actions.push({ type: 'LINE', line: 16 });
+                    i++;
+                } else {
+                    actions.push({ type: 'LINE', line: 17 });
+                    actions.push({ type: 'MOVE_UP', id: rightArr[j].id, newVisualIdx: startOffset + result.length, level: level, message: `${rightArr[j].value} nhỏ hơn (hoặc bằng), được đưa vào mảng kết quả ở trên.`, line: 18 });
+                    result.push(rightArr[j]);
+                    actions.push({ type: 'LINE', line: 19 });
+                    j++;
+                }
+            }
+
+            actions.push({ type: 'LINE', line: 20 });
+            while (i < leftArr.length) {
+                actions.push({ type: 'MOVE_UP', id: leftArr[i].id, newVisualIdx: startOffset + result.length, level: level, message: `Nửa phải đã hết phần tử, đưa nốt ${leftArr[i].value} vào kết quả.`, line: 20 });
+                result.push(leftArr[i]);
+                i++;
+            }
+
+            actions.push({ type: 'LINE', line: 21 });
+            while (j < rightArr.length) {
+                actions.push({ type: 'MOVE_UP', id: rightArr[j].id, newVisualIdx: startOffset + result.length, level: level, message: `Nửa trái đã hết phần tử, đưa nốt ${rightArr[j].value} vào kết quả.`, line: 21 });
+                result.push(rightArr[j]);
+                j++;
+            }
+
+            actions.push({ type: 'MERGE_DONE', elements: result.map(x => x.id), message: `Đã gộp xong thành mảng: [${result.map(x => x.value).join(', ')}] tại cấp ${level}.`, line: 22 });
+            return result;
+        }
+
+
+        // --- BỘ THỰC THI (PLAYER) ---
+        function executeAction(action) {
+            const container = document.getElementById('array-container');
+            const totalWidth = ARRAY_SIZE * blockSpacing;
+            const offsetLeft = (container.clientWidth - totalWidth) / 2 + 10;
+            const explanationBox = document.getElementById('explanation-box');
+
+            // Cập nhật thông báo giải thích
+            if (action.message) {
+                explanationBox.innerHTML = action.message;
+            }
+
+            // Xóa highlight trên code cũ
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+
+            // Phục hồi màu cho các khối đang so sánh (vàng)
+            document.querySelectorAll('.block-el').forEach(el => {
+                if (el.classList.contains('bg-yellow-400')) {
+                    el.classList.remove('bg-yellow-400', 'scale-110');
+                    el.classList.add('bg-blue-500');
+                }
+            });
+
+            // 1. Nháy dòng code
+            if (action.line !== undefined) {
+                const lineEl = document.getElementById(`line-${action.line}`);
+                if (lineEl) {
+                    lineEl.classList.add('active-line');
+                    // Đã tắt tính năng tự động cuộn để tránh giật màn hình
+                    // lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            // 2. Xử lý diễn họa khối đồ hoạ theo dạng cây (Tree)
+            if (action.type === 'DIVIDE') {
+                // Di chuyển mảng con xuống cấp đệ quy sâu hơn
+                const moveDown = (ids) => {
+                    ids.forEach(id => {
+                        const b = document.getElementById(`block-${id}`);
+                        if (b) {
+                            b.style.top = `${action.level * verticalSpacing}px`;
+                            b.classList.remove('bg-purple-600');
+                            b.classList.add('bg-blue-500'); // Trở lại trạng thái "Chưa sắp xếp"
+                        }
+                    });
+                };
+                moveDown(action.leftElements);
+                moveDown(action.rightElements);
+            }
+            else if (action.type === 'COMPARE') {
+                const b1 = document.getElementById(`block-${action.idx1}`);
+                const b2 = document.getElementById(`block-${action.idx2}`);
+                if (b1) { b1.classList.remove('bg-blue-500', 'bg-green-500', 'bg-purple-600'); b1.classList.add('bg-yellow-400', 'scale-110'); }
+                if (b2) { b2.classList.remove('bg-blue-500', 'bg-green-500', 'bg-purple-600'); b2.classList.add('bg-yellow-400', 'scale-110'); }
+            }
+            else if (action.type === 'MOVE_UP') {
+                // Đưa phần tử trúng tuyển di chuyển LÊN cấp trên
+                const b = document.getElementById(`block-${action.id}`);
+                if (b) {
+                    b.style.top = `${action.level * verticalSpacing}px`;
+                    b.style.left = `${offsetLeft + action.newVisualIdx * blockSpacing}px`;
+
+                    b.classList.remove('bg-blue-500', 'bg-yellow-400', 'scale-110');
+                    b.classList.add('bg-green-500');
+                }
+            }
+            else if (action.type === 'MERGE_DONE') {
+                // Hoàn thành gộp ở nhánh hiện tại
+                action.elements.forEach(id => {
+                    const b = document.getElementById(`block-${id}`);
+                    if (b) {
+                        b.classList.remove('bg-green-500', 'bg-blue-500');
+                        b.classList.add('bg-purple-600');
+                    }
+                });
             }
         }
 
-        // Practice Tab Support
-        document.getElementById('practice-editor').addEventListener('keydown', function(e) {
-            if (e.key == 'Tab') {
-                e.preventDefault();
-                var start = this.selectionStart;
-                var end = this.selectionEnd;
-                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-                this.selectionStart = this.selectionEnd = start + 4;
+        // --- LOGIC ĐIỀU KHIỂN (CONTROLS) ---
+        function getSpeed() {
+            return parseInt(document.getElementById('speed-slider').value);
+        }
+
+        function updateSpeed() {
+            const speedMs = getSpeed();
+            // Đảm bảo tốc độ transition css luôn nhanh hơn thời gian lặp một chút để tránh kẹt
+            const transitionSpeed = speedMs * 0.8;
+            document.querySelectorAll('.block-el').forEach(el => {
+                el.style.transition = `all ${transitionSpeed}ms ease-in-out`;
+            });
+        }
+
+        document.getElementById('speed-slider').addEventListener('input', updateSpeed);
+
+        function togglePlay() {
+            if (currentActionIdx >= actions.length) return;
+
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('play-btn');
+
+            if (isPlaying) {
+                btn.innerHTML = '⏸ Tạm dừng';
+                btn.classList.replace('bg-green-600', 'bg-orange-500');
+                btn.classList.replace('hover:bg-green-500', 'hover:bg-orange-400');
+                runLoop();
+            } else {
+                pause();
             }
+        }
+
+        function pause() {
+            isPlaying = false;
+            clearTimeout(timer);
+            const btn = document.getElementById('play-btn');
+            btn.innerHTML = '▶️ Chạy tự động';
+            btn.classList.replace('bg-orange-500', 'bg-green-600');
+            btn.classList.replace('hover:bg-orange-400', 'hover:bg-green-500');
+        }
+
+        function runLoop() {
+            if (!isPlaying) return;
+
+            if (currentActionIdx < actions.length) {
+                executeAction(actions[currentActionIdx]);
+                currentActionIdx++;
+                timer = setTimeout(runLoop, getSpeed());
+            } else {
+                pause(); // Kết thúc thuật toán
+            }
+        }
+
+        function stepNext() {
+            pause(); // Dừng auto-play nếu đang chạy
+            if (currentActionIdx < actions.length) {
+                executeAction(actions[currentActionIdx]);
+                currentActionIdx++;
+            }
+        }
+
+        // Lắng nghe sự kiện resize để căn giữa lại đồ hoạ
+        window.addEventListener('resize', () => {
+            if (currentActionIdx === 0) resetToInitial();
         });
 
-        // Run Practice Code (Piston API)
-        async function runPracticeCode() {
-            const btn = document.getElementById('btn-run-practice');
-            const consoleEl = document.getElementById('practice-console');
-            const code = document.getElementById('practice-editor').value;
-            
-            if (code.trim() === '') {
-                consoleEl.innerHTML = `<span class="text-error">> Lỗi: Vui lòng nhập mã nguồn trước khi chạy!</span><br>`;
-                return;
-            }
+        // Chạy lần đầu
+        initUI();
 
-            btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Executing...';
-            btn.classList.add('opacity-70', 'cursor-wait');
-            btn.disabled = true;
-            consoleEl.innerHTML = `<span class="text-on-surface-variant opacity-60">> Sending code to compiler...</span><br><br>`;
-
-            try {
-                const response = await fetch('https://emcv.piston.rs/api/v2/execute', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ language: 'python', version: '3.10.0', files: [{ content: code }] })
-                });
-
-                const data = await response.json();
-
-                if (data.run && data.run.code === 0) {
-                    consoleEl.innerHTML += `<span class="text-primary">> Thực thi thành công:</span><br><br>`;
-                    const output = data.run.output.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
-                    consoleEl.innerHTML += `<span class="text-on-surface">${output}</span><br>`;
-                } else {
-                    consoleEl.innerHTML += `<span class="text-error">> [LỖI RUNTIME/SYNTAX]:</span><br><br>`;
-                    const errOutput = data.run ? data.run.output : (data.compile ? data.compile.output : "Unknown error");
-                    consoleEl.innerHTML += `<span class="text-error opacity-80">${errOutput}</span><br>`;
-                }
-            } catch (error) {
-                consoleEl.innerHTML += `<span class="text-error">> Có phải vscode đéo đâu mà đòi chạy code</span><br>`;
-            } finally {
-                btn.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> Run Code';
-                btn.classList.remove('opacity-70', 'cursor-wait');
-                btn.disabled = false;
-                consoleEl.parentElement.scrollTop = consoleEl.parentElement.scrollHeight;
-            }
-        }
     </script>
 </body>
+
 </html>

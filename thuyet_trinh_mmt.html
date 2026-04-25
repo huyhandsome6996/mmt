@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ Tư duy Mạng Máy Tính</title>
+    <!-- Nhúng thư viện vis-network qua CDN -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- Nhúng Tailwind CSS phục vụ cho màn hình Bài tập Phần 2 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary-color: #3498db;
+            --primary-light: #5dade2;
+            --primary-dark: #2980b9;
+            --text-color: #333;
+            --text-muted: #666;
+            --panel-bg: #ffffff;
+            --accent: #e74c3c;
+            --title-font-size: 1.15rem;
+            --desc-font-size: 1rem;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: var(--bg-color);
+            background-image:
+                linear-gradient(rgba(52, 152, 219, 0.12) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52, 152, 219, 0.12) 1px, transparent 1px);
+            background-size: 25px 25px;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ---------------- BẢNG KẾ HOẠCH NỔI (FLOATING PANEL) ---------------- */
+        .floating-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 420px;
+            height: 85vh;
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            resize: both;
+            overflow: hidden;
+            min-width: 350px;
+            min-height: 300px;
+            max-width: 90vw;
+            max-height: 95vh;
+        }
+
+        .floating-panel.hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            cursor: move;
+            user-select: none;
+        }
+
+        .btn-close-panel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .btn-close-panel:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .panel-header h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .panel-header p {
+            margin: 5px 0 10px 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .font-settings {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .font-settings label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .font-settings input[type="range"] {
+            width: 55%;
+            cursor: ew-resize;
+        }
+
+        .presentation-progress {
+            background: rgba(255, 255, 255, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #f1c40f;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .keyword-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .keyword-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .keyword-list::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+        }
+
+        /* ---------------- CSS CHO TỪNG CARD ---------------- */
+        .keyword-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            padding-top: 25px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            position: relative;
+            resize: vertical;
+            overflow: auto;
+            min-height: 80px;
+        }
+
+        .keyword-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .keyword-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-light);
+        }
+
+        .keyword-card.active {
+            background-color: #f8fbff;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .keyword-card.active::before {
+            background-color: var(--primary-color);
+        }
+
+        .card-toolbar {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .btn-drag-handle {
+            cursor: grab;
+            background: #f1f2f6;
+            color: #747d8c;
+            border: 1px solid #dfe4ea;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .btn-drag-handle:hover {
+            background: #dfe4ea;
+            color: #2f3542;
+        }
+
+        .btn-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .btn-reattach {
+            cursor: pointer;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .btn-reattach:hover {
+            background: var(--primary-dark);
+        }
+
+        .keyword-card.detached {
+            position: absolute;
+            resize: both;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--primary-light);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .keyword-card.detached .btn-reattach {
+            display: block;
+        }
+
+        .keyword-card.detached:hover {
+            transform: none;
+        }
+
+        .keyword-card.detached.hidden-scene {
+            display: none !important;
+            pointer-events: none;
+        }
+
+        [contenteditable="true"] {
+            outline: none;
+            border-bottom: 1px dashed transparent;
+            transition: all 0.2s;
+            cursor: text;
+        }
+
+        [contenteditable="true"]:hover {
+            border-bottom: 1px dashed #ccc;
+        }
+
+        [contenteditable="true"]:focus {
+            border-bottom: 1px dashed var(--primary-color);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .keyword-title {
+            font-weight: bold;
+            color: var(--primary-dark);
+            font-size: var(--title-font-size);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.3;
+        }
+
+        .keyword-desc {
+            font-size: var(--desc-font-size);
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .keyword-example {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: linear-gradient(145deg, #ffffff, #f0f8ff);
+            border: 1px dashed var(--primary-light);
+            border-radius: 6px;
+            font-size: calc(var(--desc-font-size) * 0.95);
+            color: #2c3e50;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+
+        .keyword-card.active .keyword-example {
+            display: block;
+        }
+
+        .example-badge {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* ---------------- CSS MAP VÀ MÀN HÌNH FULLSCREEN ---------------- */
+        .map-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        #mynetwork {
+            width: 100%;
+            height: 100%;
+        }
+
+        .presentation-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 12;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .presentation-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .intro-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .intro-screen img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* THÔNG BÁO CHẾ ĐỘ VẼ */
+        .drawing-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .drawing-indicator.hidden {
+            opacity: 0;
+            top: -50px;
+        }
+
+        /* Dịch chuyển mượt mà nút điều khiển */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Khi vào Part 2 -> Bắn nút control lên góc phải trên cùng để không che đáp án */
+        body.part2-active .controls {
+            bottom: auto;
+            top: 20px;
+            right: 20px;
+        }
+
+        .btn-reset {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Times New Roman', Times, serif;
+            transition: 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background: var(--accent);
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* ẨN BẢNG ĐIỀU KHIỂN KHI TRÌNH BÀY FULL MÀN HÌNH */
+        body.intro-active .floating-panel,
+        body.part2-active .floating-panel {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* CANVAS VẼ NẰM TRÊN CÙNG */
+        #drawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        body.drawing-mode-active #drawCanvas {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        body.drawing-mode-active #mynetwork {
+            opacity: 0.8;
+        }
+
+        /* CSS BỔ SUNG CHO PHẦN 2 TỪ TAILWIND/USER */
+        .font-code {
+            font-family: 'Fira Code', monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+        }
+
+        .device-box {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .device-box:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.15);
+            z-index: 20;
+        }
+
+        /* Hiệu ứng Rơi Bit Nhị Phân mô phỏng máy tính */
+        @keyframes dropIn {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+                color: #fbbf24;
+            }
+
+            50% {
+                color: #fbbf24;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .bit-drop {
+            display: inline-block;
+            opacity: 0;
+            animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .host-bit-highlight {
+            background-color: rgba(254, 226, 226, 0.5);
+            border-radius: 2px;
+        }
+
+        /* Nền mờ đỏ cho bit host */
+        .host-bit-highlight-green {
+            background-color: rgba(220, 252, 231, 0.5);
+            border-radius: 2px;
+        }
+
+        .flash-update {
+            animation: flashUpdate 0.6s;
+        }
+
+        @keyframes flashUpdate {
+            0% {
+                background-color: rgba(253, 224, 71, 0.8);
+                transform: scale(1.05);
+            }
+
+            100% {
+                background-color: transparent;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- MÀN HÌNH HƯỚNG DẪN SỬ DỤNG (OVERLAY) -->
+    <div id="instructionOverlay"
+        class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[9999] flex items-center justify-center transition-opacity duration-500">
+        <div
+            class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg text-center transform transition-transform scale-100 border border-gray-100">
+            <div
+                class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Hướng dẫn Thuyết trình</h2>
+            <p class="text-gray-500 mb-6 text-sm">Bấm bắt đầu để tự động kích hoạt chế độ Toàn màn hình</p>
+
+            <div class="text-left text-gray-600 space-y-4 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-100">
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">↑
+                        / ↓</span>
+                    <span class="text-sm mt-1">Dùng phím mũi tên Lên/Xuống để chuyển đổi qua lại giữa các slide và khái
+                        niệm.</span>
+                </div>
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">Ctrl
+                        + 1</span>
+                    <span class="text-sm mt-1">Bật/tắt chế độ vẽ tay bằng bút đỏ trực tiếp lên màn hình.</span>
+                </div>
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">Ctrl
+                        + Z</span>
+                    <span class="text-sm mt-1">Hoàn tác (Undo) nét vẽ tay bị lỗi.</span>
+                </div>
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 px-3 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">K</span>
+                    <span class="text-sm mt-1">Ấn phím K bất kỳ lúc nào để bật/thoát chế độ Fullscreen thủ công.</span>
+                </div>
+            </div>
+            <button id="btnStart"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all text-lg shadow-lg transform hover:-translate-y-0.5">
+                Đã hiểu & Bắt đầu
+            </button>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+
+        <!-- ================= BẢN ĐỒ ================= -->
+        <div class="map-container">
+            <div id="mynetwork"></div>
+
+            <!-- MÀN HÌNH 1: MỞ ĐẦU -->
+            <div id="introScreen" class="presentation-slide intro-screen">
+                <img src="anh_mo_dau.png" alt="Mở đầu">
+            </div>
+
+            <!-- MÀN HÌNH 2: SLIDE TÍNH TOÁN NET 1 -->
+            <div id="part2_net1" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+
+                    <!-- Header (Không cuộn) -->
+                    <div
+                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-blue-700">Phần 2.1: Tính toán Net 1 (Chứa PC1)</h1>
+                            <p class="text-gray-500 text-sm mt-1">Cấu hình phân bổ dải IP cho Router & PC</p>
+                        </div>
+                        <div
+                            class="flex flex-row gap-4 items-end justify-center bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            <div class="group">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Địa chỉ IP (PC1)</label>
+                                <input type="text" id="ipInput" value="175.25.37.110"
+                                    class="w-40 px-3 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none text-center font-code text-blue-800 font-bold text-base">
+                            </div>
+                            <div class="group">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Prefix</label>
+                                <div class="flex items-center shadow-sm rounded">
+                                    <span
+                                        class="bg-gray-200 px-2 py-1.5 border border-r-0 border-gray-300 rounded-l text-gray-600 font-bold text-base">/</span>
+                                    <input type="number" id="prefixInput" value="27" min="8" max="30"
+                                        class="w-16 px-2 py-1.5 border border-gray-300 rounded-r focus:outline-none focus:border-blue-500 text-center font-code text-blue-800 font-bold text-base">
+                                </div>
+                            </div>
+                            <button onclick="calculateSubnets()"
+                                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1.5 px-6 rounded-lg shadow hover:shadow-md h-[38px] text-sm">
+                                Tính Toán
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Body 2 Cột (Không cuộn, chiếm toàn bộ không gian còn lại) -->
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+
+                        <!-- Cột 1: Tìm Network ID -->
+                        <div
+                            class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-blue-500 flex flex-col h-full relative">
+                            <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
+                                <h2 class="text-xl font-bold text-blue-800 flex items-center">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
+                                        1</span> Phép tính AND
+                                </h2>
+                                <button onclick="replayAnimation('anim-net1')"
+                                    class="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                        </path>
+                                    </svg> Replay
+                                </button>
+                            </div>
+
+                            <p class="text-gray-600 text-sm mb-4 shrink-0">Mục đích: Triệt tiêu các bit Host về <strong
+                                    class="text-red-500">0</strong> để tìm ra địa chỉ Mạng.</p>
+
+                            <!-- Bảng toán học -->
+                            <div
+                                class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] leading-relaxed shadow-inner flex flex-col justify-center overflow-hidden">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-sans text-gray-400 w-16">IP:</span>
+                                    <span id="tut-ip-dec" class="font-bold text-white text-right">...</span>
+                                </div>
+                                <div id="tut-ip-bin" class="text-right text-[0.7rem] text-[#9cdcfe] mb-3">...</div>
+
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-sans text-gray-400 w-16">Mask:</span>
+                                    <span id="tut-mask-dec-table" class="font-bold text-white text-right">...</span>
+                                </div>
+                                <div id="tut-mask-bin-table" class="text-right text-[0.7rem] text-[#ce9178] mb-3">...
+                                </div>
+
+                                <hr class="border-gray-600 border-dashed my-2">
+
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="font-sans font-bold text-blue-400 text-lg w-20">NET ID:</span>
+                                    <span id="tut-net-dec"
+                                        class="font-bold text-blue-400 text-2xl text-right flash-update">...</span>
+                                </div>
+                                <div id="anim-net1"
+                                    class="text-right text-[0.8rem] font-bold text-[#4fc1ff] mt-1 drop-container">...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cột 2: Tìm Broadcast & Host -->
+                        <div class="flex flex-col gap-4 min-h-0 overflow-hidden">
+                            <!-- Broadcast (OR) -->
+                            <div
+                                class="flex-1 bg-white p-5 rounded-2xl shadow-sm border-t-4 border-red-500 flex flex-col h-full relative">
+                                <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
+                                    <h2 class="text-xl font-bold text-red-800 flex items-center">
+                                        <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
+                                            2</span> Phép tính OR
+                                    </h2>
+                                    <button onclick="replayAnimation('anim-br1')"
+                                        class="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                            </path>
+                                        </svg> Replay
+                                    </button>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4 shrink-0">Mục đích: Đẩy toàn bộ các bit Host lên
+                                    <strong class="text-green-500">1</strong>.</p>
+
+                                <div
+                                    class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] shadow-inner flex flex-col justify-center overflow-hidden">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-sans text-gray-400 w-16">Net ID:</span>
+                                        <span id="tut-br-net-dec" class="font-bold text-white text-right">...</span>
+                                    </div>
+                                    <div id="tut-br-net-bin" class="text-right text-[0.7rem] text-[#4fc1ff] mb-3">...
+                                    </div>
+
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span>
+                                        <span id="tut-wildcard-dec"
+                                            class="font-bold text-[#c586c0] text-right">...</span>
+                                    </div>
+                                    <div id="tut-wildcard-bin" class="text-right text-[0.7rem] text-[#c586c0] mb-3">...
+                                    </div>
+
+                                    <hr class="border-gray-600 border-dashed my-2">
+
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="font-sans font-bold text-red-400 text-lg">Broadcast:</span>
+                                        <span id="tut-br-dec"
+                                            class="font-bold text-red-400 text-2xl text-right flash-update">...</span>
+                                    </div>
+                                    <div id="anim-br1"
+                                        class="text-right text-[0.8rem] font-bold text-[#f48771] mt-1 drop-container">
+                                        ...</div>
+                                </div>
+                            </div>
+
+                            <!-- Host Assignment -->
+                            <div class="shrink-0 bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm">
+                                <h3 class="font-bold text-gray-800 mb-2 flex items-center"><span
+                                        class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md mr-2 text-xs">Bước
+                                        3</span> Gán IP Host</h3>
+                                <p class="font-sans text-sm text-gray-500 mb-2">Dải khả dụng: <strong
+                                        class="text-blue-700 font-code text-base bg-white px-2 rounded border shadow-sm"
+                                        id="tut-net1-first">...</strong> <span class="mx-1">→</span> <strong
+                                        class="text-blue-700 font-code text-base bg-white px-2 rounded border shadow-sm"
+                                        id="tut-net1-last">...</strong></p>
+                                <div class="flex gap-4 font-code text-sm">
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
+                                            class="text-gray-500 text-xs block font-sans">Cổng .a (GW)</span><strong
+                                            class="text-blue-700 text-lg" id="tut-a-res">...</strong></div>
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
+                                            class="text-gray-500 text-xs block font-sans">PC0</span><strong
+                                            class="text-gray-700 text-lg" id="tut-pc0-res">...</strong></div>
+                                    <div class="bg-gray-100 p-2 rounded border border-gray-200 flex-1 opacity-70"><span
+                                            class="text-gray-500 text-xs block font-sans">PC1 (Đề bài)</span><strong
+                                            class="text-gray-600 text-lg" id="tut-pc1-res">...</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 3: SLIDE TÍNH TOÁN NET 2 -->
+            <div id="part2_net2" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+
+                    <!-- Header (Không cuộn) -->
+                    <div
+                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-green-700">Phần 2.2: Suy diễn Mạng 2 (Net 2)</h1>
+                            <p class="text-gray-500 text-sm mt-1">Nối tiếp dải IP liền kề từ kết quả của Mạng 1</p>
+                        </div>
+                    </div>
+
+                    <!-- Body 2 Cột -->
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+
+                        <!-- Cột 1: Tìm Net 2 ID -->
+                        <div
+                            class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-green-500 flex flex-col h-full relative">
+                            <h2 class="text-xl font-bold text-green-800 flex items-center border-b pb-2 mb-3 shrink-0">
+                                <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
+                                    1</span> Tìm Địa chỉ Mạng 2
+                            </h2>
+                            <p class="text-gray-600 text-base mb-6 shrink-0 leading-relaxed">Mạng 2 nằm ngay sau Mạng 1.
+                                Ta lấy địa chỉ cuối cùng của Mạng 1 (Broadcast) cộng thêm 1 đơn vị sẽ ra địa chỉ bắt đầu
+                                của Mạng 2.</p>
+
+                            <div
+                                class="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="text-center mb-6">
+                                    <span class="block text-gray-500 text-sm mb-1 uppercase tracking-wide">Broadcast Net
+                                        1</span>
+                                    <span id="tut-br-dec-2"
+                                        class="text-red-500 font-bold font-code text-4xl drop-shadow-sm">...</span>
+                                </div>
+                                <div class="text-gray-400 mb-6 font-bold text-3xl">+ 1</div>
+                                <div class="text-center">
+                                    <span class="block text-gray-500 text-sm mb-1 uppercase tracking-wide">Network ID
+                                        Net 2</span>
+                                    <span id="tut-net2-dec"
+                                        class="text-green-600 font-bold font-code text-5xl bg-green-100 px-6 py-3 rounded-2xl shadow-md border-2 border-green-200 flash-update">...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cột 2: Tìm Broadcast & Host -->
+                        <div class="flex flex-col gap-4 min-h-0 overflow-hidden">
+                            <!-- Broadcast (OR) -->
+                            <div
+                                class="flex-1 bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-500 flex flex-col h-full relative">
+                                <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
+                                    <h2 class="text-xl font-bold text-orange-800 flex items-center">
+                                        <span
+                                            class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
+                                            2</span> Tìm Broadcast 2 (OR)
+                                    </h2>
+                                    <button onclick="replayAnimation('anim-br2')"
+                                        class="text-xs text-gray-500 hover:text-orange-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                            </path>
+                                        </svg> Replay
+                                    </button>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4 shrink-0">Thực hiện tương tự Net 1. Đẩy các bit
+                                    Host của Net 2 lên 1 bằng phép OR.</p>
+
+                                <div
+                                    class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] shadow-inner flex flex-col justify-center overflow-hidden">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-sans text-gray-400 w-16 text-xs">Net 2 ID:</span>
+                                        <span id="tut-net2-id-dec" class="font-bold text-white text-right">...</span>
+                                    </div>
+                                    <div id="tut-net2-id-bin" class="text-right text-[0.7rem] text-[#4fc1ff] mb-3">...
+                                    </div>
+
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span>
+                                        <span id="tut-wildcard-dec-3"
+                                            class="font-bold text-[#c586c0] text-right">...</span>
+                                    </div>
+                                    <div id="tut-wildcard-bin-3" class="text-right text-[0.7rem] text-[#c586c0] mb-3">
+                                        ...</div>
+
+                                    <hr class="border-gray-600 border-dashed my-2">
+
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="font-sans font-bold text-orange-400 text-lg w-28">Broadcast
+                                            2:</span>
+                                        <span id="tut-net2-br-dec-final"
+                                            class="font-bold text-orange-400 text-2xl text-right flash-update">...</span>
+                                    </div>
+                                    <div id="anim-br2"
+                                        class="text-right text-[0.8rem] font-bold text-[#f48771] mt-1 drop-container">
+                                        ...</div>
+                                </div>
+                            </div>
+
+                            <!-- Host Assignment -->
+                            <div class="shrink-0 bg-green-50/50 p-4 rounded-2xl border border-green-100 shadow-sm">
+                                <h3 class="font-bold text-gray-800 mb-2 flex items-center"><span
+                                        class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md mr-2 text-xs">Bước
+                                        3</span> Gán IP Host (Net 2)</h3>
+                                <p class="font-sans text-sm text-gray-500 mb-2">Dải khả dụng: <strong
+                                        class="text-green-700 font-code text-base bg-white px-2 rounded border shadow-sm"
+                                        id="tut-net2-first">...</strong> <span class="mx-1">→</span> <strong
+                                        class="text-green-700 font-code text-base bg-white px-2 rounded border shadow-sm"
+                                        id="tut-net2-last">...</strong></p>
+                                <div class="flex gap-4 font-code text-sm">
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
+                                            class="text-gray-500 text-xs block font-sans">Cổng .b (GW)</span><strong
+                                            class="text-green-700 text-lg" id="tut-b-res">...</strong></div>
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
+                                            class="text-gray-500 text-xs block font-sans">PC3</span><strong
+                                            class="text-gray-700 text-lg" id="tut-pc3-res">...</strong></div>
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
+                                            class="text-gray-500 text-xs block font-sans">PC4</span><strong
+                                            class="text-gray-700 text-lg" id="tut-pc4-res">...</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 4: SƠ ĐỒ TOPO & BẢNG -->
+            <div id="part2_topo" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-6xl h-[92vh] flex flex-col gap-4 font-sans">
+                    <!-- Topo Map Area -->
+                    <div
+                        class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center pt-6 pb-2 min-h-0 overflow-hidden relative">
+                        <h2 class="text-xl font-bold text-gray-800 absolute top-4 left-6 z-20">Sơ đồ Mạng Phân Bổ Trực
+                            Quan</h2>
+
+                        <!-- Topology SVG Logic (Adapted and Scaled) -->
+                        <div
+                            class="transform scale-90 lg:scale-100 origin-top pt-6 mt-4 w-full max-w-[800px] mx-auto select-none">
+                            <!-- Router -->
+                            <div class="flex flex-col items-center relative z-10 device-box cursor-pointer">
+                                <div
+                                    class="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-200 rounded-full flex items-center justify-center border-[3px] border-blue-500 shadow-md">
+                                    <svg class="w-8 h-8 text-blue-700" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="mt-1 font-bold text-gray-800 text-sm">Router0</span>
+                            </div>
+                            <!-- Router lines -->
+                            <div class="w-[60%] mx-auto flex justify-between relative mt-[-10px] z-0">
+                                <div class="w-1/2 border-t-[3px] border-l-[3px] border-gray-400 rounded-tl-xl h-8">
+                                </div>
+                                <div class="w-1/2 border-t-[3px] border-r-[3px] border-gray-400 rounded-tr-xl h-8">
+                                </div>
+                            </div>
+                            <!-- Interfaces -->
+                            <div class="w-[70%] mx-auto flex justify-between mt-1 px-4 text-xs font-semibold">
+                                <div
+                                    class="text-center bg-white px-2 py-1 rounded shadow border border-blue-300 device-box z-10">
+                                    <span class="text-gray-500 block font-sans mb-0.5">Cổng a</span>
+                                    <span id="topo-int-a"
+                                        class="font-code font-bold bg-blue-50 text-blue-700 px-1 rounded border border-blue-100">175.25.37.97</span>
+                                </div>
+                                <div
+                                    class="text-center bg-white px-2 py-1 rounded shadow border border-green-300 device-box z-10">
+                                    <span class="text-gray-500 block font-sans mb-0.5">Cổng b</span>
+                                    <span id="topo-int-b"
+                                        class="font-code font-bold bg-green-50 text-green-700 px-1 rounded border border-green-100">175.25.37.129</span>
+                                </div>
+                            </div>
+                            <!-- Lines down to switches -->
+                            <div class="w-[66%] mx-auto flex justify-between relative mt-[-8px] z-0">
+                                <div class="w-1 bg-gray-400 h-8 rounded-full"></div>
+                                <div class="w-1 bg-gray-400 h-8 rounded-full"></div>
+                            </div>
+                            <!-- Switches -->
+                            <div class="w-full flex justify-between px-10">
+                                <!-- Switch 0 -->
+                                <div class="flex flex-col items-center w-[45%] relative device-box">
+                                    <div
+                                        class="w-20 h-10 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg flex items-center justify-center border-[3px] border-blue-500 shadow-md z-10">
+                                        <svg class="w-6 h-6 text-blue-700" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="mt-2 bg-blue-50 text-blue-800 px-2 py-1 rounded text-xs font-bold border border-blue-300 text-center">
+                                        <span class="text-[0.6rem] text-blue-600 block">Network 1</span>
+                                        <span id="topo-net1" class="font-code">175.25.37.96/27</span>
+                                    </div>
+                                    <!-- Switch lines -->
+                                    <div class="w-[80%] flex justify-between relative mt-2 z-0">
+                                        <div
+                                            class="w-1/2 border-t-[3px] border-l-[3px] border-gray-300 rounded-tl-lg h-6">
+                                        </div>
+                                        <div
+                                            class="w-1/2 border-t-[3px] border-r-[3px] border-gray-300 rounded-tr-lg h-6">
+                                        </div>
+                                    </div>
+                                    <!-- PCs 1 -->
+                                    <div class="w-full flex justify-between px-2">
+                                        <div class="flex flex-col items-center device-box text-xs">
+                                            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <span class="font-bold text-gray-700">PC0</span>
+                                            <span id="topo-pc0"
+                                                class="font-code bg-white px-1 border mt-0.5 shadow-sm rounded">175...</span>
+                                        </div>
+                                        <div
+                                            class="flex flex-col items-center device-box text-xs bg-blue-50 p-1 rounded-lg border border-blue-200">
+                                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <span class="font-bold text-blue-800">PC1 (Input)</span>
+                                            <span id="topo-pc1"
+                                                class="font-code bg-blue-600 text-white px-1 mt-0.5 rounded">175...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Switch 1 -->
+                                <div class="flex flex-col items-center w-[45%] relative device-box">
+                                    <div
+                                        class="w-20 h-10 bg-gradient-to-r from-green-100 to-green-50 rounded-lg flex items-center justify-center border-[3px] border-green-500 shadow-md z-10">
+                                        <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="mt-2 bg-green-50 text-green-800 px-2 py-1 rounded text-xs font-bold border border-green-300 text-center">
+                                        <span class="text-[0.6rem] text-green-600 block">Network 2</span>
+                                        <span id="topo-net2" class="font-code">175.25.37.128/27</span>
+                                    </div>
+                                    <!-- Switch lines -->
+                                    <div class="w-[80%] flex justify-between relative mt-2 z-0">
+                                        <div
+                                            class="w-1/2 border-t-[3px] border-l-[3px] border-gray-300 rounded-tl-lg h-6">
+                                        </div>
+                                        <div
+                                            class="w-1/2 border-t-[3px] border-r-[3px] border-gray-300 rounded-tr-lg h-6">
+                                        </div>
+                                    </div>
+                                    <!-- PCs 2 -->
+                                    <div class="w-full flex justify-between px-2">
+                                        <div class="flex flex-col items-center device-box text-xs">
+                                            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <span class="font-bold text-gray-700">PC3</span>
+                                            <span id="topo-pc3"
+                                                class="font-code bg-white px-1 border mt-0.5 shadow-sm rounded">175...</span>
+                                        </div>
+                                        <div class="flex flex-col items-center device-box text-xs">
+                                            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <span class="font-bold text-gray-700">PC4</span>
+                                            <span id="topo-pc4"
+                                                class="font-code bg-white px-1 border mt-0.5 shadow-sm rounded">175...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result Table Area -->
+                    <div
+                        class="shrink-0 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-6 items-center">
+                        <div
+                            class="shrink-0 font-bold text-indigo-800 flex items-center bg-indigo-50 px-4 py-8 rounded-xl border border-indigo-100">
+                            <svg class="w-8 h-8 mr-2 text-indigo-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Đáp Án Cuối Cùng
+                        </div>
+                        <div class="flex-1 grid grid-cols-3 gap-x-4 gap-y-2 text-sm font-sans">
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
+                                    class="font-bold text-gray-600">Net 1:</span><span
+                                    class="font-code font-bold text-blue-700" id="table-net1">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
+                                    class="font-bold text-gray-600">.a:</span><span class="font-code text-gray-800"
+                                    id="table-a">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
+                                    class="font-bold text-gray-600">PC0:</span><span class="font-code text-gray-800"
+                                    id="table-pc0">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
+                                    class="font-bold text-gray-600">Net 2:</span><span
+                                    class="font-code font-bold text-green-700" id="table-net2">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
+                                    class="font-bold text-gray-600">.b:</span><span class="font-code text-gray-800"
+                                    id="table-b">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
+                                    class="font-bold text-gray-600">PC3:</span><span class="font-code text-gray-800"
+                                    id="table-pc3">...</span></div>
+                            <div></div> <!-- empty slot for grid alignment if needed -->
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded col-start-3">
+                                <span class="font-bold text-gray-600">PC4:</span><span class="font-code text-gray-800"
+                                    id="table-pc4">...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS VẼ TAY -->
+            <canvas id="drawCanvas"></canvas>
+
+            <!-- THÔNG BÁO CHẾ ĐỘ VẼ -->
+            <div id="drawingIndicator" class="drawing-indicator hidden">🖌️ Chế độ Vẽ: BẬT (Bấm Ctrl+Z để hoàn tác,
+                Ctrl+1 để tắt)</div>
+
+            <div class="controls">
+                <button class="btn-reset" onclick="resetHighlight()">Xem tổng quan Map</button>
+                <button class="btn-reset btn-danger" onclick="clearSavedData()"
+                    title="Xóa dữ liệu đã chỉnh sửa và khôi phục về mặc định">Khôi phục gốc</button>
+            </div>
+        </div>
+
+        <!-- BẢNG KẾ HOẠCH THUYẾT TRÌNH TRÔI NỔI -->
+        <div class="floating-panel" id="planPanel">
+            <div class="panel-header" id="panelHeader" title="Kéo thả để di chuyển bảng">
+                <button class="btn-close-panel" onclick="togglePlanPanel()" title="Đóng">✖</button>
+
+                <div class="font-settings">
+                    <label>Cỡ chữ Tiêu đề: <input type="range" id="titleSizeSlider" min="0.8" max="2.5" step="0.05"
+                            value="1.15"></label>
+                    <label>Cỡ chữ Nội dung: <input type="range" id="descSizeSlider" min="0.8" max="2" step="0.05"
+                            value="1.0"></label>
+                    <label title="Tốc độ nét vẽ tái hiện lại khi chuyển cảnh">Tốc độ vẽ hình: <input type="range"
+                            id="drawSpeedSlider" min="1" max="15" step="1" value="4"></label>
+                </div>
+
+                <div class="presentation-progress">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="stepCounter">Đang trình bày: Mở đầu</span>
+                    <span class="nav-hint">⌨️ Phím ⬇️ / ⬆️ điều hướng</span>
+                </div>
+            </div>
+
+            <div class="keyword-list" id="keywordList">
+                <!-- Sẽ sinh bằng JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- HIỂN THỊ HƯỚNG DẪN & FULLSCREEN ---
+        const instructionOverlay = document.getElementById('instructionOverlay');
+        const btnStart = document.getElementById('btnStart');
+        let isStarted = false;
+
+        function startPresentation() {
+            if (isStarted) return;
+            isStarted = true;
+
+            // Ẩn popup
+            instructionOverlay.style.opacity = '0';
+            setTimeout(() => {
+                instructionOverlay.style.display = 'none';
+            }, 500);
+
+            // Bật Fullscreen
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Lỗi fullscreen: ${err.message}`);
+                });
+            }
+        }
+
+        btnStart.addEventListener('click', startPresentation);
+
+        // Cho phép bấm Enter/Space để bắt đầu nếu đang ở màn hình hướng dẫn
+        document.addEventListener('keydown', (e) => {
+            if (!isStarted && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                startPresentation();
+            }
+        });
+
+
+        // --- 0. KHAI BÁO BIẾN GLOBAL VÀ LƯU TRỮ ---
+        let currentStepIndex = -1; // -1: Lobby | 0: Intro | >0: Node | Cuối: Part 2
+        let zIndexCounter = 1000;
+        let highlightActive = false;
+
+        window.currentSceneId = 'intro';
+        window.initialSceneId = 'intro';
+        window.sceneStates = {};
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        function saveGlobalState() {
+            saveCurrentSceneState();
+
+            const cardsData = [];
+            document.querySelectorAll('.keyword-card').forEach(card => {
+                const titleEl = card.querySelector('.keyword-title');
+                const descEl = card.querySelector('.keyword-desc');
+                const exampleEl = card.querySelector('.keyword-example span');
+
+                cardsData.push({
+                    id: card.id,
+                    title: titleEl.innerHTML,
+                    desc: descEl.innerHTML,
+                    example: exampleEl.innerHTML,
+                    isDetached: card.classList.contains('detached'),
+                    sceneId: card.dataset.sceneId || null,
+                    style: {
+                        left: card.style.left,
+                        top: card.style.top,
+                        width: card.style.width,
+                        height: card.style.height,
+                        zIndex: card.style.zIndex
+                    }
+                });
+            });
+
+            const state = {
+                currentSceneId: window.currentSceneId,
+                sceneStates: window.sceneStates,
+                cards: cardsData,
+                fontSettings: {
+                    titleSize: document.getElementById('titleSizeSlider').value,
+                    descSize: document.getElementById('descSizeSlider').value,
+                    drawSpeed: document.getElementById('drawSpeedSlider').value
+                },
+                panelHidden: document.getElementById('planPanel').classList.contains('hidden')
+            };
+
+            // Dùng key v9 để nạp layout auto fullscreen và move controls
+            localStorage.setItem('mindmapState_v9', JSON.stringify(state));
+        }
+
+        const debouncedSaveGlobalState = debounce(saveGlobalState, 500);
+
+        function loadGlobalState() {
+            const stateStr = localStorage.getItem('mindmapState_v9');
+            if (!stateStr) return false;
+
+            try {
+                const state = JSON.parse(stateStr);
+                if (state.currentSceneId) window.initialSceneId = state.currentSceneId;
+                if (state.sceneStates) window.sceneStates = state.sceneStates;
+
+                if (state.fontSettings) {
+                    document.getElementById('titleSizeSlider').value = state.fontSettings.titleSize;
+                    document.getElementById('descSizeSlider').value = state.fontSettings.descSize;
+                    if (state.fontSettings.drawSpeed) document.getElementById('drawSpeedSlider').value = state.fontSettings.drawSpeed;
+                    document.documentElement.style.setProperty('--title-font-size', `${state.fontSettings.titleSize}rem`);
+                    document.documentElement.style.setProperty('--desc-font-size', `${state.fontSettings.descSize}rem`);
+                }
+
+                if (state.panelHidden) document.getElementById('planPanel').classList.add('hidden');
+
+                if (state.cards) {
+                    state.cards.forEach(cardData => {
+                        const card = document.getElementById(cardData.id);
+                        if (!card) return;
+                        card.querySelector('.keyword-title').innerHTML = cardData.title;
+                        card.querySelector('.keyword-desc').innerHTML = cardData.desc;
+                        card.querySelector('.keyword-example span').innerHTML = cardData.example;
+                        if (cardData.isDetached) {
+                            const nodeId = cardData.id.replace('card-', '');
+                            const placeholder = document.createElement('div');
+                            placeholder.id = `placeholder-${nodeId}`;
+                            placeholder.style.display = 'none';
+                            card.parentNode.insertBefore(placeholder, card);
+                            document.getElementById('mainContainer').appendChild(card);
+                            card.classList.add('detached');
+                            if (cardData.sceneId) card.dataset.sceneId = cardData.sceneId;
+                            card.style.position = 'absolute';
+                            card.style.left = cardData.style.left;
+                            card.style.top = cardData.style.top;
+                            card.style.width = cardData.style.width;
+                            card.style.height = cardData.style.height;
+                            card.style.zIndex = cardData.style.zIndex;
+                        }
+                    });
+                }
+                return true;
+            } catch (e) {
+                console.error('Lỗi khi khôi phục dữ liệu:', e);
+                return false;
+            }
+        }
+
+        function clearSavedData() {
+            if (confirm("Bạn có chắc chắn muốn xóa tất cả dữ liệu đã chỉnh sửa và khôi phục về trạng thái gốc ban đầu?")) {
+                localStorage.removeItem('mindmapState_v9');
+                location.reload();
+            }
+        }
+
+        // --- 1. DỮ LIỆU CẬP NHẬT THEO GIÁO TRÌNH ---
+        const rawData = {
+            "nodes": [
+                { "id": 1, "label": "MẠNG MÁY TÍNH", "description": "Hệ thống kết nối các thiết bị để trao đổi thông tin.", "example": "<b>Chi tiết:</b> Là hệ thống gồm hai hay nhiều máy tính, thiết bị được kết nối với nhau theo một phương thức nào đó để có thể trao đổi thông tin dữ liệu cho nhau." },
+                { "id": 2, "label": "MÔI TRƯỜNG KẾT NỐI", "description": "Thành phần cơ bản tạo nên mạng máy tính (hữu tuyến, vô tuyến).", "example": "<b>Chi tiết:</b> Là một trong các thành phần cơ bản tạo nên mạng máy tính. Môi trường truyền dẫn bao gồm cáp nối (hữu tuyến) hoặc sóng vô tuyến (vô tuyến)." },
+                { "id": 3, "label": "PC", "description": "Máy tính cá nhân, thiết bị đầu cuối trực tiếp.", "example": "<b>Chi tiết:</b> Máy tính cá nhân, đóng vai trò là thiết bị đầu cuối trực tiếp làm việc với con người." },
+                { "id": 4, "label": "CÁP UTP", "description": "Môi trường truyền dẫn hữu tuyến (Cáp thẳng, cáp chéo).", "example": "<b>Chi tiết:</b> Là môi trường truyền dẫn hữu tuyến. Cáp UTP được chia thành cáp thẳng (dùng để nối các thiết bị khác loại, ví dụ PC nối với Switch) và cáp chéo (dùng để nối các thiết bị cùng loại, ví dụ PC nối với Router)." },
+                { "id": 5, "label": "GIAO THỨC", "description": "Các quy tắc, quy ước trong mạng (HTTP, TCP, UDP...).", "example": "<b>Chi tiết:</b> Là các quy tắc, quy ước trong mạng. Tiêu biểu như giao thức HTTP/HTTPS dùng cho web, giao thức TCP và UDP dùng để kiểm soát truyền dữ liệu." },
+                { "id": 6, "label": "192.75.1.3/16", "description": "Một địa chỉ IP (IPv4 32 bit).", "example": "<b>Chi tiết:</b> Là một địa chỉ IP (phiên bản IPv4 có cấu trúc 32 bit). Hậu tố /16 (chính là Prefix length hay Subnet mask) cho biết có 16 bit được dùng làm phần địa chỉ mạng (NetID), 16 bit còn lại dành cho Host." },
+                { "id": 7, "label": "TCP/IP", "description": "Mô hình phân tầng chuẩn hóa kiến trúc mạng.", "example": "<b>Chi tiết:</b> Là một mô hình phân tầng được sử dụng để chuẩn hóa kiến trúc mạng máy tính." },
+                { "id": 8, "label": "OSI", "description": "Mô hình tham chiếu phân tầng tiêu chuẩn.", "example": "<b>Chi tiết:</b> Là mô hình tham chiếu phân tầng tiêu chuẩn trong việc chuẩn hóa kiến trúc mạng." },
+                { "id": 9, "label": "SUBNET", "description": "Thông đi kèm IP phân định NetID/HostID.", "example": "<b>Chi tiết:</b> Là thông tin đi kèm với địa chỉ IP để cho biết IP đó có bao nhiêu bit dành cho phần mạng (net). Trong Subnet mask, các bit tương ứng với phần net có giá trị bằng 1, các bit tương ứng với phần host có giá trị bằng 0." },
+                { "id": 10, "label": "KIẾN TRÚC MẠNG", "description": "Cấu trúc tổng thể của mạng.", "example": "<b>Chi tiết:</b> Cấu trúc tổng thể của mạng, thường được chuẩn hóa thông qua các mô hình phân tầng (như OSI, TCP/IP) để thuận tiện cho việc phân tích và triển khai." },
+                { "id": 11, "label": "DNS", "description": "Dịch vụ phân giải tên miền.", "example": "<b>Chi tiết:</b> Dịch vụ phân giải tên miền, là một lợi ích được tích hợp bên trong hệ thống dịch vụ danh bạ (Directory Service)." },
+                { "id": 12, "label": "170.67.12.128/25", "description": "Một địa chỉ IP định dạng IPv4.", "example": "<b>Chi tiết:</b> Là một địa chỉ IP định dạng IPv4. Con số /25 cho biết địa chỉ này có 25 bit được sử dụng cho phần mạng (NetID), phần còn lại dành cho host." },
+                { "id": 13, "label": "THÀNH PHẦN", "description": "Phần cứng và phần mềm tạo nên mạng.", "example": "<b>Chi tiết:</b> Hệ thống mạng máy tính cơ bản bao gồm phần cứng (các môi trường truyền thông, thiết bị mạng như NIC, Hub, Switch, Router) và phần mềm (Hệ điều hành mạng, các chương trình ứng dụng mạng). Hiểu đơn giản, mạng gồm: Máy tính, thiết bị mạng, môi trường truyền và hệ điều hành mạng." },
+                { "id": 14, "label": "CÁP QUANG", "description": "Một loại môi trường truyền dẫn tín hiệu mạng.", "example": "<b>Chi tiết:</b> Một loại môi trường truyền dẫn tín hiệu mạng." },
+                { "id": 15, "label": "WIFI", "description": "Môi trường truyền dẫn tín hiệu vô tuyến.", "example": "<b>Chi tiết:</b> Là môi trường truyền dẫn tín hiệu vô tuyến." },
+                { "id": 16, "label": "THIẾT BỊ MẠNG", "description": "Thiết bị trung chuyển và thiết bị đầu cuối.", "example": "<b>Chi tiết:</b> Bao gồm các thiết bị trung chuyển dùng để kết nối, mở rộng mạng (như Hub, Switch, Router) và các thiết bị cuối làm việc trực tiếp với người dùng." },
+                { "id": 17, "label": "ĐỊA CHỈ IP", "description": "Định danh duy nhất máy tính trong mạng.", "example": "<b>Chi tiết:</b> Gồm hai phiên bản chính là IPv4 (32-bit) và IPv6 (128-bit). Đóng vai trò như địa chỉ logic duy nhất để định tuyến gói tin (Packet) trên hạ tầng mạng toàn cầu." },
+                { "id": 18, "label": "HỆ ĐIỀU HÀNH MẠNG", "description": "Phần mềm quản lý tài nguyên mạng.", "example": "<b>Chi tiết:</b> Cung cấp các dịch vụ mạng cốt lõi như quản lý phân quyền người dùng, chia sẻ tệp tin, máy in và cấu hình bảo mật hệ thống. (Ví dụ: Windows Server, Linux CentOS)." },
+                { "id": 19, "label": "TOPOLOGY", "description": "Hình trạng hay cấu trúc kết nối của mạng.", "example": "<b>Chi tiết:</b> Hình trạng hay cấu trúc kết nối của mạng máy tính. Một số hình trạng kết nối thường gặp là Point to Point (nối các cặp máy tính) hoặc Point to Multipoint (một trạm kết nối đến nhiều trạm)." },
+                { "id": 20, "label": "ROUTER", "description": "Thiết bị mạng trung chuyển định tuyến.", "example": "<b>Chi tiết:</b> Là thiết bị mạng trung chuyển. Router có khả năng đọc địa chỉ IP để xác định địa chỉ mạng (địa chỉ Net) trong gói tin nhận được. Để kết nối Router với PC, người ta sử dụng cáp chéo." },
+                { "id": 21, "label": "THIẾT BỊ ĐẦU CUỐI", "description": "Thiết bị làm việc trực tiếp với con người.", "example": "<b>Chi tiết:</b> Là các thiết bị làm việc trực tiếp với con người trong mạng, điển hình là máy tính cá nhân (PC)." },
+                { "id": 22, "label": "SWITCH", "description": "Thiết bị mạng trung chuyển giúp mở rộng mạng.", "example": "<b>Chi tiết:</b> Là thiết bị mạng trung chuyển giúp mở rộng mạng. Để kết nối Switch với một thiết bị khác loại như PC, người ta sử dụng cáp thẳng." },
+                { "id": 23, "label": "NIC", "description": "Thiết bị giao tiếp mạng bắt buộc trên PC.", "example": "<b>Chi tiết:</b> Network Interface Card hay Card mạng. Đây là một thiết bị mạng, đóng vai trò là thiết bị giao tiếp mạng bắt buộc phải có trên mỗi trạm làm việc (máy tính)." },
+                { "id": 24, "label": "HUB", "description": "Thiết bị trung chuyển mạng ở tầng vật lý.", "example": "<b>Chi tiết:</b> Hoạt động ở tầng 1 (Physical Layer). Hub không thông minh, nó chỉ đơn thuần tiếp nhận, khuếch đại tín hiệu và phát tán mù cụ ra tất cả các cổng còn lại." },
+                { "id": 25, "label": "DHCP", "description": "Giao thức cấp phát địa chỉ IP động.", "example": "<b>Chi tiết:</b> Dynamic Host Configuration Protocol - Giao thức cấp phát địa chỉ IP động. DHCP hoạt động theo mô hình Client - Server, trong đó cấu hình DHCP được đặt trên một thiết bị server (như máy tính, router, modem...)." },
+                { "id": 26, "label": "CẤP PHÁT ĐỊA CHỈ TĨNH", "description": "Phương pháp cấp IP do con người cấu hình thủ công.", "example": "<b>Chi tiết:</b> Là phương pháp cấp IP do con người cấu hình thủ công. Địa chỉ IP được cấp phát tĩnh sẽ cố định và không thay đổi cho đến khi nó được cấu hình lại." },
+                { "id": 27, "label": "CẤP PHÁT ĐỊA CHỈ ĐỘNG", "description": "Phương pháp cấp IP tự động từ Server.", "example": "<b>Chi tiết:</b> Là phương pháp mà địa chỉ IP được cấp phát tự động từ một thiết bị đóng vai trò Server. Địa chỉ này chỉ được cấp trong một khoảng thời gian nhất định và có thể được thu hồi để cấp phát lại." },
+                { "id": 28, "label": "MÔ HÌNH PHÂN TẦNG", "description": "Kiến trúc mạng được chia thành các tầng.", "example": "<b>Chi tiết:</b> Việc chia kiến trúc mạng thành các mô hình phân tầng có ý nghĩa rất quan trọng, giúp các kỹ sư dễ dàng trong việc phân tích, thiết kế, triển khai và sửa lỗi hệ thống mạng." }
+            ],
+            "edges": [
+                { "from": 1, "to": 13, "label": "Bao gồm các" },
+                { "from": 13, "to": 16, "label": "Gồm có" },
+                { "from": 13, "to": 2, "label": "Cần có" },
+                { "from": 13, "to": 5, "label": "Tuân theo" },
+                { "from": 13, "to": 18, "label": "Được quản lý bởi" },
+                { "from": 16, "to": 21, "label": "Làm việc với con người" },
+                { "from": 16, "to": 20, "label": "Thiết bị trung chuyển" },
+                { "from": 16, "to": 22, "label": "Thiết bị trung chuyển" },
+                { "from": 16, "to": 24, "label": "Thiết bị trung chuyển" },
+                { "from": 21, "to": 3, "label": "Ví dụ điển hình" },
+                { "from": 3, "to": 23, "label": "Kết nối qua" },
+                { "from": 2, "to": 4, "label": "Hữu tuyến" },
+                { "from": 2, "to": 14, "label": "Hữu tuyến" },
+                { "from": 2, "to": 15, "label": "Vô tuyến" },
+                { "from": 5, "to": 7, "label": "Ví dụ giao thức" },
+                { "from": 5, "to": 11, "label": "Ví dụ giao thức" },
+                { "from": 5, "to": 25, "label": "Ví dụ giao thức" },
+                { "from": 10, "to": 28, "label": "Được tổ chức theo" },
+                { "from": 28, "to": 8, "label": "Là một mô hình" },
+                { "from": 28, "to": 7, "label": "Là một mô hình" },
+                { "from": 10, "to": 19, "label": "Sơ đồ vật lý" },
+                { "from": 25, "to": 27, "label": "Thực hiện việc" },
+                { "from": 17, "to": 26, "label": "Có thể là" },
+                { "from": 17, "to": 27, "label": "Có thể là" },
+                { "from": 17, "to": 9, "label": "Xác định nhờ Subnet Mask" },
+                { "from": 17, "to": 6, "label": "Ví dụ địa chỉ Host" },
+                { "from": 17, "to": 12, "label": "Ví dụ địa chỉ Net" }
+            ]
+        };
+
+        // THÊM 'intro' & 3 SLIDE 'part2' VÀO CHUỖI THUYẾT TRÌNH
+        const presentationSequence = [
+            'intro', 1, 13, 2, 4, 14, 15, 16, 21, 3, 23, 24, 22, 20, 5, 28, 8, 7, 17, 6, 12, 9, 25, 26, 27, 11, 18, 10, 19, 'part2_net1', 'part2_net2', 'part2_topo'
+        ];
+
+        function saveCurrentSceneState() {
+            const panel = document.getElementById('planPanel');
+            if (!window.sceneStates[window.currentSceneId]) {
+                window.sceneStates[window.currentSceneId] = {};
+            }
+            window.sceneStates[window.currentSceneId].panel = { width: panel.style.width, height: panel.style.height, top: panel.style.top, left: panel.style.left };
+
+            if (typeof network !== 'undefined' && network !== null && typeof window.currentSceneId === 'number') {
+                window.sceneStates[window.currentSceneId].networkView = { position: network.getViewPosition(), scale: network.getScale() };
+            }
+        }
+
+        function restoreSceneState(sceneId) {
+            const panel = document.getElementById('planPanel');
+            const state = window.sceneStates[sceneId];
+            if (state && state.panel) {
+                panel.style.width = state.panel.width || ''; panel.style.height = state.panel.height || '';
+                panel.style.top = state.panel.top || ''; panel.style.left = state.panel.left || '';
+            }
+        }
+
+        // --- TÍNH TOÁN TOÁN HỌC (PART 2) ---
+        function ip2long(ip) {
+            let parts = ip.split('.');
+            if (parts.length !== 4) return null;
+            return parts.reduce((acc, octet) => {
+                let val = parseInt(octet, 10);
+                if (isNaN(val) || val < 0 || val > 255) return null;
+                return (acc << 8) + val;
+            }, 0) >>> 0;
+        }
+
+        function long2ip(long) {
+            return [(long >>> 24) & 255, (long >>> 16) & 255, (long >>> 8) & 255, long & 255].join('.');
+        }
+
+        function getMaskLong(prefix) { return prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0; }
+
+        // Hàm tạo HTML nhị phân có hỗ trợ animation thả bit
+        function toFormattedBinaryString(long, prefix, isWildcard = false, isAnimDrop = false) {
+            let binStr = (long >>> 0).toString(2).padStart(32, '0');
+            let htmlStr = '';
+            for (let i = 0; i < 32; i++) {
+                let isNetworkBit = i < prefix;
+
+                // Mặc định màu: Net xanh, Host đỏ
+                let colorClass = isNetworkBit ? 'text-blue-400' : 'text-[#f48771] host-bit-highlight';
+
+                if (isWildcard) {
+                    colorClass = isNetworkBit ? 'text-gray-500' : 'text-[#c586c0] font-extrabold';
+                }
+
+                if (isAnimDrop) {
+                    // Cấu hình delay nhịp nhàng từ trái qua phải
+                    let delay = i * 0.03;
+                    let bitClass = `bit-drop ${colorClass}`;
+                    htmlStr += `<span class="${bitClass}" style="animation-delay: ${delay}s">${binStr[i]}</span>`;
+                } else {
+                    htmlStr += `<span class="${colorClass}">${binStr[i]}</span>`;
+                }
+
+                if ((i + 1) % 8 === 0 && i !== 31) {
+                    if (isAnimDrop) htmlStr += `<span class="text-gray-500 mx-[2px] bit-drop" style="animation-delay: ${(i + 0.5) * 0.03}s">.</span>`;
+                    else htmlStr += `<span class="text-gray-500 mx-[2px]">.</span>`;
+                }
+                else if ((i + 1) % 4 === 0 && i !== 31) htmlStr += `<span class="mx-[1px]"></span>`;
+            }
+            return htmlStr;
+        }
+
+        function updateDOM(id, text) {
+            const el = document.getElementById(id);
+            if (el) { el.innerText = text; el.parentElement.classList.remove('flash-update'); void el.offsetWidth; el.parentElement.classList.add('flash-update'); }
+        }
+
+        function updateHTML(id, html) {
+            const el = document.getElementById(id);
+            if (el) { el.innerHTML = html; }
+        }
+
+        // Chạy lại hiệu ứng thả số
+        function replayAnimation(containerId) {
+            const el = document.getElementById(containerId);
+            if (el) {
+                const oldHtml = el.innerHTML;
+                el.innerHTML = '';
+                void el.offsetWidth; // trigger reflow
+                el.innerHTML = oldHtml;
+            }
+        }
+
+        function calculateSubnets() {
+            const ipStr = document.getElementById('ipInput').value.trim();
+            const prefixStr = document.getElementById('prefixInput').value.trim();
+            const prefix = parseInt(prefixStr, 10);
+
+            const ipLong = ip2long(ipStr);
+            if (ipLong === null || isNaN(prefix) || prefix < 8 || prefix > 30) return;
+
+            const hostBits = 32 - prefix;
+            const maskLong = getMaskLong(prefix);
+            const maskStr = long2ip(maskLong);
+            const wildcardLong = (~maskLong) >>> 0;
+            const wildcardStr = long2ip(wildcardLong);
+
+            const net1IdLong = (ipLong & maskLong) >>> 0;
+            const net1BroadcastLong = (net1IdLong | wildcardLong) >>> 0;
+            const net1FirstLong = net1IdLong + 1;
+            const net1LastLong = net1BroadcastLong - 1;
+            const routerA = net1FirstLong;
+            const pc0 = net1IdLong + 2;
+
+            const net2IdLong = net1BroadcastLong + 1;
+            const net2BroadcastLong = (net2IdLong | wildcardLong) >>> 0;
+            const net2FirstLong = net2IdLong + 1;
+            const net2LastLong = net2BroadcastLong - 1;
+            const routerB = net2FirstLong;
+            const pc3 = net2IdLong + 2;
+            const pc4 = net2IdLong + 3;
+
+            // ----- CẬP NHẬT GIAO DIỆN (DOM) -----
+
+            // Slide 1: NET 1
+            updateDOM('tut-prefix', `/${prefix}`);
+            updateDOM('tut-mask-dec', maskStr);
+            updateHTML('tut-mask-bin', toFormattedBinaryString(maskLong, prefix));
+            updateDOM('tut-wildcard-dec-step1', wildcardStr);
+
+            updateDOM('tut-ip-dec', ipStr);
+            updateHTML('tut-ip-bin', toFormattedBinaryString(ipLong, prefix));
+
+            updateDOM('tut-mask-dec-table', maskStr);
+            updateHTML('tut-mask-bin-table', toFormattedBinaryString(maskLong, prefix));
+
+            updateDOM('tut-net-dec', long2ip(net1IdLong));
+            updateHTML('anim-net1', toFormattedBinaryString(net1IdLong, prefix, false, true)); // Anim drop
+
+            updateDOM('tut-br-net-dec', long2ip(net1IdLong));
+            updateHTML('tut-br-net-bin', toFormattedBinaryString(net1IdLong, prefix));
+
+            updateDOM('tut-wildcard-dec', wildcardStr);
+            updateHTML('tut-wildcard-bin', toFormattedBinaryString(wildcardLong, prefix, true));
+
+            updateDOM('tut-br-dec', long2ip(net1BroadcastLong));
+            updateHTML('anim-br1', toFormattedBinaryString(net1BroadcastLong, prefix, false, true)); // Anim drop
+
+            updateDOM('tut-net1-first', long2ip(net1FirstLong));
+            updateDOM('tut-net1-last', long2ip(net1LastLong));
+            updateDOM('tut-a-res', long2ip(routerA));
+            updateDOM('tut-pc0-res', long2ip(pc0));
+            updateDOM('tut-pc1-res', ipStr);
+
+            // Slide 2: NET 2
+            updateDOM('tut-br-dec-2', long2ip(net1BroadcastLong));
+            updateDOM('tut-net2-dec', long2ip(net2IdLong));
+
+            updateDOM('tut-net2-id-dec', long2ip(net2IdLong));
+            updateHTML('tut-net2-id-bin', toFormattedBinaryString(net2IdLong, prefix));
+
+            updateDOM('tut-wildcard-dec-3', wildcardStr);
+            updateHTML('tut-wildcard-bin-3', toFormattedBinaryString(wildcardLong, prefix, true));
+
+            updateDOM('tut-net2-br-dec-final', long2ip(net2BroadcastLong));
+            updateHTML('anim-br2', toFormattedBinaryString(net2BroadcastLong, prefix, false, true)); // Anim drop
+
+            updateDOM('tut-net2-first', long2ip(net2FirstLong));
+            updateDOM('tut-net2-last', long2ip(net2LastLong));
+            updateDOM('tut-b-res', long2ip(routerB));
+            updateDOM('tut-pc3-res', long2ip(pc3));
+            updateDOM('tut-pc4-res', long2ip(pc4));
+
+            // Slide 3: TOPO MAP
+            updateDOM('topo-int-a', long2ip(routerA));
+            updateDOM('topo-int-b', long2ip(routerB));
+            updateDOM('topo-net1', `${long2ip(net1IdLong)}/${prefix}`);
+            updateDOM('topo-pc0', long2ip(pc0));
+            updateDOM('topo-pc1', ipStr);
+            updateDOM('topo-net2', `${long2ip(net2IdLong)}/${prefix}`);
+            updateDOM('topo-pc3', long2ip(pc3));
+            updateDOM('topo-pc4', long2ip(pc4));
+
+            updateDOM('table-net1', long2ip(net1IdLong));
+            updateDOM('table-net2', long2ip(net2IdLong));
+            updateDOM('table-a', long2ip(routerA));
+            updateDOM('table-b', long2ip(routerB));
+            updateDOM('table-pc0', long2ip(pc0));
+            updateDOM('table-pc3', long2ip(pc3));
+            updateDOM('table-pc4', long2ip(pc4));
+        }
+
+
+        // --- 1.5 TÍNH NĂNG VẼ TAY (DRAWING CANVAS & REPLAY MƯỢT MÀ) ---
+        const drawCanvas = document.getElementById('drawCanvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        let isDrawingMode = false;
+        let isDrawing = false;
+        let currentStroke = null;
+        let replayAnimationId = null;
+
+        function resizeCanvas() {
+            drawCanvas.width = window.innerWidth;
+            drawCanvas.height = window.innerHeight;
+            redrawInstant(window.currentSceneId);
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function getPointerPos(e) {
+            if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function drawSmoothStroke(ctx, stroke, maxPointsToDraw = null) {
+            if (!stroke || !stroke.points || stroke.points.length === 0) return;
+            const pointsToDraw = maxPointsToDraw !== null ? stroke.points.slice(0, maxPointsToDraw) : stroke.points;
+            if (pointsToDraw.length === 0) return;
+
+            ctx.beginPath();
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.width;
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.shadowColor = 'rgba(231, 76, 60, 0.4)'; ctx.shadowBlur = 1;
+
+            ctx.moveTo(pointsToDraw[0].x, pointsToDraw[0].y);
+            if (pointsToDraw.length < 3) {
+                for (let i = 1; i < pointsToDraw.length; i++) ctx.lineTo(pointsToDraw[i].x, pointsToDraw[i].y);
+            } else {
+                let i;
+                for (i = 1; i < pointsToDraw.length - 2; i++) {
+                    const xc = (pointsToDraw[i].x + pointsToDraw[i + 1].x) / 2;
+                    const yc = (pointsToDraw[i].y + pointsToDraw[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(pointsToDraw[i].x, pointsToDraw[i].y, xc, yc);
+                }
+                ctx.quadraticCurveTo(pointsToDraw[i].x, pointsToDraw[i].y, pointsToDraw[i + 1].x, pointsToDraw[i + 1].y);
+            }
+            ctx.stroke();
+            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        }
+
+        function redrawInstant(sceneId, extraStroke = null) {
+            cancelAnimationFrame(replayAnimationId);
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            const state = window.sceneStates[sceneId];
+            if (state && state.drawings) state.drawings.forEach(stroke => drawSmoothStroke(drawCtx, stroke));
+            if (extraStroke) drawSmoothStroke(drawCtx, extraStroke);
+        }
+
+        function startDrawing(e) {
+            if (!isDrawingMode) return;
+            isDrawing = true;
+            const pos = getPointerPos(e);
+            currentStroke = { color: '#e74c3c', width: 4, points: [{ x: pos.x, y: pos.y }] };
+            if (e.touches) e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing || !isDrawingMode) return;
+            const pos = getPointerPos(e);
+            currentStroke.points.push({ x: pos.x, y: pos.y });
+            redrawInstant(window.currentSceneId, currentStroke);
+            if (e.touches) e.preventDefault();
+        }
+
+        function stopDrawing(e) {
+            if (!isDrawing || !isDrawingMode) return;
+            isDrawing = false;
+            if (currentStroke && currentStroke.points.length > 1) {
+                if (!window.sceneStates[window.currentSceneId]) window.sceneStates[window.currentSceneId] = {};
+                if (!window.sceneStates[window.currentSceneId].drawings) window.sceneStates[window.currentSceneId].drawings = [];
+                window.sceneStates[window.currentSceneId].drawings.push(currentStroke);
+                debouncedSaveGlobalState();
+            }
+            currentStroke = null;
+        }
+
+        drawCanvas.addEventListener('mousedown', startDrawing);
+        drawCanvas.addEventListener('mousemove', draw);
+        drawCanvas.addEventListener('mouseup', stopDrawing);
+        drawCanvas.addEventListener('mouseout', stopDrawing);
+        drawCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+        drawCanvas.addEventListener('touchmove', draw, { passive: false });
+        drawCanvas.addEventListener('touchmove', function (e) { if (isDrawingMode) e.preventDefault(); }, { passive: false }); // Prevent scrolling
+        drawCanvas.addEventListener('touchend', stopDrawing);
+
+        function replayDrawings(sceneId) {
+            cancelAnimationFrame(replayAnimationId);
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            const state = window.sceneStates[sceneId];
+            if (!state || !state.drawings || state.drawings.length === 0) return;
+
+            const strokes = state.drawings;
+            let strokeIdx = 0, pointIdx = 0;
+            let speed = parseInt(document.getElementById('drawSpeedSlider').value) || 4;
+
+            function drawNextChunk() {
+                if (strokeIdx >= strokes.length) return;
+                pointIdx += speed;
+                if (pointIdx >= strokes[strokeIdx].points.length) { strokeIdx++; pointIdx = 0; }
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+                for (let i = 0; i < strokeIdx; i++) drawSmoothStroke(drawCtx, strokes[i]);
+                if (strokeIdx < strokes.length) {
+                    drawSmoothStroke(drawCtx, strokes[strokeIdx], pointIdx);
+                    replayAnimationId = requestAnimationFrame(drawNextChunk);
+                }
+            }
+            drawNextChunk();
+        }
+
+        // --- 2. RENDER PANEL KẾ HOẠCH VÀ TÍNH NĂNG DETACH/KÉO THẢ ---
+        const keywordListEl = document.getElementById('keywordList');
+        const mainContainer = document.getElementById('mainContainer');
+        const cardObserver = new ResizeObserver(() => debouncedSaveGlobalState());
+
+        presentationSequence.forEach(nodeId => {
+            if (nodeId === 'intro' || String(nodeId).startsWith('part2')) return;
+
+            const node = rawData.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            const card = document.createElement('div');
+            card.className = 'keyword-card'; card.id = `card-${node.id}`;
+            card.innerHTML = `
+                <div class="card-toolbar" contenteditable="false">
+                    <button class="btn-reattach" title="Ghim lại vào danh sách">📌</button>
+                    <button class="btn-drag-handle" title="Kéo tách ra ngoài">✥</button>
+                </div>
+                <div class="keyword-title" contenteditable="true" spellcheck="false">${node.id}. ${node.label}</div>
+                <div class="keyword-desc" contenteditable="true" spellcheck="false">${node.description}</div>
+                <div class="keyword-example"><div class="example-badge">📖 LÝ THUYẾT</div><br/><span contenteditable="true" spellcheck="false">${node.example}</span></div>
+            `;
+            card.querySelectorAll('[contenteditable="true"]').forEach(el => el.addEventListener('input', debouncedSaveGlobalState));
+            cardObserver.observe(card);
+
+            card.onclick = (e) => { if (e.target.isContentEditable || e.target.closest('.card-toolbar')) return; focusNode(node.id, true); };
+            card.addEventListener('mousedown', () => { if (card.classList.contains('detached')) card.style.zIndex = ++zIndexCounter; });
+
+            const dragHandle = card.querySelector('.btn-drag-handle');
+            const btnReattach = card.querySelector('.btn-reattach');
+
+            dragHandle.addEventListener('mousedown', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                if (!card.classList.contains('detached')) {
+                    const rect = card.getBoundingClientRect();
+                    const placeholder = document.createElement('div'); placeholder.id = `placeholder-${node.id}`; placeholder.style.display = 'none';
+                    card.parentNode.insertBefore(placeholder, card); mainContainer.appendChild(card); card.classList.add('detached');
+                    card.dataset.sceneId = window.currentSceneId;
+                    card.style.position = 'absolute'; card.style.left = rect.left + 'px'; card.style.top = rect.top + 'px';
+                    card.style.width = rect.width + 'px'; if (card.style.height) card.style.height = card.style.height;
+                    saveGlobalState();
+                }
+                card.style.zIndex = ++zIndexCounter;
+                let startX = e.clientX, startY = e.clientY, initialLeft = parseFloat(card.style.left) || 0, initialTop = parseFloat(card.style.top) || 0;
+                function onMouseMove(moveEvent) { card.style.left = initialLeft + (moveEvent.clientX - startX) + 'px'; card.style.top = initialTop + (moveEvent.clientY - startY) + 'px'; }
+                function onMouseUp() { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); debouncedSaveGlobalState(); }
+                document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
+            });
+
+            btnReattach.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                const placeholder = document.getElementById(`placeholder-${node.id}`);
+                if (placeholder) { placeholder.parentNode.insertBefore(card, placeholder); placeholder.remove(); } else { keywordListEl.appendChild(card); }
+                card.classList.remove('detached'); delete card.dataset.sceneId;
+                card.style.position = ''; card.style.left = ''; card.style.top = ''; card.style.zIndex = ''; card.style.width = ''; card.style.height = '';
+                saveGlobalState();
+            });
+
+            keywordListEl.appendChild(card);
+        });
+
+        // BẮT SỰ KIỆN THAY ĐỔI CÀI ĐẶT
+        const titleSizeSlider = document.getElementById('titleSizeSlider');
+        const descSizeSlider = document.getElementById('descSizeSlider');
+        const drawSpeedSlider = document.getElementById('drawSpeedSlider');
+        const rootVars = document.documentElement.style;
+
+        titleSizeSlider.addEventListener('input', (e) => { rootVars.setProperty('--title-font-size', `${e.target.value}rem`); debouncedSaveGlobalState(); });
+        descSizeSlider.addEventListener('input', (e) => { rootVars.setProperty('--desc-font-size', `${e.target.value}rem`); debouncedSaveGlobalState(); });
+        drawSpeedSlider.addEventListener('input', () => debouncedSaveGlobalState());
+
+        // --- 3. VẼ SƠ ĐỒ VIS.JS ---
+        const nodeOptions = {
+            shape: 'box',
+            color: { background: '#5DADE2', border: '#2980B9', highlight: { background: '#E74C3C', border: '#C0392B' }, hover: { background: '#3498DB', border: '#2980B9' } },
+            font: { color: '#ffffff', size: 16, face: "'Times New Roman', Times, serif", bold: true }, margin: 12, shadow: true
+        };
+        const edgeOptions = {
+            arrows: { to: { enabled: true, scaleFactor: 0.8, type: 'arrow' } },
+            font: { size: 13, color: '#34495e', face: "'Times New Roman', Times, serif", align: 'middle', background: 'rgba(255,255,255,0.8)' },
+            color: { color: '#95a5a6', highlight: '#E74C3C', hover: '#3498DB' }, smooth: { type: 'continuous', roundness: 0.5 }
+        };
+        const nodesData = new vis.DataSet(rawData.nodes.map(n => ({ ...n, ...nodeOptions })));
+        const edgesData = new vis.DataSet(rawData.edges.map(e => ({ ...e, ...edgeOptions })));
+        const container = document.getElementById('mynetwork');
+        const network = new vis.Network(container, { nodes: nodesData, edges: edgesData }, {
+            interaction: { hover: true, tooltipDelay: 200, zoomView: true },
+            physics: { solver: 'forceAtlas2Based', forceAtlas2Based: { gravitationalConstant: -100, centralGravity: 0.005, springLength: 200, springConstant: 0.08 }, stabilization: { iterations: 150 } },
+            layout: { randomSeed: 2 }
+        });
+
+        network.on("dragEnd", function () { if (typeof window.currentSceneId === 'number') { saveCurrentSceneState(); debouncedSaveGlobalState(); } });
+        network.on("zoom", function () { if (typeof window.currentSceneId === 'number') { saveCurrentSceneState(); debouncedSaveGlobalState(); } });
+
+        // --- KHỞI TẠO TRẠNG THÁI ---
+        const isStateLoaded = loadGlobalState();
+        resizeCanvas();
+
+        if (isStateLoaded && window.initialSceneId !== 'lobby') {
+            const nodeId = isNaN(parseInt(window.initialSceneId)) ? window.initialSceneId : parseInt(window.initialSceneId);
+            focusNode(nodeId, false, true);
+
+            const s = window.sceneStates[window.initialSceneId];
+            if (s && s.networkView && typeof nodeId === 'number') {
+                network.moveTo({ position: s.networkView.position, scale: s.networkView.scale });
+            } else if (typeof nodeId === 'number') {
+                network.focus(nodeId, { scale: 1.3 });
+            }
+            setTimeout(() => replayDrawings(window.initialSceneId), 100);
+        } else {
+            focusNode('intro', false, true);
+            setTimeout(() => replayDrawings('intro'), 100);
+        }
+
+        // --- 4. TƯƠNG TÁC KEYBOARD & FOCUS ---
+        document.addEventListener('keydown', (e) => {
+            const isEditingText = document.activeElement && document.activeElement.isContentEditable;
+            // Bật / Tắt chế độ vẽ (Ctrl + 1)
+            if (e.ctrlKey && e.key === '1' && !isEditingText) {
+                e.preventDefault(); isDrawingMode = !isDrawingMode;
+                document.body.classList.toggle('drawing-mode-active', isDrawingMode);
+                if (isDrawingMode) document.getElementById('drawingIndicator').classList.remove('hidden');
+                else document.getElementById('drawingIndicator').classList.add('hidden');
+                return;
+            }
+            // Hoàn tác (Undo) nét vẽ - Ctrl + Z
+            if (e.ctrlKey && e.key.toLowerCase() === 'z' && !isEditingText) {
+                e.preventDefault(); const state = window.sceneStates[window.currentSceneId];
+                if (state && state.drawings && state.drawings.length > 0) {
+                    state.drawings.pop(); redrawInstant(window.currentSceneId); debouncedSaveGlobalState();
+                }
+                return;
+            }
+
+            if (e.key.toLowerCase() === 'k' && !isEditingText) { toggleFullScreen(); return; }
+
+            if (!isEditingText) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (currentStepIndex < presentationSequence.length - 1) {
+                        currentStepIndex++; focusNode(presentationSequence[currentStepIndex], true);
+                    }
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (currentStepIndex > 0) {
+                        currentStepIndex--; focusNode(presentationSequence[currentStepIndex], true);
+                    }
+                }
+            }
+        });
+
+        network.on("click", function (params) {
+            if (isDrawingMode) return;
+            if (params.nodes.length > 0) focusNode(params.nodes[0], true);
+            else resetHighlight();
+        });
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => console.log(err));
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        function togglePlanPanel() {
+            document.getElementById('planPanel').classList.toggle('hidden');
+            saveGlobalState();
+        }
+
+        function updateProgressUI() {
+            const totalConcepts = 28; // mindmap concepts
+            let progress = 0;
+
+            if (currentStepIndex === 0) {
+                document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Mở đầu</b>`;
+            } else if (String(presentationSequence[currentStepIndex]).startsWith('part2')) {
+                let subTitle = '';
+                if (window.currentSceneId === 'part2_net1') subTitle = '1/3';
+                else if (window.currentSceneId === 'part2_net2') subTitle = '2/3';
+                else subTitle = '3/3';
+                document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Phần 2 (${subTitle})</b>`;
+                progress = 100;
+            } else if (currentStepIndex > 0) {
+                document.getElementById('stepCounter').innerHTML = `Khái niệm: <b>${currentStepIndex} / ${totalConcepts}</b>`;
+                progress = (currentStepIndex / totalConcepts) * 100;
+            } else {
+                document.getElementById('stepCounter').innerHTML = `Tổng quan: <b>0 / ${totalConcepts}</b>`;
+            }
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        // HÀM TRUNG TÂM XỬ LÝ CHUYỂN CẢNH
+        function focusNode(selectedNodeId, moveCamera = true, isBootstrapping = false) {
+            if (!isBootstrapping) saveCurrentSceneState();
+
+            window.currentSceneId = selectedNodeId;
+            restoreSceneState(window.currentSceneId);
+            currentStepIndex = presentationSequence.indexOf(selectedNodeId);
+            updateProgressUI();
+
+            // Xóa Focus thẻ Card
+            document.querySelectorAll('.keyword-card').forEach(card => card.classList.remove('active'));
+
+            // Ẩn tất cả các màn hình đặc biệt
+            document.body.classList.remove('intro-active', 'part2-active');
+            document.getElementById('introScreen').classList.remove('active');
+            document.getElementById('part2_net1').classList.remove('active');
+            document.getElementById('part2_net2').classList.remove('active');
+            document.getElementById('part2_topo').classList.remove('active');
+
+            if (selectedNodeId === 'intro') {
+                document.body.classList.add('intro-active');
+                document.getElementById('introScreen').classList.add('active');
+                cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); replayDrawings('intro');
+                highlightActive = true;
+            }
+            else if (String(selectedNodeId).startsWith('part2')) {
+                document.body.classList.add('part2-active'); // Ẩn panel kế hoạch
+                document.getElementById(selectedNodeId).classList.add('active');
+
+                if (selectedNodeId === 'part2_net1' || selectedNodeId === 'part2_net2') {
+                    calculateSubnets();
+
+                    // Tự động chạy animation mô phỏng khi vào slide
+                    if (selectedNodeId === 'part2_net1') {
+                        setTimeout(() => {
+                            replayAnimation('anim-net1');
+                            setTimeout(() => replayAnimation('anim-br1'), 1500);
+                        }, 500);
+                    } else if (selectedNodeId === 'part2_net2') {
+                        setTimeout(() => {
+                            replayAnimation('anim-br2');
+                        }, 500);
+                    }
+                }
+
+                cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); replayDrawings(selectedNodeId);
+                highlightActive = true;
+            }
+            else {
+                const activeCard = document.getElementById(`card-${selectedNodeId}`);
+                if (activeCard) {
+                    activeCard.classList.add('active');
+                    if (!activeCard.classList.contains('detached') && moveCamera) activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    else if (activeCard.classList.contains('detached')) activeCard.style.zIndex = ++zIndexCounter;
+                }
+
+                const connectedNodes = network.getConnectedNodes(selectedNodeId);
+                const connectedEdges = network.getConnectedEdges(selectedNodeId);
+                connectedNodes.push(selectedNodeId);
+
+                const allNodes = nodesData.get(); const updateNodes = [];
+                for (let i = 0; i < allNodes.length; i++) {
+                    if (connectedNodes.includes(allNodes[i].id)) {
+                        updateNodes.push({ id: allNodes[i].id, color: { background: allNodes[i].id === selectedNodeId ? '#E74C3C' : '#5DADE2', border: allNodes[i].id === selectedNodeId ? '#C0392B' : '#2980B9' }, font: { color: '#ffffff' }, opacity: 1 });
+                    } else {
+                        updateNodes.push({ id: allNodes[i].id, color: { background: 'rgba(93, 173, 226, 0.2)', border: 'rgba(41, 128, 185, 0.2)' }, font: { color: 'rgba(255, 255, 255, 0.5)' } });
+                    }
+                }
+
+                const allEdges = edgesData.get(); const updateEdges = [];
+                for (let i = 0; i < allEdges.length; i++) {
+                    if (connectedEdges.includes(allEdges[i].id)) updateEdges.push({ id: allEdges[i].id, color: { color: '#E74C3C' }, font: { color: '#E74C3C', background: 'rgba(255,255,255,1)' } });
+                    else updateEdges.push({ id: allEdges[i].id, color: { color: 'rgba(149, 165, 166, 0.1)' }, font: { color: 'rgba(52, 73, 94, 0.2)', background: 'transparent' } });
+                }
+
+                nodesData.update(updateNodes); edgesData.update(updateEdges);
+                cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+                if (moveCamera) {
+                    const state = window.sceneStates[window.currentSceneId];
+                    if (state && state.networkView) {
+                        network.moveTo({ position: state.networkView.position, scale: state.networkView.scale, animation: { duration: 500, easingFunction: "easeInOutCubic" } });
+                        setTimeout(() => replayDrawings(window.currentSceneId), 550);
+                    } else {
+                        network.focus(selectedNodeId, { scale: 1.3, animation: { duration: 600, easingFunction: "easeInOutCubic" } });
+                        setTimeout(() => { saveCurrentSceneState(); debouncedSaveGlobalState(); replayDrawings(window.currentSceneId); }, 650);
+                    }
+                } else { replayDrawings(window.currentSceneId); }
+                highlightActive = true;
+            }
+
+            // Ẩn hiện các khung DETACH
+            document.querySelectorAll('.keyword-card.detached').forEach(card => {
+                const isTargetCard = (card.id === `card-${window.currentSceneId}`);
+                if (card.dataset.sceneId === String(window.currentSceneId) || isTargetCard) {
+                    card.classList.remove('hidden-scene'); if (isTargetCard) card.style.zIndex = ++zIndexCounter;
+                } else { card.classList.add('hidden-scene'); }
+            });
+
+            if (!isBootstrapping) debouncedSaveGlobalState();
+        }
+
+        // HÀM RESET (XEM TỔNG QUAN)
+        function resetHighlight() {
+            document.body.classList.remove('intro-active', 'part2-active');
+            document.getElementById('introScreen').classList.remove('active');
+            document.getElementById('part2_net1').classList.remove('active');
+            document.getElementById('part2_net2').classList.remove('active');
+            document.getElementById('part2_topo').classList.remove('active');
+
+            if (window.currentSceneId === 'lobby') {
+                network.fit({ animation: { duration: 600, easingFunction: "easeInOutCubic" } });
+                cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                setTimeout(() => { saveCurrentSceneState(); debouncedSaveGlobalState(); replayDrawings('lobby'); }, 650);
+                return;
+            }
+
+            saveCurrentSceneState();
+            window.currentSceneId = 'lobby'; restoreSceneState('lobby');
+            currentStepIndex = -1; updateProgressUI();
+            document.querySelectorAll('.keyword-card').forEach(card => card.classList.remove('active'));
+
+            const allNodes = nodesData.get(); const updateNodes = [];
+            for (let i = 0; i < allNodes.length; i++) updateNodes.push({ id: allNodes[i].id, color: nodeOptions.color, font: nodeOptions.font });
+            const allEdges = edgesData.get(); const updateEdges = [];
+            for (let i = 0; i < allEdges.length; i++) updateEdges.push({ id: allEdges[i].id, color: edgeOptions.color, font: edgeOptions.font });
+            nodesData.update(updateNodes); edgesData.update(updateEdges);
+
+            cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            const state = window.sceneStates['lobby'];
+            if (state && state.networkView) {
+                network.moveTo({ position: state.networkView.position, scale: state.networkView.scale, animation: { duration: 500, easingFunction: "easeInOutCubic" } });
+                setTimeout(() => replayDrawings('lobby'), 550);
+            } else {
+                network.fit({ animation: { duration: 600, easingFunction: "easeInOutCubic" } });
+                setTimeout(() => replayDrawings('lobby'), 650);
+            }
+            highlightActive = false;
+
+            document.querySelectorAll('.keyword-card.detached').forEach(card => {
+                if (card.dataset.sceneId === 'lobby') card.classList.remove('hidden-scene');
+                else card.classList.add('hidden-scene');
+            });
+            debouncedSaveGlobalState();
+        }
+
+        // --- 5. LOGIC DRAG VÀ THEO DÕI THAY ĐỔI CỦA BẢNG KẾ HOẠCH ---
+        const panel = document.getElementById('planPanel');
+        const header = document.getElementById('panelHeader');
+        let isDragging = false; let startX, startY, initialLeft, initialTop;
+
+        header.addEventListener('mousedown', function (e) {
+            if (e.target.closest('.btn-close-panel') || e.target.tagName.toLowerCase() === 'input') return;
+            isDragging = true; startX = e.clientX; startY = e.clientY;
+            panel.style.transition = 'none'; const rect = panel.getBoundingClientRect();
+            initialLeft = rect.left; initialTop = rect.top;
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            panel.style.left = `${initialLeft + (e.clientX - startX)}px`;
+            panel.style.top = `${initialTop + (e.clientY - startY)}px`;
+            panel.style.right = 'auto'; panel.style.bottom = 'auto';
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (isDragging) { isDragging = false; panel.style.transition = 'opacity 0.3s ease, visibility 0.3s ease'; saveCurrentSceneState(); saveGlobalState(); }
+        });
+
+        const panelObserver = new ResizeObserver(() => { if (window.currentSceneId && !isDragging) { saveCurrentSceneState(); debouncedSaveGlobalState(); } });
+        panelObserver.observe(panel);
+    </script>
+</body>
+
+</html>
