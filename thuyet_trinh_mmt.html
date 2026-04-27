@@ -7,7 +7,7 @@
     <title>Sơ đồ Tư duy Mạng Máy Tính</title>
     <!-- Nhúng thư viện vis-network qua CDN -->
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <!-- Nhúng Tailwind CSS phục vụ cho màn hình Bài tập Phần 2 -->
+    <!-- Nhúng Tailwind CSS phục vụ cho màn hình Bài tập Phần 2 & 3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;600;700&display=swap"
@@ -400,6 +400,16 @@
             object-fit: contain;
         }
 
+        /* Cấu hình cho slide trắng mới thêm */
+        .custom-grid-slide {
+            background-color: #ffffff;
+            background-image:
+                linear-gradient(rgba(52, 152, 219, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52, 152, 219, 0.15) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: 12;
+        }
+
         /* THÔNG BÁO CHẾ ĐỘ VẼ */
         .drawing-indicator {
             position: absolute;
@@ -422,7 +432,7 @@
             top: -50px;
         }
 
-        /* Dịch chuyển mượt mà nút điều khiển */
+        /* NÚT ĐIỀU KHIỂN MAP (GIỜ CÓ THỂ KÉO ĐƯỢC) */
         .controls {
             position: absolute;
             bottom: 20px;
@@ -440,8 +450,8 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Khi vào Part 2 -> Bắn nút control lên góc phải trên cùng để không che đáp án */
-        body.part2-active .controls {
+        /* Khi vào Part 2 hoặc 3 -> Bắn nút control lên góc phải trên cùng nếu người dùng chưa kéo nó */
+        body.part-active .controls:not([style*="left"]) {
             bottom: auto;
             top: 20px;
             right: 20px;
@@ -474,7 +484,7 @@
 
         /* ẨN BẢNG ĐIỀU KHIỂN KHI TRÌNH BÀY FULL MÀN HÌNH */
         body.intro-active .floating-panel,
-        body.part2-active .floating-panel {
+        body.part-active .floating-panel {
             opacity: 0 !important;
             visibility: hidden !important;
             pointer-events: none !important;
@@ -500,7 +510,64 @@
             opacity: 0.8;
         }
 
-        /* CSS BỔ SUNG CHO PHẦN 2 TỪ TAILWIND/USER */
+        /* TÍNH NĂNG ẢNH PASTE TỪ CLIPBOARD */
+        .pasted-image-wrapper {
+            position: absolute;
+            z-index: 500;
+            border: 2px dashed transparent;
+            transition: border 0.3s;
+            resize: both;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(2px);
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            min-width: 50px;
+            min-height: 50px;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .pasted-image-wrapper:hover {
+            border-color: var(--primary-color);
+        }
+
+        .pasted-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            display: block;
+        }
+
+        .pasted-image-wrapper .delete-img-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        .pasted-image-wrapper:hover .delete-img-btn {
+            display: flex;
+        }
+
+        .pasted-image-wrapper.hidden-scene {
+            display: none !important;
+            pointer-events: none;
+        }
+
+        /* CSS BỔ SUNG CHO PHẦN 2 & 3 TỪ TAILWIND/USER */
         .font-code {
             font-family: 'Fira Code', monospace;
             font-variant-numeric: tabular-nums;
@@ -547,7 +614,6 @@
             border-radius: 2px;
         }
 
-        /* Nền mờ đỏ cho bit host */
         .host-bit-highlight-green {
             background-color: rgba(220, 252, 231, 0.5);
             border-radius: 2px;
@@ -567,6 +633,61 @@
                 background-color: transparent;
                 transform: scale(1);
             }
+        }
+
+        /* Terminal Styling for Part 3 */
+        .terminal-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Fira Code', monospace;
+            padding: 1.5rem;
+            /* Căn lề rộng rãi hơn */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            /* CẤM HIỂN THỊ SCROLLBAR */
+            font-size: 0.85rem;
+            /* Font lớn, dễ đọc hơn */
+            line-height: 1.6;
+            /* Tăng khoảng cách dòng */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Tự động chia đều để căn giữa ăn gian không gian trống */
+        }
+
+        .term-cmd {
+            color: #569cd6;
+            font-weight: bold;
+        }
+
+        .term-ip {
+            color: #ce9178;
+        }
+
+        .term-comment {
+            color: #6a9955;
+            font-style: italic;
+            text-align: left;
+        }
+
+        .term-prompt {
+            color: #4ec9b0;
+        }
+
+        /* Layout lưới 2 cột cho từng dòng lệnh trong Terminal */
+        .term-row {
+            display: grid;
+            grid-template-columns: minmax(auto, 50%) 1fr;
+            gap: 16px;
+            align-items: start;
+            margin-bottom: 2px;
+        }
+
+        /* Dòng trắng phân cách trong Terminal */
+        .term-spacer {
+            height: 1.25rem;
+            /* Khoảng nghỉ lớn hơn cho dễ nhìn */
         }
     </style>
 </head>
@@ -590,27 +711,34 @@
             <div class="text-left text-gray-600 space-y-4 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-100">
                 <div class="flex items-start">
                     <span
-                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">↑
-                        / ↓</span>
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">↑
+                        ↓</span>
                     <span class="text-sm mt-1">Dùng phím mũi tên Lên/Xuống để chuyển đổi qua lại giữa các slide và khái
                         niệm.</span>
                 </div>
                 <div class="flex items-start">
                     <span
-                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">Ctrl
-                        + 1</span>
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">Ctrl
+                        1</span>
                     <span class="text-sm mt-1">Bật/tắt chế độ vẽ tay bằng bút đỏ trực tiếp lên màn hình.</span>
                 </div>
                 <div class="flex items-start">
                     <span
-                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">Ctrl
-                        + Z</span>
-                    <span class="text-sm mt-1">Hoàn tác (Undo) nét vẽ tay bị lỗi.</span>
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">Ctrl
+                        V</span>
+                    <span class="text-sm mt-1">Dán ảnh từ bộ nhớ tạm vào trực tiếp cảnh (slide) hiện tại.</span>
                 </div>
                 <div class="flex items-start">
                     <span
-                        class="bg-white p-1.5 px-3 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0">K</span>
-                    <span class="text-sm mt-1">Ấn phím K bất kỳ lúc nào để bật/thoát chế độ Fullscreen thủ công.</span>
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-blue-700 border border-blue-200 shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">Ctrl
+                        D</span>
+                    <span class="text-sm mt-1">Tạo thêm Slide trắng kẻ ô li ở cuối cùng để tự do ghi chú, vẽ và dán
+                        ảnh.</span>
+                </div>
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 px-3 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">K</span>
+                    <span class="text-sm mt-1">Bật/thoát chế độ Fullscreen thủ công.</span>
                 </div>
             </div>
             <button id="btnStart"
@@ -628,26 +756,27 @@
 
             <!-- MÀN HÌNH 1: MỞ ĐẦU -->
             <div id="introScreen" class="presentation-slide intro-screen">
-                <img src="anh_mo_dau.png" alt="Mở đầu">
+                <img src="anh_mo_dau.png" alt="Mở đầu"
+                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjRweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+QW5oX21vX2RhdS5wbmc8L3RleHQ+PC9zdmc+'">
             </div>
 
             <!-- MÀN HÌNH 2: SLIDE TÍNH TOÁN NET 1 -->
             <div id="part2_net1" class="presentation-slide flex flex-col items-center justify-center p-4">
-                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-3 font-sans text-gray-800">
 
                     <!-- Header (Không cuộn) -->
                     <div
-                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 gap-4">
+                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 gap-4">
                         <div>
                             <h1 class="text-2xl font-bold text-blue-700">Phần 2.1: Tính toán Net 1 (Chứa PC1)</h1>
                             <p class="text-gray-500 text-sm mt-1">Cấu hình phân bổ dải IP cho Router & PC</p>
                         </div>
                         <div
-                            class="flex flex-row gap-4 items-end justify-center bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            class="flex flex-row gap-3 items-end justify-center bg-gray-50 p-2 rounded-xl border border-gray-200">
                             <div class="group">
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">Địa chỉ IP (PC1)</label>
                                 <input type="text" id="ipInput" value="175.25.37.110"
-                                    class="w-40 px-3 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none text-center font-code text-blue-800 font-bold text-base">
+                                    class="w-36 px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none text-center font-code text-blue-800 font-bold text-base">
                             </div>
                             <div class="group">
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">Prefix</label>
@@ -659,25 +788,44 @@
                                 </div>
                             </div>
                             <button onclick="calculateSubnets()"
-                                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1.5 px-6 rounded-lg shadow hover:shadow-md h-[38px] text-sm">
-                                Tính Toán
-                            </button>
+                                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1.5 px-6 rounded-lg shadow hover:shadow-md h-[38px] text-sm">Tính
+                                Toán</button>
                         </div>
                     </div>
 
-                    <!-- Body 2 Cột (Không cuộn, chiếm toàn bộ không gian còn lại) -->
-                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+                    <!-- Bước 1: Tính bit Host -->
+                    <div
+                        class="shrink-0 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-md text-sm border border-indigo-200">Bước
+                                1</span>
+                            <span class="font-bold text-gray-800">Tính số bit Host:</span>
+                            <span class="text-sm text-gray-500">(Lấy 32 bit tiêu chuẩn của IPv4 trừ đi Prefix)</span>
+                        </div>
+                        <div class="font-code text-lg font-bold text-gray-700 flex items-center gap-2">
+                            <span class="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm">32</span>
+                            <span class="text-gray-400">-</span>
+                            <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 shadow-sm"
+                                id="tut-prefix-calc">27</span>
+                            <span class="text-gray-400">=</span>
+                            <span
+                                class="bg-red-50 text-red-600 px-3 py-1 rounded-lg border border-red-200 text-xl shadow-sm"
+                                id="tut-host-bits">5</span>
+                        </div>
+                    </div>
 
+                    <!-- Body 2 Cột -->
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
                         <!-- Cột 1: Tìm Network ID -->
                         <div
-                            class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-blue-500 flex flex-col h-full relative">
-                            <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
-                                <h2 class="text-xl font-bold text-blue-800 flex items-center">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
-                                        1</span> Phép tính AND
-                                </h2>
+                            class="bg-white p-4 rounded-2xl shadow-sm border-t-4 border-blue-500 flex flex-col h-full relative">
+                            <div class="flex justify-between items-start border-b pb-2 mb-2 shrink-0">
+                                <h2 class="text-lg font-bold text-blue-800 flex items-center"><span
+                                        class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
+                                        2</span> Phép tính AND</h2>
                                 <button onclick="replayAnimation('anim-net1')"
-                                    class="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition">
+                                    class="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition border border-gray-200">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -685,31 +833,25 @@
                                     </svg> Replay
                                 </button>
                             </div>
-
-                            <p class="text-gray-600 text-sm mb-4 shrink-0">Mục đích: Triệt tiêu các bit Host về <strong
+                            <p class="text-gray-600 text-sm mb-3 shrink-0">Mục đích: Triệt tiêu các bit Host về <strong
                                     class="text-red-500">0</strong> để tìm ra địa chỉ Mạng.</p>
 
                             <!-- Bảng toán học -->
                             <div
                                 class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] leading-relaxed shadow-inner flex flex-col justify-center overflow-hidden">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-sans text-gray-400 w-16">IP:</span>
-                                    <span id="tut-ip-dec" class="font-bold text-white text-right">...</span>
-                                </div>
+                                <div class="flex justify-between items-center mb-1"><span
+                                        class="font-sans text-gray-400 w-16">IP:</span><span id="tut-ip-dec"
+                                        class="font-bold text-white text-right">...</span></div>
                                 <div id="tut-ip-bin" class="text-right text-[0.7rem] text-[#9cdcfe] mb-3">...</div>
-
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-sans text-gray-400 w-16">Mask:</span>
-                                    <span id="tut-mask-dec-table" class="font-bold text-white text-right">...</span>
-                                </div>
+                                <div class="flex justify-between items-center mb-1"><span
+                                        class="font-sans text-gray-400 w-16">Mask:</span><span id="tut-mask-dec-table"
+                                        class="font-bold text-white text-right">...</span></div>
                                 <div id="tut-mask-bin-table" class="text-right text-[0.7rem] text-[#ce9178] mb-3">...
                                 </div>
-
                                 <hr class="border-gray-600 border-dashed my-2">
-
-                                <div class="flex justify-between items-center mt-2">
-                                    <span class="font-sans font-bold text-blue-400 text-lg w-20">NET ID:</span>
-                                    <span id="tut-net-dec"
+                                <div class="flex justify-between items-center mt-2"><span
+                                        class="font-sans font-bold text-blue-400 text-lg w-20">NET ID:</span><span
+                                        id="tut-net-dec"
                                         class="font-bold text-blue-400 text-2xl text-right flash-update">...</span>
                                 </div>
                                 <div id="anim-net1"
@@ -720,16 +862,14 @@
 
                         <!-- Cột 2: Tìm Broadcast & Host -->
                         <div class="flex flex-col gap-4 min-h-0 overflow-hidden">
-                            <!-- Broadcast (OR) -->
                             <div
-                                class="flex-1 bg-white p-5 rounded-2xl shadow-sm border-t-4 border-red-500 flex flex-col h-full relative">
-                                <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
-                                    <h2 class="text-xl font-bold text-red-800 flex items-center">
-                                        <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
-                                            2</span> Phép tính OR
-                                    </h2>
+                                class="flex-1 bg-white p-4 rounded-2xl shadow-sm border-t-4 border-red-500 flex flex-col h-full relative">
+                                <div class="flex justify-between items-start border-b pb-2 mb-2 shrink-0">
+                                    <h2 class="text-lg font-bold text-red-800 flex items-center"><span
+                                            class="bg-red-100 text-red-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
+                                            3</span> Phép tính OR</h2>
                                     <button onclick="replayAnimation('anim-br1')"
-                                        class="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition">
+                                        class="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition border border-gray-200">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -737,31 +877,26 @@
                                         </svg> Replay
                                     </button>
                                 </div>
-                                <p class="text-gray-600 text-sm mb-4 shrink-0">Mục đích: Đẩy toàn bộ các bit Host lên
-                                    <strong class="text-green-500">1</strong>.</p>
-
+                                <p class="text-gray-600 text-sm mb-3 shrink-0">Mục đích: Đẩy toàn bộ các bit Host lên
+                                    <strong class="text-green-500">1</strong> để lấy địa chỉ Broadcast.
+                                </p>
                                 <div
                                     class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] shadow-inner flex flex-col justify-center overflow-hidden">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-sans text-gray-400 w-16">Net ID:</span>
-                                        <span id="tut-br-net-dec" class="font-bold text-white text-right">...</span>
-                                    </div>
+                                    <div class="flex justify-between items-center mb-1"><span
+                                            class="font-sans text-gray-400 w-16">Net ID:</span><span id="tut-br-net-dec"
+                                            class="font-bold text-white text-right">...</span></div>
                                     <div id="tut-br-net-bin" class="text-right text-[0.7rem] text-[#4fc1ff] mb-3">...
                                     </div>
-
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span>
-                                        <span id="tut-wildcard-dec"
-                                            class="font-bold text-[#c586c0] text-right">...</span>
+                                    <div class="flex justify-between items-center mb-1"><span
+                                            class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span><span
+                                            id="tut-wildcard-dec" class="font-bold text-[#c586c0] text-right">...</span>
                                     </div>
                                     <div id="tut-wildcard-bin" class="text-right text-[0.7rem] text-[#c586c0] mb-3">...
                                     </div>
-
                                     <hr class="border-gray-600 border-dashed my-2">
-
-                                    <div class="flex justify-between items-center mt-2">
-                                        <span class="font-sans font-bold text-red-400 text-lg">Broadcast:</span>
-                                        <span id="tut-br-dec"
+                                    <div class="flex justify-between items-center mt-2"><span
+                                            class="font-sans font-bold text-red-400 text-lg">Broadcast:</span><span
+                                            id="tut-br-dec"
                                             class="font-bold text-red-400 text-2xl text-right flash-update">...</span>
                                     </div>
                                     <div id="anim-br1"
@@ -773,8 +908,8 @@
                             <!-- Host Assignment -->
                             <div class="shrink-0 bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm">
                                 <h3 class="font-bold text-gray-800 mb-2 flex items-center"><span
-                                        class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md mr-2 text-xs">Bước
-                                        3</span> Gán IP Host</h3>
+                                        class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded-md mr-2 text-xs">Bước
+                                        4</span> Gán IP Host</h3>
                                 <p class="font-sans text-sm text-gray-500 mb-2">Dải khả dụng: <strong
                                         class="text-blue-700 font-code text-base bg-white px-2 rounded border shadow-sm"
                                         id="tut-net1-first">...</strong> <span class="mx-1">→</span> <strong
@@ -782,14 +917,16 @@
                                         id="tut-net1-last">...</strong></p>
                                 <div class="flex gap-4 font-code text-sm">
                                     <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
-                                            class="text-gray-500 text-xs block font-sans">Cổng .a (GW)</span><strong
-                                            class="text-blue-700 text-lg" id="tut-a-res">...</strong></div>
+                                            class="text-gray-500 text-[0.7rem] block font-sans">Cổng .a
+                                            (GW)</span><strong class="text-blue-700 text-base"
+                                            id="tut-a-res">...</strong></div>
                                     <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
-                                            class="text-gray-500 text-xs block font-sans">PC0</span><strong
-                                            class="text-gray-700 text-lg" id="tut-pc0-res">...</strong></div>
+                                            class="text-gray-500 text-[0.7rem] block font-sans">PC0</span><strong
+                                            class="text-gray-700 text-base" id="tut-pc0-res">...</strong></div>
                                     <div class="bg-gray-100 p-2 rounded border border-gray-200 flex-1 opacity-70"><span
-                                            class="text-gray-500 text-xs block font-sans">PC1 (Đề bài)</span><strong
-                                            class="text-gray-600 text-lg" id="tut-pc1-res">...</strong></div>
+                                            class="text-gray-500 text-[0.7rem] block font-sans">PC1 (Đề
+                                            bài)</span><strong class="text-gray-600 text-base"
+                                            id="tut-pc1-res">...</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -800,8 +937,6 @@
             <!-- MÀN HÌNH 3: SLIDE TÍNH TOÁN NET 2 -->
             <div id="part2_net2" class="presentation-slide flex flex-col items-center justify-center p-4">
                 <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
-
-                    <!-- Header (Không cuộn) -->
                     <div
                         class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
                         <div>
@@ -810,20 +945,16 @@
                         </div>
                     </div>
 
-                    <!-- Body 2 Cột -->
                     <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
-
-                        <!-- Cột 1: Tìm Net 2 ID -->
                         <div
                             class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-green-500 flex flex-col h-full relative">
                             <h2 class="text-xl font-bold text-green-800 flex items-center border-b pb-2 mb-3 shrink-0">
                                 <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
-                                    1</span> Tìm Địa chỉ Mạng 2
+                                    5</span> Tìm Địa chỉ Mạng 2
                             </h2>
                             <p class="text-gray-600 text-base mb-6 shrink-0 leading-relaxed">Mạng 2 nằm ngay sau Mạng 1.
                                 Ta lấy địa chỉ cuối cùng của Mạng 1 (Broadcast) cộng thêm 1 đơn vị sẽ ra địa chỉ bắt đầu
                                 của Mạng 2.</p>
-
                             <div
                                 class="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-gray-200">
                                 <div class="text-center mb-6">
@@ -842,19 +973,15 @@
                             </div>
                         </div>
 
-                        <!-- Cột 2: Tìm Broadcast & Host -->
                         <div class="flex flex-col gap-4 min-h-0 overflow-hidden">
-                            <!-- Broadcast (OR) -->
                             <div
                                 class="flex-1 bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-500 flex flex-col h-full relative">
                                 <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
-                                    <h2 class="text-xl font-bold text-orange-800 flex items-center">
-                                        <span
+                                    <h2 class="text-xl font-bold text-orange-800 flex items-center"><span
                                             class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước
-                                            2</span> Tìm Broadcast 2 (OR)
-                                    </h2>
+                                            6</span> Tìm Broadcast 2 (OR)</h2>
                                     <button onclick="replayAnimation('anim-br2')"
-                                        class="text-xs text-gray-500 hover:text-orange-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition">
+                                        class="text-xs text-gray-500 hover:text-orange-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition border border-gray-200">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -864,30 +991,24 @@
                                 </div>
                                 <p class="text-gray-600 text-sm mb-4 shrink-0">Thực hiện tương tự Net 1. Đẩy các bit
                                     Host của Net 2 lên 1 bằng phép OR.</p>
-
                                 <div
                                     class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] shadow-inner flex flex-col justify-center overflow-hidden">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-sans text-gray-400 w-16 text-xs">Net 2 ID:</span>
-                                        <span id="tut-net2-id-dec" class="font-bold text-white text-right">...</span>
+                                    <div class="flex justify-between items-center mb-1"><span
+                                            class="font-sans text-gray-400 w-16 text-xs">Net 2 ID:</span><span
+                                            id="tut-net2-id-dec" class="font-bold text-white text-right">...</span>
                                     </div>
                                     <div id="tut-net2-id-bin" class="text-right text-[0.7rem] text-[#4fc1ff] mb-3">...
                                     </div>
-
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span>
-                                        <span id="tut-wildcard-dec-3"
-                                            class="font-bold text-[#c586c0] text-right">...</span>
-                                    </div>
+                                    <div class="flex justify-between items-center mb-1"><span
+                                            class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span><span
+                                            id="tut-wildcard-dec-3"
+                                            class="font-bold text-[#c586c0] text-right">...</span></div>
                                     <div id="tut-wildcard-bin-3" class="text-right text-[0.7rem] text-[#c586c0] mb-3">
                                         ...</div>
-
                                     <hr class="border-gray-600 border-dashed my-2">
-
-                                    <div class="flex justify-between items-center mt-2">
-                                        <span class="font-sans font-bold text-orange-400 text-lg w-28">Broadcast
-                                            2:</span>
-                                        <span id="tut-net2-br-dec-final"
+                                    <div class="flex justify-between items-center mt-2"><span
+                                            class="font-sans font-bold text-orange-400 text-lg w-28">Broadcast
+                                            2:</span><span id="tut-net2-br-dec-final"
                                             class="font-bold text-orange-400 text-2xl text-right flash-update">...</span>
                                     </div>
                                     <div id="anim-br2"
@@ -895,12 +1016,10 @@
                                         ...</div>
                                 </div>
                             </div>
-
-                            <!-- Host Assignment -->
                             <div class="shrink-0 bg-green-50/50 p-4 rounded-2xl border border-green-100 shadow-sm">
                                 <h3 class="font-bold text-gray-800 mb-2 flex items-center"><span
-                                        class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md mr-2 text-xs">Bước
-                                        3</span> Gán IP Host (Net 2)</h3>
+                                        class="bg-green-200 text-green-800 px-2 py-0.5 rounded-md mr-2 text-xs">Bước
+                                        7</span> Gán IP Host (Net 2)</h3>
                                 <p class="font-sans text-sm text-gray-500 mb-2">Dải khả dụng: <strong
                                         class="text-green-700 font-code text-base bg-white px-2 rounded border shadow-sm"
                                         id="tut-net2-first">...</strong> <span class="mx-1">→</span> <strong
@@ -908,14 +1027,15 @@
                                         id="tut-net2-last">...</strong></p>
                                 <div class="flex gap-4 font-code text-sm">
                                     <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
-                                            class="text-gray-500 text-xs block font-sans">Cổng .b (GW)</span><strong
-                                            class="text-green-700 text-lg" id="tut-b-res">...</strong></div>
+                                            class="text-gray-500 text-[0.7rem] block font-sans">Cổng .b
+                                            (GW)</span><strong class="text-green-700 text-base"
+                                            id="tut-b-res">...</strong></div>
                                     <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
-                                            class="text-gray-500 text-xs block font-sans">PC3</span><strong
-                                            class="text-gray-700 text-lg" id="tut-pc3-res">...</strong></div>
+                                            class="text-gray-500 text-[0.7rem] block font-sans">PC3</span><strong
+                                            class="text-gray-700 text-base" id="tut-pc3-res">...</strong></div>
                                     <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span
-                                            class="text-gray-500 text-xs block font-sans">PC4</span><strong
-                                            class="text-gray-700 text-lg" id="tut-pc4-res">...</strong></div>
+                                            class="text-gray-500 text-[0.7rem] block font-sans">PC4</span><strong
+                                            class="text-gray-700 text-base" id="tut-pc4-res">...</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -926,16 +1046,12 @@
             <!-- MÀN HÌNH 4: SƠ ĐỒ TOPO & BẢNG -->
             <div id="part2_topo" class="presentation-slide flex flex-col items-center justify-center p-4">
                 <div class="w-full max-w-6xl h-[92vh] flex flex-col gap-4 font-sans">
-                    <!-- Topo Map Area -->
                     <div
                         class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center pt-6 pb-2 min-h-0 overflow-hidden relative">
                         <h2 class="text-xl font-bold text-gray-800 absolute top-4 left-6 z-20">Sơ đồ Mạng Phân Bổ Trực
                             Quan</h2>
-
-                        <!-- Topology SVG Logic (Adapted and Scaled) -->
                         <div
                             class="transform scale-90 lg:scale-100 origin-top pt-6 mt-4 w-full max-w-[800px] mx-auto select-none">
-                            <!-- Router -->
                             <div class="flex flex-col items-center relative z-10 device-box cursor-pointer">
                                 <div
                                     class="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-200 rounded-full flex items-center justify-center border-[3px] border-blue-500 shadow-md">
@@ -948,14 +1064,12 @@
                                 </div>
                                 <span class="mt-1 font-bold text-gray-800 text-sm">Router0</span>
                             </div>
-                            <!-- Router lines -->
                             <div class="w-[60%] mx-auto flex justify-between relative mt-[-10px] z-0">
                                 <div class="w-1/2 border-t-[3px] border-l-[3px] border-gray-400 rounded-tl-xl h-8">
                                 </div>
                                 <div class="w-1/2 border-t-[3px] border-r-[3px] border-gray-400 rounded-tr-xl h-8">
                                 </div>
                             </div>
-                            <!-- Interfaces -->
                             <div class="w-[70%] mx-auto flex justify-between mt-1 px-4 text-xs font-semibold">
                                 <div
                                     class="text-center bg-white px-2 py-1 rounded shadow border border-blue-300 device-box z-10">
@@ -970,14 +1084,11 @@
                                         class="font-code font-bold bg-green-50 text-green-700 px-1 rounded border border-green-100">175.25.37.129</span>
                                 </div>
                             </div>
-                            <!-- Lines down to switches -->
                             <div class="w-[66%] mx-auto flex justify-between relative mt-[-8px] z-0">
                                 <div class="w-1 bg-gray-400 h-8 rounded-full"></div>
                                 <div class="w-1 bg-gray-400 h-8 rounded-full"></div>
                             </div>
-                            <!-- Switches -->
                             <div class="w-full flex justify-between px-10">
-                                <!-- Switch 0 -->
                                 <div class="flex flex-col items-center w-[45%] relative device-box">
                                     <div
                                         class="w-20 h-10 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg flex items-center justify-center border-[3px] border-blue-500 shadow-md z-10">
@@ -992,7 +1103,6 @@
                                         <span class="text-[0.6rem] text-blue-600 block">Network 1</span>
                                         <span id="topo-net1" class="font-code">175.25.37.96/27</span>
                                     </div>
-                                    <!-- Switch lines -->
                                     <div class="w-[80%] flex justify-between relative mt-2 z-0">
                                         <div
                                             class="w-1/2 border-t-[3px] border-l-[3px] border-gray-300 rounded-tl-lg h-6">
@@ -1001,7 +1111,6 @@
                                             class="w-1/2 border-t-[3px] border-r-[3px] border-gray-300 rounded-tr-lg h-6">
                                         </div>
                                     </div>
-                                    <!-- PCs 1 -->
                                     <div class="w-full flex justify-between px-2">
                                         <div class="flex flex-col items-center device-box text-xs">
                                             <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor"
@@ -1028,7 +1137,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Switch 1 -->
                                 <div class="flex flex-col items-center w-[45%] relative device-box">
                                     <div
                                         class="w-20 h-10 bg-gradient-to-r from-green-100 to-green-50 rounded-lg flex items-center justify-center border-[3px] border-green-500 shadow-md z-10">
@@ -1043,7 +1151,6 @@
                                         <span class="text-[0.6rem] text-green-600 block">Network 2</span>
                                         <span id="topo-net2" class="font-code">175.25.37.128/27</span>
                                     </div>
-                                    <!-- Switch lines -->
                                     <div class="w-[80%] flex justify-between relative mt-2 z-0">
                                         <div
                                             class="w-1/2 border-t-[3px] border-l-[3px] border-gray-300 rounded-tl-lg h-6">
@@ -1052,7 +1159,6 @@
                                             class="w-1/2 border-t-[3px] border-r-[3px] border-gray-300 rounded-tr-lg h-6">
                                         </div>
                                     </div>
-                                    <!-- PCs 2 -->
                                     <div class="w-full flex justify-between px-2">
                                         <div class="flex flex-col items-center device-box text-xs">
                                             <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor"
@@ -1082,7 +1188,6 @@
                         </div>
                     </div>
 
-                    <!-- Result Table Area -->
                     <div
                         class="shrink-0 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-6 items-center">
                         <div
@@ -1091,8 +1196,7 @@
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Đáp Án Cuối Cùng
+                            </svg> Đáp Án Cuối Cùng
                         </div>
                         <div class="flex-1 grid grid-cols-3 gap-x-4 gap-y-2 text-sm font-sans">
                             <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
@@ -1113,10 +1217,480 @@
                             <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span
                                     class="font-bold text-gray-600">PC3:</span><span class="font-code text-gray-800"
                                     id="table-pc3">...</span></div>
-                            <div></div> <!-- empty slot for grid alignment if needed -->
+                            <div></div>
                             <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded col-start-3">
                                 <span class="font-bold text-gray-600">PC4:</span><span class="font-code text-gray-800"
-                                    id="table-pc4">...</span></div>
+                                    id="table-pc4">...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 5: SLIDE 3.1 QUY HOẠCH IP MỞ RỘNG -->
+            <div id="part3_topo_ip" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-5 font-sans text-gray-800">
+                    <!-- Header -->
+                    <div
+                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-purple-700">Phần 3.1: Mở rộng mạng - Căn cứ Quy hoạch IP
+                            </h1>
+                            <p class="text-gray-500 text-sm mt-1">Giải thích chi tiết bước tính IP cho Link R0-R1 và Net
+                                3 dành cho người mới bắt đầu</p>
+                        </div>
+                    </div>
+
+                    <!-- Body 2 Cột -->
+                    <div class="flex-1 grid grid-cols-[55%_45%] gap-6 min-h-0 overflow-hidden">
+                        <!-- Cột trái: Giải thích siêu chi tiết -->
+                        <div class="flex flex-col gap-5 h-full justify-center">
+                            <!-- Link R0-R1 -->
+                            <div
+                                class="bg-red-50 p-6 rounded-2xl border-l-4 border-red-500 text-[0.9rem] text-gray-800 leading-relaxed shadow-sm">
+                                <h3 class="font-bold text-red-700 text-lg mb-3 border-b border-red-200 pb-2">1. Cáp
+                                    Serial nối 2 Router (Link R0-R1) dùng làm gì?</h3>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li><b>Mục đích:</b> Nối 2 Router với nhau để tạo thành một mạng nội bộ riêng tư chỉ
+                                        có 2 thiết bị (kết nối Điểm - Điểm). Phải gán IP thì chúng mới "nhìn thấy" nhau.
+                                    </li>
+                                    <li><b>Cần bao nhiêu IP?</b> Cáp nối 2 thiết bị nên ta chỉ cần chuẩn xác <b>2
+                                            IP</b>.</li>
+                                    <li><b>Tính Toán:</b> Ta có công thức <span
+                                            class="font-code font-bold bg-white px-1.5 py-0.5 rounded text-red-600 border border-red-100">2<sup>h</sup>
+                                            - 2</span>. Để có 2 IP sử dụng được &rarr; 2<sup>h</sup> - 2 &ge; 2 &rarr;
+                                        <b>h = 2</b>. Cần mượn đúng 2 bit Host.
+                                    </li>
+                                    <li><b>Tính Mask:</b> Lấy tổng 32 bit trừ 2 bit Host = <b>30</b> &rarr; Prefix là
+                                        <span
+                                            class="font-bold text-red-600 bg-white px-2 py-0.5 rounded border border-red-200">/30</span>.
+                                    </li>
+                                    <li><b>Chọn dải IP:</b> Mạng Net 2 trước đó kết thúc ở <code
+                                            class="bg-white px-1 border border-gray-200 rounded">.158</code>. Vậy dải
+                                        tiếp theo sẽ bắt đầu từ <code
+                                            class="bg-white px-1 border border-red-200 rounded font-bold text-red-600">.160</code>.
+                                    </li>
+                                    <li>&rarr; <b>KẾT LUẬN:</b> Dải mạng là <span
+                                            class="font-code font-bold text-lg text-red-600 bg-white px-2 py-0.5 rounded shadow-sm border border-red-200">175.25.37.160/30</span>
+                                        <br><span class="text-xs text-gray-500 ml-4">(Sẽ sinh ra 2 IP là <b>.161</b> gán
+                                            cho R0 và <b>.162</b> gán cho R1)</span>.
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Net 3 -->
+                            <div
+                                class="bg-purple-50 p-6 rounded-2xl border-l-4 border-purple-500 text-[0.9rem] text-gray-800 leading-relaxed shadow-sm">
+                                <h3 class="font-bold text-purple-800 text-lg mb-3 border-b border-purple-200 pb-2">2.
+                                    Tính toán Net 3 (Mạng 50 máy tính)</h3>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li><b>Số IP cần dùng:</b> Đề yêu cầu 50 PC + 1 Server. Nhớ <b>cộng thêm 1 IP</b>
+                                        cho cổng Gateway của Router. Tổng = <span
+                                            class="font-bold text-purple-700 bg-white px-1.5 py-0.5 rounded border border-purple-200">52
+                                            IP</span>.</li>
+                                    <li><b>Tìm số bit Host (h):</b> Ta cần số mũ <span
+                                            class="font-code bg-white px-1.5 py-0.5 rounded font-bold text-purple-700 border border-purple-200">2<sup>h</sup>
+                                            - 2 &ge; 52</span>. Nhẩm thử: 2<sup>5</sup> = 32 (thiếu), 2<sup>6</sup> = 64
+                                        (đủ). &rarr; Chọn <b>h = 6</b>.</li>
+                                    <li><b>Tính Mask:</b> Lấy tổng 32 bit trừ 6 bit Host = <b>26</b> &rarr; Prefix là
+                                        <span
+                                            class="font-bold text-purple-700 bg-white px-2 py-0.5 rounded border border-purple-200">/26</span>.
+                                    </li>
+                                    <li><b>Bước nhảy của mạng:</b> 2<sup>6</sup> = <b>64</b>. Mạng phải nhảy ở các mốc:
+                                        <code
+                                            class="bg-white px-1 border border-gray-200 rounded text-gray-400">.0</code>,
+                                        <code
+                                            class="bg-white px-1 border border-gray-200 rounded text-gray-400">.64</code>,
+                                        <code
+                                            class="bg-white px-1 border border-gray-200 rounded text-gray-400">.128</code>,
+                                        <code
+                                            class="bg-white px-1 border border-purple-200 rounded text-purple-700 font-bold">.192</code>...
+                                    </li>
+                                    <li><b>Chọn khúc mạng:</b> Các mốc trước đó đã dùng hết. Mốc tiếp theo đang trống
+                                        hoàn toàn là <code
+                                            class="bg-white px-1 border border-purple-200 rounded font-bold text-purple-700">.192</code>.
+                                    </li>
+                                    <li>&rarr; <b>KẾT LUẬN:</b> Dải mạng là <span
+                                            class="font-code font-bold text-lg text-purple-800 bg-white px-2 py-0.5 rounded shadow-sm border border-purple-200">175.25.37.192/26</span>
+                                        <br><span class="text-xs text-gray-500 ml-4">(Lấy <b>.193</b> làm Gateway. Các
+                                            IP .194 &rarr; .254 cấp cho máy tính)</span>.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Bảng IP Planning -->
+                        <div
+                            class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-indigo-500 flex flex-col justify-center">
+                            <h2 class="text-xl font-bold text-indigo-800 border-b pb-3 mb-4 shrink-0">Bảng Quy Hoạch IP
+                                (IP Planning) Toàn Hệ Thống</h2>
+                            <div class="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                                        <tr>
+                                            <th class="px-4 py-3">Vùng mạng</th>
+                                            <th class="px-4 py-3">Chức năng</th>
+                                            <th class="px-4 py-3">Network / Mask</th>
+                                            <th class="px-4 py-3">Gateway</th>
+                                            <th class="px-4 py-3">Dải IP khả dụng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="font-code text-[0.8rem]">
+                                        <tr class="border-b bg-white hover:bg-gray-50">
+                                            <td class="px-4 py-3 font-sans font-bold text-blue-600">Net 1</td>
+                                            <td class="px-4 py-3 font-sans text-gray-500">Switch 0 (PC0, 1)</td>
+                                            <td class="px-4 py-3">175.25.37.96<span class="text-gray-400">/27</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-blue-700 font-bold">.97</td>
+                                            <td class="px-4 py-3">.98 → .126</td>
+                                        </tr>
+                                        <tr class="border-b bg-gray-50 hover:bg-gray-100">
+                                            <td class="px-4 py-3 font-sans font-bold text-green-600">Net 2</td>
+                                            <td class="px-4 py-3 font-sans text-gray-500">Switch 1 (PC2, 3)</td>
+                                            <td class="px-4 py-3">175.25.37.128<span class="text-gray-400">/27</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-green-700 font-bold">.129</td>
+                                            <td class="px-4 py-3">.130 → .158</td>
+                                        </tr>
+                                        <tr class="border-b bg-white hover:bg-gray-50">
+                                            <td class="px-4 py-3 font-sans font-bold text-red-600">Link R0-R1</td>
+                                            <td class="px-4 py-3 font-sans text-gray-500">Cáp Serial WAN</td>
+                                            <td class="px-4 py-3">175.25.37.160<span class="text-gray-400">/30</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-400 italic">Không</td>
+                                            <td class="px-4 py-3 text-red-600 font-bold">.161(R0), .162(R1)</td>
+                                        </tr>
+                                        <tr class="bg-purple-50 hover:bg-purple-100">
+                                            <td class="px-4 py-3 font-sans font-bold text-purple-700">Net 3 (Mới)</td>
+                                            <td class="px-4 py-3 font-sans text-purple-600">Switch 2 (50 PC)</td>
+                                            <td class="px-4 py-3 font-bold text-purple-800">175.25.37.192<span
+                                                    class="text-purple-400">/26</span></td>
+                                            <td class="px-4 py-3 text-purple-700 font-bold text-[0.9rem]">.193</td>
+                                            <td class="px-4 py-3">.194 → .254</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 6: SLIDE 3.2 CẤU HÌNH ROUTER -->
+            <div id="part3_router_config" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                    <div
+                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Phần 3.2: Cấu hình Interface & Định tuyến tĩnh
+                            </h1>
+                            <p class="text-gray-500 text-sm mt-1">Giải thích siêu chi tiết ý nghĩa từng dòng lệnh cấu
+                                hình (CLI) cho Router</p>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+                        <!-- Router 0 Config -->
+                        <div class="terminal-block relative">
+                            <div
+                                class="absolute top-2 right-4 text-xs font-sans text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                                CLI: Router0</div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router&gt;</span> <span class="term-cmd">enable</span>
+                                </div>
+                                <div class="term-comment">! Bật chế độ Đặc quyền (#) để có quyền quản trị</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router#</span> <span class="term-cmd">configure
+                                        terminal</span></div>
+                                <div class="term-comment">! Vào chế độ Cấu hình toàn cục (Global Config)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">no ip
+                                        domain-lookup</span></div>
+                                <div class="term-comment">! Tắt dò tìm DNS, giúp Router không bị treo khi gõ sai lệnh
+                                </div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface
+                                        g0/0/0</span></div>
+                                <div class="term-comment">! Đi vào cài đặt cổng LAN 1 (Cổng nối xuống Net 1)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip
+                                        address <span class="term-ip">175.25.37.97 255.255.255.224</span></span></div>
+                                <div class="term-comment">! Gán IP (.97) làm Gateway cho máy tính ở Net 1 đi qua</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no
+                                        shutdown</span></div>
+                                <div class="term-comment">! Bật nguồn mở cổng lên (Mặc định bị tắt)</div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface
+                                        g0/0/1</span></div>
+                                <div class="term-comment">! Đi vào cài đặt cổng LAN 2 (Cổng nối xuống Net 2)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip
+                                        address <span class="term-ip">175.25.37.129 255.255.255.224</span></span></div>
+                                <div class="term-comment">! Gán IP (.129) làm Gateway cho Net 2</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no
+                                        shutdown</span></div>
+                                <div class="term-comment">! Bật nguồn mở cổng lên xanh</div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface
+                                        s0/1/0</span></div>
+                                <div class="term-comment">! Đi vào cổng cáp Serial (WAN) nối sang Router 1</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip
+                                        address <span class="term-ip">175.25.37.161 255.255.255.252</span></span></div>
+                                <div class="term-comment">! Gán IP liên kết P2P (Dùng Subnet Mask của /30)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no
+                                        shutdown</span></div>
+                                <div class="term-comment">! Bật nguồn cổng cáp Serial</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span
+                                        class="term-cmd">exit</span></div>
+                                <div class="term-comment">! Thoát khỏi chế độ cài đặt cổng (Interface)</div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div>
+                                    <span class="term-prompt">Router(config)#</span>
+                                    <span class="term-cmd text-yellow-300">ip route <span class="term-ip">175.25.37.192
+                                            255.255.255.192 175.25.37.162</span></span>
+                                </div>
+                                <div
+                                    class="term-comment text-yellow-300 bg-yellow-900/30 p-1.5 rounded border border-yellow-700/50">
+                                    ! Cú pháp: [Mạng muốn tới] [Mask mạng tới] [Cổng Next-hop]. Lệnh này dạy Router 0
+                                    biết cách gửi thư sang Net 3 (50 PC) thông qua trạm kế tiếp là .162</div>
+                            </div>
+                        </div>
+
+                        <!-- Router 1 Config -->
+                        <div class="terminal-block relative">
+                            <div
+                                class="absolute top-2 right-4 text-xs font-sans text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                                CLI: Router1</div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router&gt;</span> <span class="term-cmd">enable</span>
+                                </div>
+                                <div class="term-comment">! Bật chế độ Đặc quyền (#)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router#</span> <span class="term-cmd">configure
+                                        terminal</span></div>
+                                <div class="term-comment">! Vào chế độ Cấu hình toàn cục</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">no ip
+                                        domain-lookup</span></div>
+                                <div class="term-comment">! Ngăn tìm kiếm DNS rác tránh lỗi treo lệnh</div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface
+                                        g0/0/0</span></div>
+                                <div class="term-comment">! Chọn cổng LAN 3 (Cổng cắm Switch 50 PC)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip
+                                        address <span class="term-ip">175.25.37.193 255.255.255.192</span></span></div>
+                                <div class="term-comment">! Gán IP Gateway cho mạng Net 3</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no
+                                        shutdown</span></div>
+                                <div class="term-comment">! Bật nguồn mở cổng lên</div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface
+                                        s0/1/0</span></div>
+                                <div class="term-comment">! Chọn cổng Serial WAN (Cáp nối về Router 0)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip
+                                        address <span class="term-ip">175.25.37.162 255.255.255.252</span></span></div>
+                                <div class="term-comment">! Gán IP cho đầu dây cáp bên này (/30)</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no
+                                        shutdown</span></div>
+                                <div class="term-comment">! Bật nguồn cổng</div>
+                            </div>
+                            <div class="term-row">
+                                <div><span class="term-prompt">Router(config-if)#</span> <span
+                                        class="term-cmd">exit</span></div>
+                                <div class="term-comment">! Thoát ra ngoài cấu hình toàn cục</div>
+                            </div>
+
+                            <div class="term-spacer"></div>
+
+                            <div class="term-row">
+                                <div>
+                                    <span class="term-prompt">Router(config)#</span>
+                                    <span class="term-cmd text-yellow-300">ip route <span class="term-ip">175.25.37.96
+                                            255.255.255.224 175.25.37.161</span></span>
+                                </div>
+                                <div
+                                    class="term-comment text-yellow-300 bg-yellow-900/30 p-1.5 rounded border border-yellow-700/50">
+                                    ! Dạy Router 1 biết đường gửi thư ngược về Net 1 thông qua cửa tiếp theo là .161
+                                </div>
+                            </div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row">
+                                <div>
+                                    <span class="term-prompt">Router(config)#</span>
+                                    <span class="term-cmd text-yellow-300">ip route <span class="term-ip">175.25.37.128
+                                            255.255.255.224 175.25.37.161</span></span>
+                                </div>
+                                <div
+                                    class="term-comment text-yellow-300 bg-yellow-900/30 p-1.5 rounded border border-yellow-700/50">
+                                    ! Dạy Router 1 biết đường gửi thư ngược về Net 2 thông qua cửa tiếp theo là .161
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 7: SLIDE 3.3 DHCP & PING -->
+            <div id="part3_dhcp_ping" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                    <div
+                        class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-orange-600">Phần 3.3: Cấu hình DHCP Server & Kiểm tra kết
+                                nối</h1>
+                            <p class="text-gray-500 text-sm mt-1">Cấp phát IP động tự động và xác thực hệ thống mạng
+                                thông suốt bằng lệnh Ping</p>
+                        </div>
+                    </div>
+
+                    <!-- Top Row: DHCP Config -->
+                    <div class="grid grid-cols-3 gap-4 shrink-0">
+                        <!-- Server IP -->
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                            <div class="text-sm font-bold text-gray-500 mb-2 border-b pb-2 uppercase">1. Server IP
+                                (Static)</div>
+                            <div class="space-y-2 font-code text-[0.85rem]">
+                                <div class="flex justify-between"><span class="text-gray-500">IPv4 Address</span> <span
+                                        class="font-bold text-blue-700">175.25.37.194</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">Subnet Mask</span> <span
+                                        class="font-bold text-gray-700">255.255.255.192</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">Default GW</span> <span
+                                        class="font-bold text-green-700">175.25.37.193</span></div>
+                            </div>
+                        </div>
+
+                        <!-- DHCP Pool -->
+                        <div
+                            class="bg-white p-4 rounded-xl shadow-sm border border-orange-300 relative overflow-hidden">
+                            <div
+                                class="absolute top-0 right-0 bg-orange-500 text-white text-[0.6rem] font-bold px-2 py-1 rounded-bl-lg">
+                                SERVICES > DHCP</div>
+                            <div
+                                class="text-sm font-bold text-orange-700 mb-2 border-b border-orange-100 pb-2 uppercase">
+                                2. DHCP Pool Setup</div>
+                            <div class="space-y-1.5 font-code text-[0.8rem]">
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Service:</span>
+                                    <span class="font-bold bg-green-100 text-green-700 px-2 rounded">ON</span>
+                                </div>
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Def.
+                                        Gateway:</span> <span class="font-bold">175.25.37.193</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Start IP:</span>
+                                    <span class="font-bold text-orange-600">175.25.37.195</span>
+                                </div>
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Max
+                                        Users:</span> <span class="font-bold">50</span></div>
+                            </div>
+                        </div>
+
+                        <!-- PC Client -->
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-green-300 relative">
+                            <div
+                                class="absolute top-0 right-0 bg-green-500 text-white text-[0.6rem] font-bold px-2 py-1 rounded-bl-lg">
+                                PC Client</div>
+                            <div class="text-sm font-bold text-green-700 mb-2 border-b border-green-100 pb-2 uppercase">
+                                3. Result (PC4)</div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="radio" checked class="accent-green-500" readonly> <label
+                                    class="text-sm font-bold text-gray-700">DHCP</label>
+                                <span
+                                    class="text-xs text-green-600 font-bold ml-auto bg-green-50 px-1 border border-green-200 rounded">DHCP
+                                    request successful.</span>
+                            </div>
+                            <div
+                                class="space-y-1 font-code text-[0.8rem] bg-gray-50 p-2 rounded border border-gray-200">
+                                <div class="flex justify-between"><span class="text-gray-500">IP Addr:</span> <span
+                                        class="font-bold text-gray-800">175.25.37.195</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">Mask:</span> <span
+                                        class="font-bold text-gray-800">255.255.255.192</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">GW:</span> <span
+                                        class="font-bold text-gray-800">175.25.37.193</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: CMD Ping -->
+                    <div
+                        class="flex-1 bg-black rounded-xl p-4 font-code text-gray-300 shadow-2xl flex flex-col relative justify-center overflow-hidden">
+                        <div
+                            class="absolute top-0 left-0 w-full bg-gray-200 text-black text-center text-xs font-sans py-1 font-bold rounded-t-xl border-b border-gray-300">
+                            Command Prompt - PC0 (Thuộc Net 1)</div>
+                        <div class="mt-3 text-[0.85rem] leading-relaxed">
+                            <div><span class="text-white">C:\></span>ping 175.25.37.194 <span
+                                    class="text-gray-500 italic"> // Ping từ PC0 (Net 1) tới Server (Net 3)</span></div>
+                            <div class="mt-1">Pinging 175.25.37.194 with 32 bytes of data:</div>
+                            <div><span class="text-red-400">Request timed out.</span> <span
+                                    class="text-gray-500 italic"> // (Gói tin đầu rớt do ARP resolution)</span></div>
+                            <div>Reply from 175.25.37.194: bytes=32 time=1ms TTL=126</div>
+                            <div>Reply from 175.25.37.194: bytes=32 time&lt;1ms TTL=126</div>
+                            <div>Reply from 175.25.37.194: bytes=32 time&lt;1ms TTL=126</div>
+                            <div class="mt-1">Ping statistics for 175.25.37.194:</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;Packets: Sent = 4, Received = 3, Lost = 1 <span
+                                    class="text-red-400 font-bold">(25% loss)</span>,</div>
+
+                            <div class="mt-2"><span class="text-white">C:\></span>ping 175.25.37.194 <span
+                                    class="text-gray-500 italic"> // Ping lại lần 2</span></div>
+                            <div class="mt-1">Pinging 175.25.37.194 with 32 bytes of data:</div>
+                            <div><span class="text-green-400 font-bold">Reply from 175.25.37.194: bytes=32 time&lt;1ms
+                                    TTL=126</span></div>
+                            <div><span class="text-green-400 font-bold">Reply from 175.25.37.194: bytes=32 time&lt;1ms
+                                    TTL=126</span></div>
+                            <div><span class="text-green-400 font-bold">Reply from 175.25.37.194: bytes=32 time&lt;1ms
+                                    TTL=126</span></div>
+                            <div><span class="text-green-400 font-bold">Reply from 175.25.37.194: bytes=32 time=1ms
+                                    TTL=126</span></div>
+                            <div class="mt-1">Ping statistics for 175.25.37.194:</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;Packets: Sent = 4, Received = 4, Lost = 0 <span
+                                    class="text-green-400 font-bold">(0% loss)</span>,</div>
                         </div>
                     </div>
                 </div>
@@ -1129,7 +1703,16 @@
             <div id="drawingIndicator" class="drawing-indicator hidden">🖌️ Chế độ Vẽ: BẬT (Bấm Ctrl+Z để hoàn tác,
                 Ctrl+1 để tắt)</div>
 
-            <div class="controls">
+            <!-- NÚT ĐIỀU KHIỂN MAP (CÓ THỂ KÉO ĐƯỢC) -->
+            <div class="controls" id="controlsPanel">
+                <div id="controlsDragHandle"
+                    class="cursor-move text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition"
+                    title="Kéo để di chuyển">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16">
+                        </path>
+                    </svg>
+                </div>
                 <button class="btn-reset" onclick="resetHighlight()">Xem tổng quan Map</button>
                 <button class="btn-reset btn-danger" onclick="clearSavedData()"
                     title="Xóa dữ liệu đã chỉnh sửa và khôi phục về mặc định">Khôi phục gốc</button>
@@ -1201,13 +1784,14 @@
 
 
         // --- 0. KHAI BÁO BIẾN GLOBAL VÀ LƯU TRỮ ---
-        let currentStepIndex = -1; // -1: Lobby | 0: Intro | >0: Node | Cuối: Part 2
+        let currentStepIndex = -1; // -1: Lobby | 0: Intro | >0: Node | Cuối: Part 2 & 3
         let zIndexCounter = 1000;
         let highlightActive = false;
 
         window.currentSceneId = 'intro';
         window.initialSceneId = 'intro';
         window.sceneStates = {};
+        window.customSlides = []; // Biến lưu mảng các Slide mới tạo bằng Ctrl + D
 
         function debounce(func, wait) {
             let timeout;
@@ -1228,9 +1812,9 @@
 
                 cardsData.push({
                     id: card.id,
-                    title: titleEl.innerHTML,
-                    desc: descEl.innerHTML,
-                    example: exampleEl.innerHTML,
+                    title: titleEl ? titleEl.innerHTML : '',
+                    desc: descEl ? descEl.innerHTML : '',
+                    example: exampleEl ? exampleEl.innerHTML : '',
                     isDetached: card.classList.contains('detached'),
                     sceneId: card.dataset.sceneId || null,
                     style: {
@@ -1243,32 +1827,69 @@
                 });
             });
 
+            // Thu thập toàn bộ ảnh dán
+            const pastedImages = [];
+            document.querySelectorAll('.pasted-image-wrapper').forEach(wrapper => {
+                const img = wrapper.querySelector('img');
+                pastedImages.push({
+                    id: wrapper.id,
+                    src: img.src,
+                    sceneId: wrapper.dataset.sceneId,
+                    left: wrapper.style.left,
+                    top: wrapper.style.top,
+                    width: wrapper.style.width,
+                    height: wrapper.style.height,
+                    zIndex: wrapper.style.zIndex
+                });
+            });
+
+            const controlsPanel = document.getElementById('controlsPanel');
+
             const state = {
                 currentSceneId: window.currentSceneId,
                 sceneStates: window.sceneStates,
                 cards: cardsData,
+                pastedImages: pastedImages,
+                customSlides: window.customSlides, // Ghi nhớ các slide tùy chỉnh đã tạo
                 fontSettings: {
                     titleSize: document.getElementById('titleSizeSlider').value,
                     descSize: document.getElementById('descSizeSlider').value,
                     drawSpeed: document.getElementById('drawSpeedSlider').value
                 },
-                panelHidden: document.getElementById('planPanel').classList.contains('hidden')
+                panelHidden: document.getElementById('planPanel').classList.contains('hidden'),
+                controlsPanelState: {
+                    left: controlsPanel.style.left,
+                    top: controlsPanel.style.top,
+                    right: controlsPanel.style.right,
+                    bottom: controlsPanel.style.bottom
+                }
             };
 
-            // Dùng key v9 để nạp layout auto fullscreen và move controls
-            localStorage.setItem('mindmapState_v9', JSON.stringify(state));
+            // Dùng key v15
+            localStorage.setItem('mindmapState_v15', JSON.stringify(state));
         }
 
         const debouncedSaveGlobalState = debounce(saveGlobalState, 500);
 
         function loadGlobalState() {
-            const stateStr = localStorage.getItem('mindmapState_v9');
+            const stateStr = localStorage.getItem('mindmapState_v15') || localStorage.getItem('mindmapState_v14') || localStorage.getItem('mindmapState_v13');
             if (!stateStr) return false;
 
             try {
                 const state = JSON.parse(stateStr);
                 if (state.currentSceneId) window.initialSceneId = state.currentSceneId;
                 if (state.sceneStates) window.sceneStates = state.sceneStates;
+
+                // Khôi phục các Slide tự do
+                if (state.customSlides) {
+                    window.customSlides = state.customSlides;
+                    window.customSlides.forEach(slideId => {
+                        createCustomSlideDOM(slideId);
+                        if (!presentationSequence.includes(slideId)) {
+                            presentationSequence.push(slideId);
+                        }
+                    });
+                }
 
                 if (state.fontSettings) {
                     document.getElementById('titleSizeSlider').value = state.fontSettings.titleSize;
@@ -1280,13 +1901,21 @@
 
                 if (state.panelHidden) document.getElementById('planPanel').classList.add('hidden');
 
+                if (state.controlsPanelState) {
+                    const controlsPanel = document.getElementById('controlsPanel');
+                    controlsPanel.style.left = state.controlsPanelState.left;
+                    controlsPanel.style.top = state.controlsPanelState.top;
+                    controlsPanel.style.right = state.controlsPanelState.right;
+                    controlsPanel.style.bottom = state.controlsPanelState.bottom;
+                }
+
                 if (state.cards) {
                     state.cards.forEach(cardData => {
                         const card = document.getElementById(cardData.id);
                         if (!card) return;
-                        card.querySelector('.keyword-title').innerHTML = cardData.title;
-                        card.querySelector('.keyword-desc').innerHTML = cardData.desc;
-                        card.querySelector('.keyword-example span').innerHTML = cardData.example;
+                        if (card.querySelector('.keyword-title')) card.querySelector('.keyword-title').innerHTML = cardData.title;
+                        if (card.querySelector('.keyword-desc')) card.querySelector('.keyword-desc').innerHTML = cardData.desc;
+                        if (card.querySelector('.keyword-example span')) card.querySelector('.keyword-example span').innerHTML = cardData.example;
                         if (cardData.isDetached) {
                             const nodeId = cardData.id.replace('card-', '');
                             const placeholder = document.createElement('div');
@@ -1305,6 +1934,15 @@
                         }
                     });
                 }
+
+                if (state.pastedImages) {
+                    state.pastedImages.forEach(imgData => {
+                        createPastedImage(imgData.src, imgData.sceneId, imgData.left, imgData.top, imgData.width, imgData.height, imgData.id);
+                        const wrapper = document.getElementById(imgData.id);
+                        if (wrapper && imgData.zIndex) wrapper.style.zIndex = imgData.zIndex;
+                    });
+                }
+
                 return true;
             } catch (e) {
                 console.error('Lỗi khi khôi phục dữ liệu:', e);
@@ -1314,53 +1952,213 @@
 
         function clearSavedData() {
             if (confirm("Bạn có chắc chắn muốn xóa tất cả dữ liệu đã chỉnh sửa và khôi phục về trạng thái gốc ban đầu?")) {
-                localStorage.removeItem('mindmapState_v9');
+                localStorage.removeItem('mindmapState_v15');
+                localStorage.removeItem('mindmapState_v14');
+                localStorage.removeItem('mindmapState_v13');
                 location.reload();
             }
+        }
+
+        // --- TÍNH NĂNG TẠO SLIDE TỰ DO (CTRL+D) ---
+        function createCustomSlideDOM(slideId) {
+            const container = document.querySelector('.map-container');
+
+            // Render HTML của Slide nền kẻ ô li
+            if (!document.getElementById(slideId)) {
+                const slide = document.createElement('div');
+                slide.id = slideId;
+                slide.className = 'presentation-slide custom-grid-slide';
+                container.insertBefore(slide, document.getElementById('drawCanvas'));
+            }
+
+            // Render DOM Card tương ứng vào trong danh sách
+            const cardId = `card-${slideId}`;
+            if (!document.getElementById(cardId)) {
+                const card = document.createElement('div');
+                card.className = 'keyword-card'; card.id = cardId;
+                card.innerHTML = `
+                    <div class="card-toolbar" contenteditable="false">
+                        <button class="btn-reattach" title="Ghim lại vào danh sách">📌</button>
+                        <button class="btn-drag-handle" title="Kéo tách ra ngoài">✥</button>
+                    </div>
+                    <div class="keyword-title" contenteditable="true" spellcheck="false">Slide Trắng Mới</div>
+                    <div class="keyword-desc" contenteditable="true" spellcheck="false">Bảng kẻ ô li tự do, dùng để ghi chú và viết bảng.</div>
+                    <div class="keyword-example"><div class="example-badge">📝 GHI CHÚ</div><br/><span contenteditable="true" spellcheck="false">Sử dụng Ctrl+1 để vẽ và Ctrl+V để dán ảnh minh họa vào đây.</span></div>
+                `;
+                card.querySelectorAll('[contenteditable="true"]').forEach(el => el.addEventListener('input', debouncedSaveGlobalState));
+                cardObserver.observe(card);
+
+                card.onclick = (e) => { if (e.target.isContentEditable || e.target.closest('.card-toolbar')) return; focusNode(slideId, true); };
+                card.addEventListener('mousedown', () => { if (card.classList.contains('detached')) card.style.zIndex = ++zIndexCounter; });
+
+                const dragHandle = card.querySelector('.btn-drag-handle');
+                const btnReattach = card.querySelector('.btn-reattach');
+
+                dragHandle.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    if (!card.classList.contains('detached')) {
+                        const rect = card.getBoundingClientRect();
+                        const placeholder = document.createElement('div'); placeholder.id = `placeholder-${slideId}`; placeholder.style.display = 'none';
+                        card.parentNode.insertBefore(placeholder, card); document.getElementById('mainContainer').appendChild(card); card.classList.add('detached');
+                        card.dataset.sceneId = window.currentSceneId;
+                        card.style.position = 'absolute'; card.style.left = rect.left + 'px'; card.style.top = rect.top + 'px';
+                        card.style.width = rect.width + 'px'; if (card.style.height) card.style.height = card.style.height;
+                        saveGlobalState();
+                    }
+                    card.style.zIndex = ++zIndexCounter;
+                    let startX = e.clientX, startY = e.clientY, initialLeft = parseFloat(card.style.left) || 0, initialTop = parseFloat(card.style.top) || 0;
+                    function onMouseMove(moveEvent) { card.style.left = initialLeft + (moveEvent.clientX - startX) + 'px'; card.style.top = initialTop + (moveEvent.clientY - startY) + 'px'; }
+                    function onMouseUp() { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); debouncedSaveGlobalState(); }
+                    document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
+                });
+
+                btnReattach.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    const placeholder = document.getElementById(`placeholder-${slideId}`);
+                    if (placeholder) { placeholder.parentNode.insertBefore(card, placeholder); placeholder.remove(); } else { document.getElementById('keywordList').appendChild(card); }
+                    card.classList.remove('detached'); delete card.dataset.sceneId;
+                    card.style.position = ''; card.style.left = ''; card.style.top = ''; card.style.zIndex = ''; card.style.width = ''; card.style.height = '';
+                    saveGlobalState();
+                });
+
+                document.getElementById('keywordList').appendChild(card);
+            }
+        }
+
+        // --- TÍNH NĂNG PASTE ẢNH TỪ CLIPBOARD (CTRL+V) ---
+        document.addEventListener('paste', function (e) {
+            // Không phản hồi nếu người dùng đang nhập text vào khung nhập liệu
+            if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const base64Data = event.target.result;
+                        // Dán ảnh vào giữa màn hình
+                        const startX = window.innerWidth / 2 - 100;
+                        const startY = window.innerHeight / 2 - 100;
+                        createPastedImage(base64Data, window.currentSceneId, startX, startY);
+                        saveGlobalState();
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
+        });
+
+        function createPastedImage(src, sceneId, left, top, width = 'auto', height = 'auto', imgId = null) {
+            const container = document.getElementById('mainContainer');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pasted-image-wrapper';
+
+            // Nếu ảnh không thuộc cảnh hiện tại thì ẩn nó đi
+            if (String(sceneId) !== String(window.currentSceneId)) {
+                wrapper.classList.add('hidden-scene');
+            }
+
+            wrapper.dataset.sceneId = sceneId;
+            wrapper.id = imgId || 'img-' + Date.now() + Math.floor(Math.random() * 1000);
+
+            wrapper.style.left = typeof left === 'number' ? left + 'px' : left;
+            wrapper.style.top = typeof top === 'number' ? top + 'px' : top;
+            if (width !== 'auto') wrapper.style.width = width;
+            if (height !== 'auto') wrapper.style.height = height;
+
+            const img = document.createElement('img');
+            img.src = src;
+            wrapper.appendChild(img);
+
+            // Nút xóa ảnh
+            const delBtn = document.createElement('button');
+            delBtn.innerHTML = '✖';
+            delBtn.className = 'delete-img-btn';
+            delBtn.onclick = function (e) {
+                e.stopPropagation();
+                wrapper.remove();
+                debouncedSaveGlobalState();
+            };
+            wrapper.appendChild(delBtn);
+
+            // Kéo thả ảnh (bỏ qua vùng resize ở góc dưới bên phải)
+            let isDraggingImg = false, iStartX, iStartY, iInitLeft, iInitTop;
+            wrapper.addEventListener('mousedown', function (e) {
+                if (e.target === delBtn) return;
+
+                // Tránh lỗi khi bấm vào khu vực resize ở góc dưới bên phải
+                const rect = wrapper.getBoundingClientRect();
+                if (e.clientX > rect.right - 20 && e.clientY > rect.bottom - 20) return;
+
+                isDraggingImg = true;
+                iStartX = e.clientX; iStartY = e.clientY;
+                iInitLeft = parseFloat(wrapper.style.left) || 0;
+                iInitTop = parseFloat(wrapper.style.top) || 0;
+                wrapper.style.zIndex = ++zIndexCounter;
+            });
+            document.addEventListener('mousemove', function (e) {
+                if (!isDraggingImg) return;
+                wrapper.style.left = iInitLeft + (e.clientX - iStartX) + 'px';
+                wrapper.style.top = iInitTop + (e.clientY - iStartY) + 'px';
+            });
+            document.addEventListener('mouseup', function (e) {
+                if (isDraggingImg) {
+                    isDraggingImg = false;
+                    debouncedSaveGlobalState();
+                }
+            });
+
+            // Lắng nghe thay đổi kích thước thủ công
+            const resizeObs = new ResizeObserver(() => {
+                if (!isDraggingImg) debouncedSaveGlobalState();
+            });
+            resizeObs.observe(wrapper);
+
+            container.appendChild(wrapper);
         }
 
         // --- 1. DỮ LIỆU CẬP NHẬT THEO GIÁO TRÌNH ---
         const rawData = {
             "nodes": [
-                { "id": 1, "label": "MẠNG MÁY TÍNH", "description": "Hệ thống kết nối các thiết bị để trao đổi thông tin.", "example": "<b>Chi tiết:</b> Là hệ thống gồm hai hay nhiều máy tính, thiết bị được kết nối với nhau theo một phương thức nào đó để có thể trao đổi thông tin dữ liệu cho nhau." },
-                { "id": 2, "label": "MÔI TRƯỜNG KẾT NỐI", "description": "Thành phần cơ bản tạo nên mạng máy tính (hữu tuyến, vô tuyến).", "example": "<b>Chi tiết:</b> Là một trong các thành phần cơ bản tạo nên mạng máy tính. Môi trường truyền dẫn bao gồm cáp nối (hữu tuyến) hoặc sóng vô tuyến (vô tuyến)." },
-                { "id": 3, "label": "PC", "description": "Máy tính cá nhân, thiết bị đầu cuối trực tiếp.", "example": "<b>Chi tiết:</b> Máy tính cá nhân, đóng vai trò là thiết bị đầu cuối trực tiếp làm việc với con người." },
-                { "id": 4, "label": "CÁP UTP", "description": "Môi trường truyền dẫn hữu tuyến (Cáp thẳng, cáp chéo).", "example": "<b>Chi tiết:</b> Là môi trường truyền dẫn hữu tuyến. Cáp UTP được chia thành cáp thẳng (dùng để nối các thiết bị khác loại, ví dụ PC nối với Switch) và cáp chéo (dùng để nối các thiết bị cùng loại, ví dụ PC nối với Router)." },
-                { "id": 5, "label": "GIAO THỨC", "description": "Các quy tắc, quy ước trong mạng (HTTP, TCP, UDP...).", "example": "<b>Chi tiết:</b> Là các quy tắc, quy ước trong mạng. Tiêu biểu như giao thức HTTP/HTTPS dùng cho web, giao thức TCP và UDP dùng để kiểm soát truyền dữ liệu." },
-                { "id": 6, "label": "192.75.1.3/16", "description": "Một địa chỉ IP (IPv4 32 bit).", "example": "<b>Chi tiết:</b> Là một địa chỉ IP (phiên bản IPv4 có cấu trúc 32 bit). Hậu tố /16 (chính là Prefix length hay Subnet mask) cho biết có 16 bit được dùng làm phần địa chỉ mạng (NetID), 16 bit còn lại dành cho Host." },
-                { "id": 7, "label": "TCP/IP", "description": "Mô hình phân tầng chuẩn hóa kiến trúc mạng.", "example": "<b>Chi tiết:</b> Là một mô hình phân tầng được sử dụng để chuẩn hóa kiến trúc mạng máy tính." },
-                { "id": 8, "label": "OSI", "description": "Mô hình tham chiếu phân tầng tiêu chuẩn.", "example": "<b>Chi tiết:</b> Là mô hình tham chiếu phân tầng tiêu chuẩn trong việc chuẩn hóa kiến trúc mạng." },
-                { "id": 9, "label": "SUBNET", "description": "Thông đi kèm IP phân định NetID/HostID.", "example": "<b>Chi tiết:</b> Là thông tin đi kèm với địa chỉ IP để cho biết IP đó có bao nhiêu bit dành cho phần mạng (net). Trong Subnet mask, các bit tương ứng với phần net có giá trị bằng 1, các bit tương ứng với phần host có giá trị bằng 0." },
-                { "id": 10, "label": "KIẾN TRÚC MẠNG", "description": "Cấu trúc tổng thể của mạng.", "example": "<b>Chi tiết:</b> Cấu trúc tổng thể của mạng, thường được chuẩn hóa thông qua các mô hình phân tầng (như OSI, TCP/IP) để thuận tiện cho việc phân tích và triển khai." },
-                { "id": 11, "label": "DNS", "description": "Dịch vụ phân giải tên miền.", "example": "<b>Chi tiết:</b> Dịch vụ phân giải tên miền, là một lợi ích được tích hợp bên trong hệ thống dịch vụ danh bạ (Directory Service)." },
-                { "id": 12, "label": "170.67.12.128/25", "description": "Một địa chỉ IP định dạng IPv4.", "example": "<b>Chi tiết:</b> Là một địa chỉ IP định dạng IPv4. Con số /25 cho biết địa chỉ này có 25 bit được sử dụng cho phần mạng (NetID), phần còn lại dành cho host." },
-                { "id": 13, "label": "THÀNH PHẦN", "description": "Phần cứng và phần mềm tạo nên mạng.", "example": "<b>Chi tiết:</b> Hệ thống mạng máy tính cơ bản bao gồm phần cứng (các môi trường truyền thông, thiết bị mạng như NIC, Hub, Switch, Router) và phần mềm (Hệ điều hành mạng, các chương trình ứng dụng mạng). Hiểu đơn giản, mạng gồm: Máy tính, thiết bị mạng, môi trường truyền và hệ điều hành mạng." },
-                { "id": 14, "label": "CÁP QUANG", "description": "Một loại môi trường truyền dẫn tín hiệu mạng.", "example": "<b>Chi tiết:</b> Một loại môi trường truyền dẫn tín hiệu mạng." },
-                { "id": 15, "label": "WIFI", "description": "Môi trường truyền dẫn tín hiệu vô tuyến.", "example": "<b>Chi tiết:</b> Là môi trường truyền dẫn tín hiệu vô tuyến." },
-                { "id": 16, "label": "THIẾT BỊ MẠNG", "description": "Thiết bị trung chuyển và thiết bị đầu cuối.", "example": "<b>Chi tiết:</b> Bao gồm các thiết bị trung chuyển dùng để kết nối, mở rộng mạng (như Hub, Switch, Router) và các thiết bị cuối làm việc trực tiếp với người dùng." },
-                { "id": 17, "label": "ĐỊA CHỈ IP", "description": "Định danh duy nhất máy tính trong mạng.", "example": "<b>Chi tiết:</b> Gồm hai phiên bản chính là IPv4 (32-bit) và IPv6 (128-bit). Đóng vai trò như địa chỉ logic duy nhất để định tuyến gói tin (Packet) trên hạ tầng mạng toàn cầu." },
-                { "id": 18, "label": "HỆ ĐIỀU HÀNH MẠNG", "description": "Phần mềm quản lý tài nguyên mạng.", "example": "<b>Chi tiết:</b> Cung cấp các dịch vụ mạng cốt lõi như quản lý phân quyền người dùng, chia sẻ tệp tin, máy in và cấu hình bảo mật hệ thống. (Ví dụ: Windows Server, Linux CentOS)." },
-                { "id": 19, "label": "TOPOLOGY", "description": "Hình trạng hay cấu trúc kết nối của mạng.", "example": "<b>Chi tiết:</b> Hình trạng hay cấu trúc kết nối của mạng máy tính. Một số hình trạng kết nối thường gặp là Point to Point (nối các cặp máy tính) hoặc Point to Multipoint (một trạm kết nối đến nhiều trạm)." },
-                { "id": 20, "label": "ROUTER", "description": "Thiết bị mạng trung chuyển định tuyến.", "example": "<b>Chi tiết:</b> Là thiết bị mạng trung chuyển. Router có khả năng đọc địa chỉ IP để xác định địa chỉ mạng (địa chỉ Net) trong gói tin nhận được. Để kết nối Router với PC, người ta sử dụng cáp chéo." },
-                { "id": 21, "label": "THIẾT BỊ ĐẦU CUỐI", "description": "Thiết bị làm việc trực tiếp với con người.", "example": "<b>Chi tiết:</b> Là các thiết bị làm việc trực tiếp với con người trong mạng, điển hình là máy tính cá nhân (PC)." },
-                { "id": 22, "label": "SWITCH", "description": "Thiết bị mạng trung chuyển giúp mở rộng mạng.", "example": "<b>Chi tiết:</b> Là thiết bị mạng trung chuyển giúp mở rộng mạng. Để kết nối Switch với một thiết bị khác loại như PC, người ta sử dụng cáp thẳng." },
-                { "id": 23, "label": "NIC", "description": "Thiết bị giao tiếp mạng bắt buộc trên PC.", "example": "<b>Chi tiết:</b> Network Interface Card hay Card mạng. Đây là một thiết bị mạng, đóng vai trò là thiết bị giao tiếp mạng bắt buộc phải có trên mỗi trạm làm việc (máy tính)." },
-                { "id": 24, "label": "HUB", "description": "Thiết bị trung chuyển mạng ở tầng vật lý.", "example": "<b>Chi tiết:</b> Hoạt động ở tầng 1 (Physical Layer). Hub không thông minh, nó chỉ đơn thuần tiếp nhận, khuếch đại tín hiệu và phát tán mù cụ ra tất cả các cổng còn lại." },
-                { "id": 25, "label": "DHCP", "description": "Giao thức cấp phát địa chỉ IP động.", "example": "<b>Chi tiết:</b> Dynamic Host Configuration Protocol - Giao thức cấp phát địa chỉ IP động. DHCP hoạt động theo mô hình Client - Server, trong đó cấu hình DHCP được đặt trên một thiết bị server (như máy tính, router, modem...)." },
-                { "id": 26, "label": "CẤP PHÁT ĐỊA CHỈ TĨNH", "description": "Phương pháp cấp IP do con người cấu hình thủ công.", "example": "<b>Chi tiết:</b> Là phương pháp cấp IP do con người cấu hình thủ công. Địa chỉ IP được cấp phát tĩnh sẽ cố định và không thay đổi cho đến khi nó được cấu hình lại." },
-                { "id": 27, "label": "CẤP PHÁT ĐỊA CHỈ ĐỘNG", "description": "Phương pháp cấp IP tự động từ Server.", "example": "<b>Chi tiết:</b> Là phương pháp mà địa chỉ IP được cấp phát tự động từ một thiết bị đóng vai trò Server. Địa chỉ này chỉ được cấp trong một khoảng thời gian nhất định và có thể được thu hồi để cấp phát lại." },
-                { "id": 28, "label": "MÔ HÌNH PHÂN TẦNG", "description": "Kiến trúc mạng được chia thành các tầng.", "example": "<b>Chi tiết:</b> Việc chia kiến trúc mạng thành các mô hình phân tầng có ý nghĩa rất quan trọng, giúp các kỹ sư dễ dàng trong việc phân tích, thiết kế, triển khai và sửa lỗi hệ thống mạng." }
+                { "id": 1, "label": "MẠNG MÁY TÍNH", "description": "Kết nối các thiết bị để trao đổi dữ liệu.", "example": "<b>Chi tiết:</b> Là hai hay nhiều máy tính, thiết bị kết nối với nhau theo một phương thức nào đó để có thể trao đổi thông tin dữ liệu cho nhau." },
+                { "id": 2, "label": "MÔI TRƯỜNG KẾT NỐI", "description": "Con đường để tín hiệu đi qua (hữu tuyến/vô tuyến).", "example": "<b>Chi tiết:</b> (Hay môi trường truyền thông). Là con đường để tín hiệu đi qua giữa các thiết bị mạng, bao gồm môi trường hữu tuyến (cáp) và vô tuyến (sóng)." },
+                { "id": 3, "label": "PC", "description": "Thiết bị đầu cuối trực tiếp làm việc với con người.", "example": "<b>Chi tiết:</b> Nằm trong hệ thống mạng, là một thiết bị đầu cuối trực tiếp làm việc với con người để tạo và nhận dữ liệu." },
+                { "id": 4, "label": "CÁP UTP", "description": "Môi trường truyền hữu tuyến phổ biến nhất.", "example": "<b>Chi tiết:</b> Môi trường truyền hữu tuyến phổ biến nhất. Có 2 cách bấm cáp chính là cáp thẳng (nối thiết bị khác loại) và cáp chéo (nối thiết bị cùng loại)." },
+                { "id": 5, "label": "GIAO THỨC", "description": "Các qui tắc/qui ước quy định cách thức giao tiếp.", "example": "<b>Chi tiết:</b> Là các qui tắc / qui ước chung quy định cách thức các thiết bị giao tiếp và truyền dữ liệu trong mạng." },
+                { "id": 6, "label": "192.75.1.3/16", "description": "Địa chỉ IP có phần mạng 16 bit.", "example": "<b>Chi tiết:</b> Là một địa chỉ IP có prefix length là /16 (16 bit cho phần mạng). Từ đó xác định được Subnet Mask của IP này là 255.255.0.0." },
+                { "id": 7, "label": "TCP/IP", "description": "Mô hình kiến trúc mạng rộng rãi trên thực tế.", "example": "<b>Chi tiết:</b> Là một mô hình phân tầng kiến trúc mạng đang được sử dụng rộng rãi trên thực tế (như mạng Internet hiện nay)." },
+                { "id": 8, "label": "OSI", "description": "Mô hình tham chiếu mang tính lý thuyết gồm 7 tầng.", "example": "<b>Chi tiết:</b> Mô hình phân tầng tham chiếu (gồm 7 tầng) mang tính lý thuyết, có ý nghĩa quan trọng trong việc phân tích, thiết kế, triển khai và sửa lỗi hệ thống mạng." },
+                { "id": 9, "label": "SUBNET", "description": "Chia không gian IP lớn thành các mạng nhỏ.", "example": "<b>Chi tiết:</b> Là kết quả của việc sử dụng kỹ thuật mượn bit để chia một không gian địa chỉ IP lớn ban đầu thành các dải địa chỉ mạng nhỏ hơn." },
+                { "id": 10, "label": "KIẾN TRÚC MẠNG", "description": "Cách thức tổ chức hệ thống mạng.", "example": "<b>Chi tiết:</b> Cách thức tổ chức và kết cấu của hệ thống mạng, được chuẩn hóa thông qua các mô hình phân tầng như OSI hay TCP/IP." },
+                { "id": 11, "label": "DNS", "description": "Dịch vụ phân giải tên miền.", "example": "<b>Chi tiết:</b> Dịch vụ phân giải tên miền. Làm nhiệm vụ chuyển đổi qua lại giữa Tên miền dễ nhớ (VD: web.com) và Địa chỉ IP của máy chủ." },
+                { "id": 12, "label": "170.67.12.128/25", "description": "Subnet mượn 1 bit Host.", "example": "<b>Chi tiết:</b> Là một địa chỉ đường mạng (Subnet) đã mượn 1 bit phần Host. Prefix length /25 tương đương với Subnet Mask 255.255.255.128." },
+                { "id": 13, "label": "THÀNH PHẦN", "description": "Gồm Phần cứng và Phần mềm.", "example": "<b>Chi tiết:</b> Hệ thống mạng bao gồm 2 thành phần chính: Phần cứng (Hardware - môi trường truyền, thiết bị mạng) và Phần mềm (Software - hệ điều hành, giao thức)." },
+                { "id": 14, "label": "CÁP QUANG", "description": "Truyền tải dữ liệu bằng tín hiệu ánh sáng.", "example": "<b>Chi tiết:</b> Một loại môi trường truyền thông hữu tuyến, truyền tải dữ liệu bằng tín hiệu ánh sáng, mang lại tốc độ cao và khoảng cách xa." },
+                { "id": 15, "label": "WIFI", "description": "Sử dụng sóng vô tuyến để kết nối không dây.", "example": "<b>Chi tiết:</b> Môi trường truyền thông vô tuyến, sử dụng sóng vô tuyến để kết nối các thiết bị mạng với nhau mà không cần dùng đến dây cáp." },
+                { "id": 16, "label": "THIẾT BỊ MẠNG", "description": "Thiết bị cuối và thiết bị trung chuyển.", "example": "<b>Chi tiết:</b> Các thành phần phần cứng được dùng để kết nối mạng, bao gồm thiết bị cuối (PC) và các thiết bị trung chuyển (Hub, Switch, Router...)." },
+                { "id": 17, "label": "HUB", "description": "Thiết bị trung chuyển cơ bản, kém thông minh.", "example": "<b>Chi tiết:</b> Một thiết bị trung chuyển cơ bản, dùng để kết nối nhiều thiết bị mạng lại với nhau nhưng kém thông minh (phát tán dữ liệu ra tất cả các cổng)." },
+                { "id": 18, "label": "TCP", "description": "Giao thức truyền dữ liệu tin cậy.", "example": "<b>Chi tiết:</b> Giao thức kiểm soát truyền dữ liệu, đảm bảo dữ liệu truyền từ máy gửi đến máy nhận một cách an toàn và tin cậy." },
+                { "id": 19, "label": "TOPOLOGY", "description": "Cấu trúc hình trạng vật lý và logic.", "example": "<b>Chi tiết:</b> Cấu trúc hình trạng mạng, thể hiện sơ đồ kết nối (về mặt vật lý và logic) giữa các thiết bị đầu cuối và thiết bị trung chuyển." },
+                { "id": 20, "label": "ROUTER", "description": "Kết nối các dải Net khác nhau.", "example": "<b>Chi tiết:</b> Thiết bị trung chuyển làm nhiệm vụ kết nối các hệ thống mạng (các dải Net) khác nhau lại với nhau và tìm đường đi cho gói tin." },
+                { "id": 21, "label": "THIẾT BỊ ĐẦU CUỐI", "description": "Điểm bắt nguồn hoặc kết thúc dữ liệu.", "example": "<b>Chi tiết:</b> Các thiết bị trực tiếp làm việc với con người, là điểm bắt nguồn hoặc điểm kết thúc của dữ liệu (Ví dụ: PC, Laptop)." },
+                { "id": 22, "label": "SWITCH", "description": "Thiết bị trung chuyển thông minh mở rộng mạng.", "example": "<b>Chi tiết:</b> Thiết bị trung chuyển thông minh, dùng để kết nối các thiết bị lại với nhau nhằm tạo ra và mở rộng mạng cục bộ (LAN)." },
+                { "id": 23, "label": "NIC", "description": "Thiết bị giao tiếp phần cứng trên máy tính.", "example": "<b>Chi tiết:</b> Thiết bị mạng phần cứng gắn liền với máy tính. Máy tính bắt buộc phải có NIC để kết nối vật lý vào hệ thống mạng." },
+                { "id": 24, "label": "ĐỊA CHỈ IP", "description": "Địa chỉ logic xác định thiết bị mạng.", "example": "<b>Chi tiết:</b> Địa chỉ logic xác định duy nhất một máy tính/thiết bị trong mạng." },
+                { "id": 25, "label": "DHCP", "description": "Tự động cấp phát IP cho Client.", "example": "<b>Chi tiết:</b> Giao thức cấu hình host động (Dynamic Host Configuration Protocol). Dùng để tự động cấp phát IP, Subnet mask, Default Gateway cho Client." },
+                { "id": 26, "label": "CẤP PHÁT TĨNH", "description": "Gán IP cố định thủ công.", "example": "<b>Chi tiết:</b> Việc gán địa chỉ IP cố định, không thay đổi cho thiết bị bằng cách cấu hình thủ công (do con người nhập tay)." },
+                { "id": 27, "label": "CẤP PHÁT ĐỘNG", "description": "IP được cấp tự động từ máy chủ.", "example": "<b>Chi tiết:</b> Địa chỉ IP được cấp phát tự động từ một máy chủ (DHCP Server) trong 1 khoảng thời gian nhất định và có thể thu hồi/cấp phát lại." },
+                { "id": 28, "label": "MÔ HÌNH PHÂN TẦNG", "description": "Cấu trúc chuẩn hóa quá trình truyền thông.", "example": "<b>Chi tiết:</b> Cấu trúc chuẩn hóa quá trình truyền thông mạng phức tạp thành nhiều tầng độc lập (như OSI, TCP/IP) để các thiết bị dễ dàng tương thích với nhau." }
             ],
             "edges": [
                 { "from": 1, "to": 13, "label": "Bao gồm các" },
                 { "from": 13, "to": 16, "label": "Gồm có" },
                 { "from": 13, "to": 2, "label": "Cần có" },
                 { "from": 13, "to": 5, "label": "Tuân theo" },
-                { "from": 13, "to": 18, "label": "Được quản lý bởi" },
                 { "from": 16, "to": 21, "label": "Làm việc với con người" },
                 { "from": 16, "to": 20, "label": "Thiết bị trung chuyển" },
                 { "from": 16, "to": 22, "label": "Thiết bị trung chuyển" },
-                { "from": 16, "to": 24, "label": "Thiết bị trung chuyển" },
+                { "from": 16, "to": 17, "label": "Thiết bị trung chuyển" },
                 { "from": 21, "to": 3, "label": "Ví dụ điển hình" },
                 { "from": 3, "to": 23, "label": "Kết nối qua" },
                 { "from": 2, "to": 4, "label": "Hữu tuyến" },
@@ -1369,22 +2167,23 @@
                 { "from": 5, "to": 7, "label": "Ví dụ giao thức" },
                 { "from": 5, "to": 11, "label": "Ví dụ giao thức" },
                 { "from": 5, "to": 25, "label": "Ví dụ giao thức" },
+                { "from": 5, "to": 18, "label": "Ví dụ giao thức" },
                 { "from": 10, "to": 28, "label": "Được tổ chức theo" },
                 { "from": 28, "to": 8, "label": "Là một mô hình" },
                 { "from": 28, "to": 7, "label": "Là một mô hình" },
                 { "from": 10, "to": 19, "label": "Sơ đồ vật lý" },
                 { "from": 25, "to": 27, "label": "Thực hiện việc" },
-                { "from": 17, "to": 26, "label": "Có thể là" },
-                { "from": 17, "to": 27, "label": "Có thể là" },
-                { "from": 17, "to": 9, "label": "Xác định nhờ Subnet Mask" },
-                { "from": 17, "to": 6, "label": "Ví dụ địa chỉ Host" },
-                { "from": 17, "to": 12, "label": "Ví dụ địa chỉ Net" }
+                { "from": 24, "to": 26, "label": "Có thể là" },
+                { "from": 24, "to": 27, "label": "Có thể là" },
+                { "from": 24, "to": 9, "label": "Xác định nhờ Subnet Mask" },
+                { "from": 24, "to": 6, "label": "Ví dụ địa chỉ Host" },
+                { "from": 24, "to": 12, "label": "Ví dụ địa chỉ Net" }
             ]
         };
 
-        // THÊM 'intro' & 3 SLIDE 'part2' VÀO CHUỖI THUYẾT TRÌNH
+        // THÊM 'intro' & CÁC SLIDE 'part2', 'part3' VÀO CHUỖI THUYẾT TRÌNH (Tối ưu lại thứ tự di chuyển)
         const presentationSequence = [
-            'intro', 1, 13, 2, 4, 14, 15, 16, 21, 3, 23, 24, 22, 20, 5, 28, 8, 7, 17, 6, 12, 9, 25, 26, 27, 11, 18, 10, 19, 'part2_net1', 'part2_net2', 'part2_topo'
+            'intro', 1, 13, 2, 4, 14, 15, 16, 21, 3, 23, 17, 22, 20, 5, 18, 11, 25, 24, 26, 27, 9, 6, 12, 10, 19, 28, 8, 7, 'part2_net1', 'part2_net2', 'part2_topo', 'part3_topo_ip', 'part3_router_config', 'part3_dhcp_ping'
         ];
 
         function saveCurrentSceneState() {
@@ -1510,7 +2309,9 @@
             // ----- CẬP NHẬT GIAO DIỆN (DOM) -----
 
             // Slide 1: NET 1
-            updateDOM('tut-prefix', `/${prefix}`);
+            updateDOM('tut-prefix-calc', prefix);
+            updateDOM('tut-host-bits', hostBits);
+
             updateDOM('tut-mask-dec', maskStr);
             updateHTML('tut-mask-bin', toFormattedBinaryString(maskLong, prefix));
             updateDOM('tut-wildcard-dec-step1', wildcardStr);
@@ -1701,7 +2502,7 @@
         const cardObserver = new ResizeObserver(() => debouncedSaveGlobalState());
 
         presentationSequence.forEach(nodeId => {
-            if (nodeId === 'intro' || String(nodeId).startsWith('part2')) return;
+            if (nodeId === 'intro' || String(nodeId).startsWith('part')) return;
 
             const node = rawData.nodes.find(n => n.id === nodeId);
             if (!node) return;
@@ -1779,8 +2580,8 @@
         };
         const nodesData = new vis.DataSet(rawData.nodes.map(n => ({ ...n, ...nodeOptions })));
         const edgesData = new vis.DataSet(rawData.edges.map(e => ({ ...e, ...edgeOptions })));
-        const container = document.getElementById('mynetwork');
-        const network = new vis.Network(container, { nodes: nodesData, edges: edgesData }, {
+        const containerDom = document.getElementById('mynetwork');
+        const network = new vis.Network(containerDom, { nodes: nodesData, edges: edgesData }, {
             interaction: { hover: true, tooltipDelay: 200, zoomView: true },
             physics: { solver: 'forceAtlas2Based', forceAtlas2Based: { gravitationalConstant: -100, centralGravity: 0.005, springLength: 200, springConstant: 0.08 }, stabilization: { iterations: 150 } },
             layout: { randomSeed: 2 }
@@ -1812,6 +2613,7 @@
         // --- 4. TƯƠNG TÁC KEYBOARD & FOCUS ---
         document.addEventListener('keydown', (e) => {
             const isEditingText = document.activeElement && document.activeElement.isContentEditable;
+
             // Bật / Tắt chế độ vẽ (Ctrl + 1)
             if (e.ctrlKey && e.key === '1' && !isEditingText) {
                 e.preventDefault(); isDrawingMode = !isDrawingMode;
@@ -1820,6 +2622,7 @@
                 else document.getElementById('drawingIndicator').classList.add('hidden');
                 return;
             }
+
             // Hoàn tác (Undo) nét vẽ - Ctrl + Z
             if (e.ctrlKey && e.key.toLowerCase() === 'z' && !isEditingText) {
                 e.preventDefault(); const state = window.sceneStates[window.currentSceneId];
@@ -1829,8 +2632,24 @@
                 return;
             }
 
+            // Tạo Slide Trắng Mới Tự Do - Ctrl + D
+            if (e.ctrlKey && e.key.toLowerCase() === 'd' && !isEditingText) {
+                e.preventDefault();
+                const newSlideId = 'custom_slide_' + Date.now();
+                window.customSlides.push(newSlideId);
+                presentationSequence.push(newSlideId);
+                createCustomSlideDOM(newSlideId);
+                debouncedSaveGlobalState();
+
+                // Tự động nhảy sang slide vừa tạo
+                focusNode(newSlideId, true);
+                return;
+            }
+
+            // Bật tắt Fullscreen - phím K
             if (e.key.toLowerCase() === 'k' && !isEditingText) { toggleFullScreen(); return; }
 
+            // Điều hướng bằng mũi tên Lên/Xuống - Trái/Phải
             if (!isEditingText) {
                 if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
                     e.preventDefault();
@@ -1875,6 +2694,16 @@
                 else subTitle = '3/3';
                 document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Phần 2 (${subTitle})</b>`;
                 progress = 100;
+            } else if (String(presentationSequence[currentStepIndex]).startsWith('part3')) {
+                let subTitle = '';
+                if (window.currentSceneId === 'part3_topo_ip') subTitle = '1/3';
+                else if (window.currentSceneId === 'part3_router_config') subTitle = '2/3';
+                else subTitle = '3/3';
+                document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Phần 3 (${subTitle})</b>`;
+                progress = 100;
+            } else if (String(presentationSequence[currentStepIndex]).startsWith('custom_slide_')) {
+                document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Slide Tự do</b>`;
+                progress = 100;
             } else if (currentStepIndex > 0) {
                 document.getElementById('stepCounter').innerHTML = `Khái niệm: <b>${currentStepIndex} / ${totalConcepts}</b>`;
                 progress = (currentStepIndex / totalConcepts) * 100;
@@ -1896,12 +2725,9 @@
             // Xóa Focus thẻ Card
             document.querySelectorAll('.keyword-card').forEach(card => card.classList.remove('active'));
 
-            // Ẩn tất cả các màn hình đặc biệt
-            document.body.classList.remove('intro-active', 'part2-active');
-            document.getElementById('introScreen').classList.remove('active');
-            document.getElementById('part2_net1').classList.remove('active');
-            document.getElementById('part2_net2').classList.remove('active');
-            document.getElementById('part2_topo').classList.remove('active');
+            // Ẩn tất cả các màn hình, trả lại trạng thái mặc định cho Body
+            document.body.classList.remove('intro-active', 'part-active', 'custom-slide-active');
+            document.querySelectorAll('.presentation-slide').forEach(slide => slide.classList.remove('active'));
 
             if (selectedNodeId === 'intro') {
                 document.body.classList.add('intro-active');
@@ -1909,8 +2735,8 @@
                 cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); replayDrawings('intro');
                 highlightActive = true;
             }
-            else if (String(selectedNodeId).startsWith('part2')) {
-                document.body.classList.add('part2-active'); // Ẩn panel kế hoạch
+            else if (String(selectedNodeId).startsWith('part')) {
+                document.body.classList.add('part-active'); // Ẩn panel kế hoạch chung cho part2 & part3
                 document.getElementById(selectedNodeId).classList.add('active');
 
                 if (selectedNodeId === 'part2_net1' || selectedNodeId === 'part2_net2') {
@@ -1932,7 +2758,22 @@
                 cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); replayDrawings(selectedNodeId);
                 highlightActive = true;
             }
+            else if (String(selectedNodeId).startsWith('custom_slide_')) {
+                document.body.classList.add('custom-slide-active');
+                document.getElementById(selectedNodeId).classList.add('active');
+                cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); replayDrawings(selectedNodeId);
+                highlightActive = true;
+
+                // Tập trung focus vào thẻ bên trái để người dùng tiện chỉnh sửa Text ghi chú
+                const activeCard = document.getElementById(`card-${selectedNodeId}`);
+                if (activeCard) {
+                    activeCard.classList.add('active');
+                    if (!activeCard.classList.contains('detached') && moveCamera) activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    else if (activeCard.classList.contains('detached')) activeCard.style.zIndex = ++zIndexCounter;
+                }
+            }
             else {
+                // Xử lý Highlight Node cho Map
                 const activeCard = document.getElementById(`card-${selectedNodeId}`);
                 if (activeCard) {
                     activeCard.classList.add('active');
@@ -1975,12 +2816,15 @@
                 highlightActive = true;
             }
 
-            // Ẩn hiện các khung DETACH
-            document.querySelectorAll('.keyword-card.detached').forEach(card => {
-                const isTargetCard = (card.id === `card-${window.currentSceneId}`);
-                if (card.dataset.sceneId === String(window.currentSceneId) || isTargetCard) {
-                    card.classList.remove('hidden-scene'); if (isTargetCard) card.style.zIndex = ++zIndexCounter;
-                } else { card.classList.add('hidden-scene'); }
+            // Ẩn hiện các khung DETACH và ẢNH ĐÃ PASTE chỉ hiển thị đúng cho Slide tương ứng
+            document.querySelectorAll('.keyword-card.detached, .pasted-image-wrapper').forEach(el => {
+                const isTargetEl = (el.id === `card-${window.currentSceneId}`);
+                if (el.dataset.sceneId === String(window.currentSceneId) || isTargetEl) {
+                    el.classList.remove('hidden-scene');
+                    if (isTargetEl) el.style.zIndex = ++zIndexCounter;
+                } else {
+                    el.classList.add('hidden-scene');
+                }
             });
 
             if (!isBootstrapping) debouncedSaveGlobalState();
@@ -1988,11 +2832,8 @@
 
         // HÀM RESET (XEM TỔNG QUAN)
         function resetHighlight() {
-            document.body.classList.remove('intro-active', 'part2-active');
-            document.getElementById('introScreen').classList.remove('active');
-            document.getElementById('part2_net1').classList.remove('active');
-            document.getElementById('part2_net2').classList.remove('active');
-            document.getElementById('part2_topo').classList.remove('active');
+            document.body.classList.remove('intro-active', 'part-active', 'custom-slide-active');
+            document.querySelectorAll('.presentation-slide').forEach(slide => slide.classList.remove('active'));
 
             if (window.currentSceneId === 'lobby') {
                 network.fit({ animation: { duration: 600, easingFunction: "easeInOutCubic" } });
@@ -2023,14 +2864,53 @@
             }
             highlightActive = false;
 
-            document.querySelectorAll('.keyword-card.detached').forEach(card => {
-                if (card.dataset.sceneId === 'lobby') card.classList.remove('hidden-scene');
-                else card.classList.add('hidden-scene');
+            document.querySelectorAll('.keyword-card.detached, .pasted-image-wrapper').forEach(el => {
+                if (el.dataset.sceneId === 'lobby') el.classList.remove('hidden-scene');
+                else el.classList.add('hidden-scene');
             });
             debouncedSaveGlobalState();
         }
 
-        // --- 5. LOGIC DRAG VÀ THEO DÕI THAY ĐỔI CỦA BẢNG KẾ HOẠCH ---
+        // --- 5. LOGIC DRAG CHO CỤM NÚT CONTROLS ---
+        const controlsPanel = document.getElementById('controlsPanel');
+        const controlsHandle = document.getElementById('controlsDragHandle');
+        let isDraggingControls = false;
+        let cStartX, cStartY, cInitLeft, cInitTop;
+
+        controlsHandle.addEventListener('mousedown', function (e) {
+            isDraggingControls = true;
+            cStartX = e.clientX;
+            cStartY = e.clientY;
+            controlsPanel.style.transition = 'none'; // Tắt transition để kéo mượt
+
+            const rect = controlsPanel.getBoundingClientRect();
+            // Xóa bỏ ràng buộc right/bottom để dùng left/top tuyệt đối
+            controlsPanel.style.right = 'auto';
+            controlsPanel.style.bottom = 'auto';
+            controlsPanel.style.left = rect.left + 'px';
+            controlsPanel.style.top = rect.top + 'px';
+
+            cInitLeft = rect.left;
+            cInitTop = rect.top;
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDraggingControls) return;
+            const dx = e.clientX - cStartX;
+            const dy = e.clientY - cStartY;
+            controlsPanel.style.left = (cInitLeft + dx) + 'px';
+            controlsPanel.style.top = (cInitTop + dy) + 'px';
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (isDraggingControls) {
+                isDraggingControls = false;
+                controlsPanel.style.transition = 'opacity 0.3s ease, visibility 0.3s ease';
+                saveGlobalState(); // Lưu vị trí mới vào localStorage
+            }
+        });
+
+        // --- 6. LOGIC DRAG VÀ THEO DÕI THAY ĐỔI CỦA BẢNG KẾ HOẠCH BÊN TRÁI ---
         const panel = document.getElementById('planPanel');
         const header = document.getElementById('panelHeader');
         let isDragging = false; let startX, startY, initialLeft, initialTop;
@@ -2055,6 +2935,7 @@
 
         const panelObserver = new ResizeObserver(() => { if (window.currentSceneId && !isDragging) { saveCurrentSceneState(); debouncedSaveGlobalState(); } });
         panelObserver.observe(panel);
+
     </script>
 </body>
 
