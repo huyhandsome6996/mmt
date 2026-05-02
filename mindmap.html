@@ -581,6 +581,30 @@
 </head>
 
 <body>
+    <!-- MÀN HÌNH ĐĂNG NHẬP (LOGIN) -->
+    <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] z-[10001] flex items-center justify-center transition-all duration-700">
+        <div class="bg-white/10 backdrop-blur-2xl p-10 rounded-[2rem] shadow-2xl border border-white/20 w-full max-w-md text-center transform transition-all">
+            <div class="w-20 h-20 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-blue-500/30">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white mb-2">Hệ Thống Bảo Mật</h2>
+            <p class="text-slate-400 mb-8">Vui lòng nhập mã truy cập để tiếp tục</p>
+            
+            <div class="space-y-4">
+                <input type="password" id="passwordInput" placeholder="Mật khẩu..." 
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-center text-lg tracking-widest">
+                
+                <button id="btnLogin" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl transition-all text-lg shadow-lg transform hover:-translate-y-1 active:scale-95">
+                    Xác nhận Truy cập
+                </button>
+                <p id="loginError" class="text-red-400 text-sm mt-2 opacity-0 transition-opacity">Mật khẩu không chính xác!</p>
+            </div>
+        </div>
+    </div>
+
     <!-- MÀN HÌNH HƯỚNG DẪN SỬ DỤNG (OVERLAY) -->
     <div id="instructionOverlay"
         class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[9999] flex items-center justify-center transition-opacity duration-500">
@@ -713,6 +737,36 @@
     </div>
 
     <script>
+        // --- TÍNH NĂNG ĐĂNG NHẬP ---
+        const loginOverlay = document.getElementById('loginOverlay');
+        const passwordInput = document.getElementById('passwordInput');
+        const btnLogin = document.getElementById('btnLogin');
+        const loginError = document.getElementById('loginError');
+
+        function checkLogin() {
+            if (passwordInput.value === 'huyhandsome') {
+                loginOverlay.style.opacity = '0';
+                loginOverlay.style.pointerEvents = 'none';
+                setTimeout(() => loginOverlay.style.display = 'none', 700);
+                sessionStorage.setItem('mindmap_isLoggedIn', 'true');
+            } else {
+                loginError.style.opacity = '1';
+                passwordInput.classList.add('border-red-500', 'animate-pulse');
+                passwordInput.value = '';
+                setTimeout(() => {
+                    loginError.style.opacity = '0';
+                    passwordInput.classList.remove('border-red-500', 'animate-pulse');
+                }, 2000);
+            }
+        }
+
+        btnLogin.addEventListener('click', checkLogin);
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkLogin(); });
+
+        if (sessionStorage.getItem('mindmap_isLoggedIn') === 'true') {
+            loginOverlay.style.display = 'none';
+        }
+
         // --- HIỂN THỊ HƯỚNG DẪN & FULLSCREEN ---
         const instructionOverlay = document.getElementById('instructionOverlay');
         const btnStart = document.getElementById('btnStart');
@@ -1389,8 +1443,14 @@
         };
         const edgeOptions = {
             arrows: { to: { enabled: true, scaleFactor: 0.8, type: 'arrow' } },
-            font: { size: 13, color: '#34495e', face: "'Times New Roman', Times, serif", align: 'middle', background: 'rgba(255,255,255,0.8)' },
-            color: { color: '#95a5a6', highlight: '#E74C3C', hover: '#3498DB' }, smooth: { type: 'continuous', roundness: 0.5 }
+            font: { size: 12, color: '#475569', face: "'Times New Roman', Times, serif", align: 'middle', background: 'rgba(255,255,255,0.7)' },
+            color: { color: '#cbd5e0', highlight: '#3498db', hover: '#94a3b8' }, 
+            smooth: { 
+                enabled: true,
+                type: 'cubicBezier', 
+                forceDirection: 'vertical', 
+                roundness: 0.5 
+            }
         };
 
         const isStateLoaded = loadGlobalState();
@@ -1398,11 +1458,14 @@
         // Khôi phục lại các node đã bị khóa cứng (nếu load từ localStorage)
         const initNodes = rawData.nodes.map(n => {
             let nData = { ...n, ...nodeOptions };
+            // Bỏ qua tọa độ cũ khi chuyển sang dạng cây để tránh xung đột layout
+            /*
             if (window.savedFixedNodes && window.savedFixedNodes[n.id]) {
                 nData.x = window.savedFixedNodes[n.id].x;
                 nData.y = window.savedFixedNodes[n.id].y;
                 nData.fixed = { x: true, y: true };
             }
+            */
             return nData;
         });
 
@@ -1414,16 +1477,22 @@
         const network = new vis.Network(containerDom, { nodes: nodesData, edges: edgesData }, {
             interaction: { hover: true, tooltipDelay: 200, zoomView: true },
             physics: {
-                solver: 'repulsion',
-                repulsion: {
-                    centralGravity: 0.0,
-                    springLength: 250,
-                    springConstant: 0.05,
-                    nodeDistance: 250
-                },
-                stabilization: { iterations: 150 }
+                enabled: false // Tắt vật lý để giữ sơ đồ dạng cây ổn định
             },
-            layout: { randomSeed: 2 }
+            layout: {
+                hierarchical: {
+                    enabled: true,
+                    levelSeparation: 250,   // Tăng khoảng cách giữa các tầng (dọc)
+                    nodeSpacing: 400,       // Tăng khoảng cách giữa các nút (ngang)
+                    treeSpacing: 400,
+                    blockShifting: true,
+                    edgeMinimization: true,
+                    parentCentralization: true,
+                    direction: 'UD',
+                    sortMethod: 'hubsize',   // Sắp xếp theo kích thước kết nối để giảm chéo dây
+                    shakeTowards: 'leaves'
+                }
+            }
         });
 
         // HIỂN THỊ TỌA ĐỘ NODE
