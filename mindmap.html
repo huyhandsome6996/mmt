@@ -1159,7 +1159,7 @@
 
         // Danh sách trình bày chỉ gồm intro và 28 Khái niệm
         const presentationSequence = [
-            'intro', 1, 13, 2, 4, 14, 15, 16, 21, 3, 23, 17, 22, 20, 5, 18, 11, 25, 24, 26, 27, 9, 6, 12, 10, 19, 28, 8, 7
+            'intro', 'lobby', 1, 13, 2, 4, 14, 15, 16, 21, 3, 23, 17, 22, 20, 5, 18, 11, 25, 24, 26, 27, 9, 6, 12, 10, 19, 28, 8, 7
         ];
 
         function saveCurrentSceneState() {
@@ -1377,8 +1377,15 @@
         // Phần Bài tập 1 yêu cầu từ khóa phải nằm trong hình chữ nhật (shape: 'box')
         const nodeOptions = {
             shape: 'box',
-            color: { background: '#5DADE2', border: '#2980B9', highlight: { background: '#E74C3C', border: '#C0392B' }, hover: { background: '#3498DB', border: '#2980B9' } },
-            font: { color: '#ffffff', size: 16, face: "'Times New Roman', Times, serif", bold: true }, margin: 12, shadow: true
+            color: { 
+                background: '#3498db', 
+                border: '#2980b9', 
+                highlight: { background: '#e74c3c', border: '#c0392b' }, 
+                hover: { background: '#2980b9', border: '#1f6391' } 
+            },
+            font: { color: '#ffffff', size: 18, face: "'Times New Roman', Times, serif", bold: true }, 
+            margin: 15, 
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.2)', size: 5, x: 2, y: 2 }
         };
         const edgeOptions = {
             arrows: { to: { enabled: true, scaleFactor: 0.8, type: 'arrow' } },
@@ -1556,12 +1563,16 @@
 
             if (currentStepIndex === 0) {
                 document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Mở đầu</b>`;
+            } else if (presentationSequence[currentStepIndex] === 'lobby') {
+                document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Tổng quan Sơ đồ</b>`;
+                progress = 0;
             } else if (String(presentationSequence[currentStepIndex]).startsWith('custom_slide_')) {
                 document.getElementById('stepCounter').innerHTML = `Đang trình bày: <b>Slide Tự do</b>`;
                 progress = 100;
             } else if (currentStepIndex > 0) {
-                document.getElementById('stepCounter').innerHTML = `Khái niệm: <b>${currentStepIndex} / ${totalConcepts}</b>`;
-                progress = (currentStepIndex / totalConcepts) * 100;
+                const stepNum = currentStepIndex - 1; // Trừ đi 1 do có lobby
+                document.getElementById('stepCounter').innerHTML = `Khái niệm: <b>${stepNum} / ${totalConcepts}</b>`;
+                progress = (stepNum / totalConcepts) * 100;
             } else {
                 document.getElementById('stepCounter').innerHTML = `Tổng quan: <b>0 / ${totalConcepts}</b>`;
             }
@@ -1589,6 +1600,26 @@
                 document.getElementById('introScreen').classList.add('active');
                 cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); replayDrawings('intro');
                 highlightActive = true;
+            }
+            else if (selectedNodeId === 'lobby') {
+                // Hiển thị tất cả node rõ nét
+                const allNodes = nodesData.get(); const updateNodes = [];
+                for (let i = 0; i < allNodes.length; i++) updateNodes.push({ id: allNodes[i].id, color: nodeOptions.color, font: nodeOptions.font, opacity: 1 });
+                const allEdges = edgesData.get(); const updateEdges = [];
+                for (let i = 0; i < allEdges.length; i++) updateEdges.push({ id: allEdges[i].id, color: edgeOptions.color, font: edgeOptions.font, opacity: 1 });
+                nodesData.update(updateNodes); edgesData.update(updateEdges);
+
+                cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                
+                if (moveCamera) {
+                    const state = window.sceneStates['lobby'];
+                    if (state && state.networkView) {
+                        network.moveTo({ position: state.networkView.position, scale: state.networkView.scale, animation: { duration: 600, easingFunction: "easeInOutCubic" } });
+                    } else {
+                        network.fit({ animation: { duration: 800, easingFunction: "easeInOutCubic" } });
+                    }
+                }
+                highlightActive = false;
             }
             else if (String(selectedNodeId).startsWith('custom_slide_')) {
                 document.body.classList.add('custom-slide-active');
