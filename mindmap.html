@@ -701,6 +701,7 @@
                         </path>
                     </svg>
                 </div>
+                <button class="btn-reset" onclick="togglePlanPanel()" id="btnShowPanel">Hiện bảng nội dung</button>
                 <button class="btn-reset" onclick="resetHighlight()">Xem tổng quan Map</button>
                 <button class="btn-reset btn-danger" onclick="clearSavedData()"
                     title="Xóa dữ liệu đã chỉnh sửa và khôi phục về mặc định">Khôi phục gốc</button>
@@ -1442,9 +1443,10 @@
             shadow: { enabled: true, color: 'rgba(0,0,0,0.2)', size: 5, x: 2, y: 2 }
         };
         const edgeOptions = {
-            arrows: { to: { enabled: true, scaleFactor: 0.8, type: 'arrow' } },
+            arrows: { to: { enabled: true, scaleFactor: 1.2, type: 'arrow' } },
             font: { size: 12, color: '#475569', face: "'Times New Roman', Times, serif", align: 'middle', background: 'rgba(255,255,255,0.7)' },
-            color: { color: '#cbd5e0', highlight: '#3498db', hover: '#94a3b8' }, 
+            color: { color: '#94a3b8', highlight: '#3498db', hover: '#64748b' }, 
+            width: 2.5,
             smooth: { 
                 enabled: true,
                 type: 'cubicBezier', 
@@ -1622,7 +1624,13 @@
         }
 
         function togglePlanPanel() {
-            document.getElementById('planPanel').classList.toggle('hidden');
+            const panel = document.getElementById('planPanel');
+            const btn = document.getElementById('btnShowPanel');
+            const isHidden = panel.classList.toggle('hidden');
+            
+            if (btn) {
+                btn.innerText = isHidden ? "Hiện bảng nội dung" : "Ẩn bảng nội dung";
+            }
             saveGlobalState();
         }
 
@@ -1651,6 +1659,12 @@
         // HÀM TRUNG TÂM XỬ LÝ CHUYỂN CẢNH
         function focusNode(selectedNodeId, moveCamera = true, isBootstrapping = false) {
             if (!isBootstrapping) saveCurrentSceneState();
+
+            // Tự động mở lại bảng nếu đang bị ẩn khi người dùng chọn xem chi tiết một node
+            const panel = document.getElementById('planPanel');
+            if (panel && panel.classList.contains('hidden') && typeof selectedNodeId === 'number') {
+                togglePlanPanel();
+            }
 
             window.currentSceneId = selectedNodeId;
             restoreSceneState(window.currentSceneId);
@@ -1736,14 +1750,28 @@
                 cancelAnimationFrame(replayAnimationId); drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
 
                 if (moveCamera) {
-                    const state = window.sceneStates[window.currentSceneId];
-                    if (state && state.networkView) {
-                        network.moveTo({ position: state.networkView.position, scale: state.networkView.scale, animation: { duration: 500, easingFunction: "easeInOutCubic" } });
-                        setTimeout(() => replayDrawings(window.currentSceneId), 550);
-                    } else {
-                        network.focus(selectedNodeId, { scale: 1.3, animation: { duration: 600, easingFunction: "easeInOutCubic" } });
-                        setTimeout(() => { saveCurrentSceneState(); debouncedSaveGlobalState(); replayDrawings(window.currentSceneId); }, 650);
-                    }
+                    const panel = document.getElementById('planPanel');
+                    const isPanelVisible = panel && !panel.classList.contains('hidden');
+                    
+                    // Lấy toàn bộ "gia đình" (cha + con) của node hiện tại
+                    const neighborNodes = network.getConnectedNodes(selectedNodeId);
+                    const focusGroup = [selectedNodeId, ...neighborNodes];
+
+                    // Tính toán khoảng trống cần chừa ra bên trái để không bị bảng che
+                    const leftPadding = isPanelVisible ? (panel.offsetWidth + 60) : 60;
+
+                    // Dùng hàm fit để bao quát toàn bộ các node liên quan
+                    network.fit({
+                        nodes: focusGroup,
+                        padding: { top: 60, right: 60, bottom: 60, left: leftPadding },
+                        animation: { duration: 800, easingFunction: "easeInOutQuad" }
+                    });
+                    
+                    setTimeout(() => { 
+                        saveCurrentSceneState(); 
+                        debouncedSaveGlobalState(); 
+                        replayDrawings(window.currentSceneId); 
+                    }, 850);
                 } else { replayDrawings(window.currentSceneId); }
                 highlightActive = true;
             }

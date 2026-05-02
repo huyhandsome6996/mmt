@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài tập Phần 2 & 3: Tính toán & Cấu hình Mạng</title>
+    <!-- Nhúng Tailwind CSS phục vụ cho màn hình Bài tập Phần 2 & 3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary-color: #3498db;
+            --primary-light: #5dade2;
+            --primary-dark: #2980b9;
+            --text-color: #333;
+            --text-muted: #666;
+            --panel-bg: #ffffff;
+            --accent: #e74c3c;
+            --title-font-size: 1.15rem;
+            --desc-font-size: 1rem;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: var(--bg-color);
+            background-image:
+                linear-gradient(rgba(52, 152, 219, 0.12) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52, 152, 219, 0.12) 1px, transparent 1px);
+            background-size: 25px 25px;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .presentation-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 12;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .presentation-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* THÔNG BÁO CHẾ ĐỘ VẼ */
+        .drawing-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .drawing-indicator.hidden {
+            opacity: 0;
+            top: -50px;
+        }
+
+        /* NÚT ĐIỀU KHIỂN */
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-reset {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Times New Roman', Times, serif;
+            transition: 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* CANVAS VẼ NẰM TRÊN CÙNG */
+        #drawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        body.drawing-mode-active #drawCanvas {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        /* CSS BỔ SUNG CHO PHẦN 2 & 3 */
+        .font-code {
+            font-family: 'Fira Code', monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+        }
+
+        .device-box {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .device-box:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.15);
+            z-index: 20;
+        }
+
+        @keyframes dropIn {
+            0% { transform: translateY(-20px); opacity: 0; color: #fbbf24; }
+            50% { color: #fbbf24; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .bit-drop {
+            display: inline-block;
+            opacity: 0;
+            animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .host-bit-highlight {
+            background-color: rgba(254, 226, 226, 0.5);
+            border-radius: 2px;
+        }
+
+        .flash-update {
+            animation: flashUpdate 0.6s;
+        }
+
+        @keyframes flashUpdate {
+            0% { background-color: rgba(253, 224, 71, 0.8); transform: scale(1.05); }
+            100% { background-color: transparent; transform: scale(1); }
+        }
+
+        .terminal-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Fira Code', monospace;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .term-cmd { color: #569cd6; font-weight: bold; }
+        .term-ip { color: #ce9178; }
+        .term-comment { color: #6a9955; font-style: italic; text-align: left; }
+        .term-prompt { color: #4ec9b0; }
+
+        .term-row {
+            display: grid;
+            grid-template-columns: minmax(auto, 50%) 1fr;
+            gap: 15px;
+            align-items: start;
+            margin-bottom: 3px;
+        }
+
+        .term-spacer { height: 1.25rem; }
+    </style>
+</head>
+
+<body class="part-active">
+    <!-- MÀN HÌNH HƯỚNG DẪN SỬ DỤNG (OVERLAY) -->
+    <div id="instructionOverlay"
+        class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[9999] flex items-center justify-center transition-opacity duration-500">
+        <div
+            class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg text-center transform transition-transform scale-100 border border-gray-100">
+            <div
+                class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Hướng dẫn Thuyết trình (Phần 2)</h2>
+            <p class="text-gray-500 mb-6 text-sm">Bấm bắt đầu để tự động kích hoạt chế độ Toàn màn hình</p>
+
+            <div class="text-left text-gray-600 space-y-4 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-100">
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">↑ ↓</span>
+                    <span class="text-sm mt-1">Dùng phím mũi tên Lên/Xuống để chuyển đổi qua lại giữa các slide bài tập.</span>
+                </div>
+                <div class="flex items-start">
+                    <span
+                        class="bg-white p-1.5 rounded-lg mr-3 font-bold text-gray-800 border shadow-sm flex items-center justify-center shrink-0 w-12 text-xs">Ctrl 1</span>
+                    <span class="text-sm mt-1">Bật/tắt chế độ vẽ tay bằng bút đỏ trực tiếp lên màn hình.</span>
+                </div>
+            </div>
+            <button id="btnStart"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all text-lg shadow-lg transform hover:-translate-y-0.5">
+                Đã hiểu & Bắt đầu
+            </button>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <div class="map-container">
+            <!-- MÀN HÌNH 2: SLIDE TÍNH TOÁN NET 1 -->
+            <div id="part2_net1" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-3 font-sans text-gray-800">
+                    <div class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-blue-700">Phần 2.1: Tính toán Net 1 (Chứa PC1)</h1>
+                            <p class="text-gray-500 text-sm mt-1">Cấu hình phân bổ dải IP cho Router & PC</p>
+                        </div>
+                        <div class="flex flex-row gap-3 items-end justify-center bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            <div class="group">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Địa chỉ IP (PC1)</label>
+                                <input type="text" id="ipInput" value="175.25.37.110"
+                                    class="w-36 px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none text-center font-code text-blue-800 font-bold text-base">
+                            </div>
+                            <div class="group">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Prefix</label>
+                                <div class="flex items-center shadow-sm rounded">
+                                    <span class="bg-gray-200 px-2 py-1.5 border border-r-0 border-gray-300 rounded-l text-gray-600 font-bold text-base">/</span>
+                                    <input type="number" id="prefixInput" value="27" min="8" max="30"
+                                        class="w-16 px-2 py-1.5 border border-gray-300 rounded-r focus:outline-none focus:border-blue-500 text-center font-code text-blue-800 font-bold text-base">
+                                </div>
+                            </div>
+                            <button onclick="calculateSubnets()"
+                                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1.5 px-6 rounded-lg shadow hover:shadow-md h-[38px] text-sm">Tính Toán</button>
+                        </div>
+                    </div>
+
+                    <div class="shrink-0 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-md text-sm border border-indigo-200">Bước 1</span>
+                            <span class="font-bold text-gray-800">Tính số bit Host:</span>
+                            <span class="text-sm text-gray-500">(Lấy 32 bit tiêu chuẩn của IPv4 trừ đi Prefix)</span>
+                        </div>
+                        <div class="font-code text-lg font-bold text-gray-700 flex items-center gap-2">
+                            <span class="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm">32</span>
+                            <span class="text-gray-400">-</span>
+                            <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 shadow-sm" id="tut-prefix-calc">27</span>
+                            <span class="text-gray-400">=</span>
+                            <span class="bg-red-50 text-red-600 px-3 py-1 rounded-lg border border-red-200 text-xl shadow-sm" id="tut-host-bits">5</span>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border-t-4 border-blue-500 flex flex-col h-full relative">
+                            <div class="flex justify-between items-start border-b pb-2 mb-2 shrink-0">
+                                <h2 class="text-lg font-bold text-blue-800 flex items-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước 2</span> Phép tính AND</h2>
+                                <button onclick="replayAnimation('anim-net1')" class="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition border border-gray-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Replay
+                                </button>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3 shrink-0">Mục đích: Triệt tiêu các bit Host về <strong class="text-red-500">0</strong> để tìm ra địa chỉ Mạng.</p>
+                            <div class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] leading-relaxed shadow-inner flex flex-col justify-center overflow-hidden">
+                                <div class="flex justify-between items-center mb-1"><span class="font-sans text-gray-400 w-16">IP:</span><span id="tut-ip-dec" class="font-bold text-white text-right">...</span></div>
+                                <div id="tut-ip-bin" class="text-right text-[0.7rem] text-[#9cdcfe] mb-3">...</div>
+                                <div class="flex justify-between items-center mb-1"><span class="font-sans text-gray-400 w-16">Mask:</span><span id="tut-mask-dec-table" class="font-bold text-white text-right">...</span></div>
+                                <div id="tut-mask-bin-table" class="text-right text-[0.7rem] text-[#ce9178] mb-3">...</div>
+                                <hr class="border-gray-600 border-dashed my-2">
+                                <div class="flex justify-between items-center mt-2"><span class="font-sans font-bold text-blue-400 text-lg w-20">NET ID:</span><span id="tut-net-dec" class="font-bold text-blue-400 text-2xl text-right flash-update">...</span></div>
+                                <div id="anim-net1" class="text-right text-[0.8rem] font-bold text-[#4fc1ff] mt-1 drop-container">...</div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-4 min-h-0 overflow-hidden">
+                            <div class="flex-1 bg-white p-4 rounded-2xl shadow-sm border-t-4 border-red-500 flex flex-col h-full relative">
+                                <div class="flex justify-between items-start border-b pb-2 mb-2 shrink-0">
+                                    <h2 class="text-lg font-bold text-red-800 flex items-center"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước 3</span> Phép tính OR</h2>
+                                    <button onclick="replayAnimation('anim-br1')" class="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition border border-gray-200">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Replay
+                                    </button>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-3 shrink-0">Mục đích: Đẩy toàn bộ các bit Host lên <strong class="text-green-500">1</strong> để lấy địa chỉ Broadcast.</p>
+                                <div class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] shadow-inner flex flex-col justify-center overflow-hidden">
+                                    <div class="flex justify-between items-center mb-1"><span class="font-sans text-gray-400 w-16">Net ID:</span><span id="tut-br-net-dec" class="font-bold text-white text-right">...</span></div>
+                                    <div id="tut-br-net-bin" class="text-right text-[0.7rem] text-[#4fc1ff] mb-3">...</div>
+                                    <div class="flex justify-between items-center mb-1"><span class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span><span id="tut-wildcard-dec" class="font-bold text-[#c586c0] text-right">...</span></div>
+                                    <div id="tut-wildcard-bin" class="text-right text-[0.7rem] text-[#c586c0] mb-3">...</div>
+                                    <hr class="border-gray-600 border-dashed my-2">
+                                    <div class="flex justify-between items-center mt-2"><span class="font-sans font-bold text-red-400 text-lg">Broadcast:</span><span id="tut-br-dec" class="font-bold text-red-400 text-2xl text-right flash-update">...</span></div>
+                                    <div id="anim-br1" class="text-right text-[0.8rem] font-bold text-[#f48771] mt-1 drop-container">...</div>
+                                </div>
+                            </div>
+                            <div class="shrink-0 bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm">
+                                <h3 class="font-bold text-gray-800 mb-2 flex items-center"><span class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded-md mr-2 text-xs">Bước 4</span> Gán IP Host</h3>
+                                <p class="font-sans text-sm text-gray-500 mb-2">Dải khả dụng: <strong class="text-blue-700 font-code text-base bg-white px-2 rounded border shadow-sm" id="tut-net1-first">...</strong> <span class="mx-1">→</span> <strong class="text-blue-700 font-code text-base bg-white px-2 rounded border shadow-sm" id="tut-net1-last">...</strong></p>
+                                <div class="flex gap-4 font-code text-sm">
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span class="text-gray-500 text-[0.7rem] block font-sans">Cổng .a (GW)</span><strong class="text-blue-700 text-base" id="tut-a-res">...</strong></div>
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span class="text-gray-500 text-[0.7rem] block font-sans">PC0</span><strong class="text-gray-700 text-base" id="tut-pc0-res">...</strong></div>
+                                    <div class="bg-gray-100 p-2 rounded border border-gray-200 flex-1 opacity-70"><span class="text-gray-500 text-[0.7rem] block font-sans">PC1 (Đề bài)</span><strong class="text-gray-600 text-base" id="tut-pc1-res">...</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 3: SLIDE TÍNH TOÁN NET 2 -->
+            <div id="part2_net2" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                    <div class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-green-700">Phần 2.2: Suy diễn Mạng 2 (Net 2)</h1>
+                            <p class="text-gray-500 text-sm mt-1">Nối tiếp dải IP liền kề từ kết quả của Mạng 1</p>
+                        </div>
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-green-500 flex flex-col h-full relative">
+                            <h2 class="text-xl font-bold text-green-800 flex items-center border-b pb-2 mb-3 shrink-0"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước 5</span> Tìm Địa chỉ Mạng 2</h2>
+                            <p class="text-gray-600 text-base mb-6 shrink-0 leading-relaxed">Mạng 2 nằm ngay sau Mạng 1. Ta lấy địa chỉ cuối cùng của Mạng 1 (Broadcast) cộng thêm 1 đơn vị sẽ ra địa chỉ bắt đầu của Mạng 2.</p>
+                            <div class="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="text-center mb-6"><span class="block text-gray-500 text-sm mb-1 uppercase tracking-wide">Broadcast Net 1</span><span id="tut-br-dec-2" class="text-red-500 font-bold font-code text-4xl drop-shadow-sm">...</span></div>
+                                <div class="text-gray-400 mb-6 font-bold text-3xl">+ 1</div>
+                                <div class="text-center"><span class="block text-gray-500 text-sm mb-1 uppercase tracking-wide">Network ID Net 2</span><span id="tut-net2-dec" class="text-green-600 font-bold font-code text-5xl bg-green-100 px-6 py-3 rounded-2xl shadow-md border-2 border-green-200 flash-update">...</span></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4 min-h-0 overflow-hidden">
+                            <div class="flex-1 bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-500 flex flex-col h-full relative">
+                                <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
+                                    <h2 class="text-xl font-bold text-orange-800 flex items-center"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md mr-2 text-sm">Bước 6</span> Tìm Broadcast 2 (OR)</h2>
+                                    <button onclick="replayAnimation('anim-br2')" class="text-xs text-gray-500 hover:text-orange-600 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded transition border border-gray-200">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Replay
+                                    </button>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4 shrink-0">Thực hiện tương tự Net 1. Đẩy các bit Host của Net 2 lên 1 bằng phép OR.</p>
+                                <div class="flex-1 bg-[#1e1e1e] text-gray-300 p-4 rounded-xl font-code text-[0.85rem] shadow-inner flex flex-col justify-center overflow-hidden">
+                                    <div class="flex justify-between items-center mb-1"><span class="font-sans text-gray-400 w-16 text-xs">Net 2 ID:</span><span id="tut-net2-id-dec" class="font-bold text-white text-right">...</span></div>
+                                    <div id="tut-net2-id-bin" class="text-right text-[0.7rem] text-[#4fc1ff] mb-3">...</div>
+                                    <div class="flex justify-between items-center mb-1"><span class="font-sans text-gray-400 w-16 text-xs">Wildcard:</span><span id="tut-wildcard-dec-3" class="font-bold text-[#c586c0] text-right">...</span></div>
+                                    <div id="tut-wildcard-bin-3" class="text-right text-[0.7rem] text-[#c586c0] mb-3">...</div>
+                                    <hr class="border-gray-600 border-dashed my-2">
+                                    <div class="flex justify-between items-center mt-2"><span class="font-sans font-bold text-orange-400 text-lg w-28">Broadcast 2:</span><span id="tut-net2-br-dec-final" class="font-bold text-orange-400 text-2xl text-right flash-update">...</span></div>
+                                    <div id="anim-br2" class="text-right text-[0.8rem] font-bold text-[#f48771] mt-1 drop-container">...</div>
+                                </div>
+                            </div>
+                            <div class="shrink-0 bg-green-50/50 p-4 rounded-2xl border border-green-100 shadow-sm">
+                                <h3 class="font-bold text-gray-800 mb-2 flex items-center"><span class="bg-green-200 text-green-800 px-2 py-0.5 rounded-md mr-2 text-xs">Bước 7</span> Gán IP Host (Net 2)</h3>
+                                <p class="font-sans text-sm text-gray-500 mb-2">Dải khả dụng: <strong class="text-green-700 font-code text-base bg-white px-2 rounded border shadow-sm" id="tut-net2-first">...</strong> <span class="mx-1">→</span> <strong class="text-green-700 font-code text-base bg-white px-2 rounded border shadow-sm" id="tut-net2-last">...</strong></p>
+                                <div class="flex gap-4 font-code text-sm">
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span class="text-gray-500 text-[0.7rem] block font-sans">Cổng .b (GW)</span><strong class="text-green-700 text-base" id="tut-b-res">...</strong></div>
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span class="text-gray-500 text-[0.7rem] block font-sans">PC3</span><strong class="text-gray-700 text-base" id="tut-pc3-res">...</strong></div>
+                                    <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex-1"><span class="text-gray-500 text-[0.7rem] block font-sans">PC4</span><strong class="text-gray-700 text-base" id="tut-pc4-res">...</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 4: SƠ ĐỒ TOPO & BẢNG -->
+            <div id="part2_topo" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-6xl h-[92vh] flex flex-col gap-4 font-sans">
+                    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center pt-6 pb-2 min-h-0 overflow-hidden relative">
+                        <h2 class="text-xl font-bold text-gray-800 absolute top-4 left-6 z-20">Sơ đồ Mạng Phân Bổ Trực Quan</h2>
+                        <div class="transform scale-90 lg:scale-100 origin-top pt-6 mt-4 w-full max-w-[800px] mx-auto select-none">
+                            <div class="flex flex-col items-center relative z-10 device-box cursor-pointer">
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-200 rounded-full flex items-center justify-center border-[3px] border-blue-500 shadow-md">
+                                    <svg class="w-8 h-8 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <span class="mt-1 font-bold text-gray-800 text-sm">Router0</span>
+                            </div>
+                            <div class="w-[60%] mx-auto flex justify-between relative mt-[-10px] z-0">
+                                <div class="w-1/2 border-t-[3px] border-l-[3px] border-gray-400 rounded-tl-xl h-8"></div>
+                                <div class="w-1/2 border-t-[3px] border-r-[3px] border-gray-400 rounded-tr-xl h-8"></div>
+                            </div>
+                            <div class="w-[70%] mx-auto flex justify-between mt-1 px-4 text-xs font-semibold">
+                                <div class="text-center bg-white px-2 py-1 rounded shadow border border-blue-300 device-box z-10">
+                                    <span class="text-gray-500 block font-sans mb-0.5">Cổng a</span>
+                                    <span id="topo-int-a" class="font-code font-bold bg-blue-50 text-blue-700 px-1 rounded border border-blue-100">175.25.37.97</span>
+                                </div>
+                                <div class="text-center bg-white px-2 py-1 rounded shadow border border-green-300 device-box z-10">
+                                    <span class="text-gray-500 block font-sans mb-0.5">Cổng b</span>
+                                    <span id="topo-int-b" class="font-code font-bold bg-green-50 text-green-700 px-1 rounded border border-green-100">175.25.37.129</span>
+                                </div>
+                            </div>
+                            <div class="w-[66%] mx-auto flex justify-between relative mt-[-8px] z-0">
+                                <div class="w-1 bg-gray-400 h-8 rounded-full"></div>
+                                <div class="w-1 bg-gray-400 h-8 rounded-full"></div>
+                            </div>
+                            <div class="w-full flex justify-between px-10">
+                                <div class="flex flex-col items-center w-[45%] relative device-box">
+                                    <div class="w-20 h-10 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg flex items-center justify-center border-[3px] border-blue-500 shadow-md z-10">
+                                        <svg class="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                    </div>
+                                    <div class="mt-2 bg-blue-50 text-blue-800 px-2 py-1 rounded text-xs font-bold border border-blue-300 text-center">
+                                        <span class="text-[0.6rem] text-blue-600 block">Network 1</span>
+                                        <span id="topo-net1" class="font-code">175.25.37.96/27</span>
+                                    </div>
+                                    <div class="w-[80%] flex justify-between relative mt-2 z-0">
+                                        <div class="w-1/2 border-t-[3px] border-l-[3px] border-gray-300 rounded-tl-lg h-6"></div>
+                                        <div class="w-1/2 border-t-[3px] border-r-[3px] border-gray-300 rounded-tr-lg h-6"></div>
+                                    </div>
+                                    <div class="w-full flex justify-between px-2">
+                                        <div class="flex flex-col items-center device-box text-xs">
+                                            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                            <span class="font-bold text-gray-700">PC0</span>
+                                            <span id="topo-pc0" class="font-code bg-white px-1 border mt-0.5 shadow-sm rounded">175...</span>
+                                        </div>
+                                        <div class="flex flex-col items-center device-box text-xs bg-blue-50 p-1 rounded-lg border border-blue-200">
+                                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                            <span class="font-bold text-blue-800">PC1 (Input)</span>
+                                            <span id="topo-pc1" class="font-code bg-blue-600 text-white px-1 mt-0.5 rounded">175...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center w-[45%] relative device-box">
+                                    <div class="w-20 h-10 bg-gradient-to-r from-green-100 to-green-50 rounded-lg flex items-center justify-center border-[3px] border-green-500 shadow-md z-10">
+                                        <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                    </div>
+                                    <div class="mt-2 bg-green-50 text-green-800 px-2 py-1 rounded text-xs font-bold border border-green-300 text-center">
+                                        <span class="text-[0.6rem] text-green-600 block">Network 2</span>
+                                        <span id="topo-net2" class="font-code">175.25.37.128/27</span>
+                                    </div>
+                                    <div class="w-[80%] flex justify-between relative mt-2 z-0">
+                                        <div class="w-1/2 border-t-[3px] border-l-[3px] border-gray-300 rounded-tl-lg h-6"></div>
+                                        <div class="w-1/2 border-t-[3px] border-r-[3px] border-gray-300 rounded-tr-lg h-6"></div>
+                                    </div>
+                                    <div class="w-full flex justify-between px-2">
+                                        <div class="flex flex-col items-center device-box text-xs">
+                                            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                            <span class="font-bold text-gray-700">PC3</span>
+                                            <span id="topo-pc3" class="font-code bg-white px-1 border mt-0.5 shadow-sm rounded">175...</span>
+                                        </div>
+                                        <div class="flex flex-col items-center device-box text-xs">
+                                            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                            <span class="font-bold text-gray-700">PC4</span>
+                                            <span id="topo-pc4" class="font-code bg-white px-1 border mt-0.5 shadow-sm rounded">175...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="shrink-0 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-6 items-center">
+                        <div class="shrink-0 font-bold text-indigo-800 flex items-center bg-indigo-50 px-4 py-8 rounded-xl border border-indigo-100">
+                            <svg class="w-8 h-8 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Đáp Án Cuối Cùng
+                        </div>
+                        <div class="flex-1 grid grid-cols-3 gap-x-4 gap-y-2 text-sm font-sans">
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span class="font-bold text-gray-600">Net 1:</span><span class="font-code font-bold text-blue-700" id="table-net1">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span class="font-bold text-gray-600">.a:</span><span class="font-code text-gray-800" id="table-a">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span class="font-bold text-gray-600">PC0:</span><span class="font-code text-gray-800" id="table-pc0">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span class="font-bold text-gray-600">Net 2:</span><span class="font-code font-bold text-green-700" id="table-net2">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span class="font-bold text-gray-600">.b:</span><span class="font-code text-gray-800" id="table-b">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded"><span class="font-bold text-gray-600">PC3:</span><span class="font-code text-gray-800" id="table-pc3">...</span></div>
+                            <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded col-start-3"><span class="font-bold text-gray-600">PC4:</span><span class="font-code text-gray-800" id="table-pc4">...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 5: SLIDE 3.1 QUY HOẠCH IP MỞ RỘNG -->
+            <div id="part3_topo_ip" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1250px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                    <div class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-purple-700">Phần 3.1: Mở rộng mạng - Căn cứ Quy hoạch IP</h1>
+                            <p class="text-gray-500 text-sm mt-0.5">Giải thích chi tiết bước tính IP cho Link R0-R1 và Net 3 dành cho người mới bắt đầu</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Calculation Steps Row -->
+                    <div class="grid grid-cols-2 gap-4 shrink-0">
+                        <!-- Step 8: Link R0-R1 -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border-t-4 border-red-500 flex flex-col relative">
+                            <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
+                                <h2 class="text-lg font-bold text-red-800 flex items-center"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-md mr-2 text-xs">Bước 8</span> Tính Link R0-R1</h2>
+                            </div>
+                            <div class="flex flex-col gap-2 justify-center text-[0.95rem]">
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Nhu cầu IP:</span><span class="bg-gray-50 px-2 py-0.5 rounded border border-gray-200 text-gray-600">Chuẩn <b class="text-gray-800">2 IP</b></span></div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Host bits (h):</span><span class="font-code text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded border border-red-100">2<sup>h</sup>-2 &ge; 2 &rarr; h=2</span></div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Prefix/Mask:</span><span class="text-gray-600">32-2 = <b class="text-red-600 bg-red-50 px-1 rounded border border-red-100">/30</b></span></div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Network ID:</span><span class="text-gray-600 font-code font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200 text-[1rem]">175.25.37.160/30</span></div>
+                                <div class="mt-1 bg-red-50/50 p-2 rounded-xl border border-red-100 flex gap-4 justify-around shadow-inner shrink-0">
+                                    <div class="text-center"><span class="text-[0.65rem] text-gray-500 block uppercase mb-0.5">Router 0</span><span class="font-code font-bold text-red-700 text-[1rem]">.161</span></div>
+                                    <div class="text-center"><span class="text-[0.65rem] text-gray-500 block uppercase mb-0.5">Router 1</span><span class="font-code font-bold text-red-700 text-[1rem]">.162</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 9: Net 3 -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border-t-4 border-purple-500 flex flex-col relative">
+                            <div class="flex justify-between items-start border-b pb-2 mb-3 shrink-0">
+                                <h2 class="text-lg font-bold text-purple-800 flex items-center"><span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md mr-2 text-xs">Bước 9</span> Tính Net 3 (50 PC)</h2>
+                            </div>
+                            <div class="flex flex-col gap-2 justify-center text-[0.95rem]">
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Tổng IP cần:</span><span class="bg-gray-50 px-2 py-0.5 rounded border border-gray-200 text-gray-600">50+1+1 = <b class="text-purple-700">52 IP</b></span></div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Host bits (h):</span><span class="font-code text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded border border-purple-100">2<sup>h</sup>-2 &ge; 52 &rarr; h=6</span></div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Prefix/Mask:</span><span class="text-gray-600">32-6 = <b class="text-purple-700 bg-purple-50 px-1 rounded border border-purple-100">/26</b></span></div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-gray-700 w-32 shrink-0">Network ID:</span><span class="text-gray-600 font-code font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-[1rem]">175.25.37.192/26</span></div>
+                                <div class="mt-1 bg-purple-50/50 p-2 rounded-xl border border-purple-100 flex gap-2 justify-between shadow-inner shrink-0">
+                                    <div class="text-center flex-1"><span class="text-[0.6rem] text-gray-500 block uppercase mb-0.5">GW</span><span class="font-code font-bold text-purple-700 text-[1rem]">.193</span></div>
+                                    <div class="text-center flex-1 border-l border-purple-200"><span class="text-[0.6rem] text-gray-500 block uppercase mb-0.5">Srv</span><span class="font-code font-bold text-orange-600 text-[1rem]">.194</span></div>
+                                    <div class="text-center flex-1 border-l border-purple-200"><span class="text-[0.6rem] text-gray-500 block uppercase mb-0.5">DHCP</span><span class="font-code font-bold text-gray-700 text-[0.9rem]">.195-244</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Table at Bottom -->
+                    <div class="flex-1 bg-white p-6 rounded-3xl shadow-md border-t-4 border-indigo-500 flex flex-col min-h-0 overflow-hidden">
+                        <h2 class="text-xl font-bold text-indigo-800 border-b pb-3 mb-4 shrink-0 flex items-center">
+                            Bảng Quy Hoạch IP Toàn Hệ Thống (Tổng Kết)
+                        </h2>
+                        <div class="flex-1 rounded-xl border border-gray-200 overflow-auto bg-gray-50/30">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="text-xs text-gray-600 uppercase bg-gray-100 border-b sticky top-0">
+                                    <tr>
+                                        <th class="px-4 py-3">Vùng mạng</th>
+                                        <th class="px-4 py-3">Network ID / Prefix</th>
+                                        <th class="px-4 py-3">Default Gateway</th>
+                                        <th class="px-4 py-3">Dải IP Khả Dụng / Mục Tiêu</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="font-code text-[0.95rem]">
+                                    <tr class="border-b bg-white hover:bg-gray-50">
+                                        <td class="px-4 py-3 font-sans font-bold text-blue-600 text-base">Net 1</td>
+                                        <td class="px-4 py-3">175.25.37.96/27</td>
+                                        <td class="px-4 py-3 text-blue-700 font-bold">.97</td>
+                                        <td class="px-4 py-3 text-gray-600">.98 &rarr; .126 <span class="font-sans text-[0.7rem] text-gray-400 ml-1">(PC0, PC1)</span></td>
+                                    </tr>
+                                    <tr class="border-b bg-gray-50/50 hover:bg-white">
+                                        <td class="px-4 py-3 font-sans font-bold text-green-600 text-base">Net 2</td>
+                                        <td class="px-4 py-3">175.25.37.128/27</td>
+                                        <td class="px-4 py-3 text-green-700 font-bold">.129</td>
+                                        <td class="px-4 py-3 text-gray-600">.130 &rarr; .158 <span class="font-sans text-[0.7rem] text-gray-400 ml-1">(PC3, PC4)</span></td>
+                                    </tr>
+                                    <tr class="border-b bg-white hover:bg-gray-50">
+                                        <td class="px-4 py-3 font-sans font-bold text-red-600 text-base">Link R0-R1</td>
+                                        <td class="px-4 py-3">175.25.37.160/30</td>
+                                        <td class="px-4 py-3 text-gray-400 italic">P2P</td>
+                                        <td class="px-4 py-3 text-red-600 font-bold">.161 / .162 <span class="font-sans text-[0.7rem] text-gray-400 ml-1">(WAN)</span></td>
+                                    </tr>
+                                    <tr class="bg-purple-50/50 hover:bg-purple-100">
+                                        <td class="px-4 py-3 font-sans font-bold text-purple-700 text-base">Net 3 (Mới)</td>
+                                        <td class="px-4 py-3 font-bold text-purple-900">175.25.37.192/26</td>
+                                        <td class="px-4 py-3 text-purple-700 font-bold text-lg">.193</td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-orange-600 font-bold">.194</span> <span class="text-[0.7rem] text-gray-400">(Srv)</span> | 
+                                            <span class="text-gray-700 font-bold">.195-.244</span> <span class="text-[0.7rem] text-gray-400">(DHCP)</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- MÀN HÌNH 6: SLIDE 3.2 CẤU HÌNH ROUTER -->
+            <div id="part3_router_config" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                    <div class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Phần 3.2: Cấu hình Interface & Định tuyến tĩnh</h1>
+                            <p class="text-gray-500 text-sm mt-1">Giải thích siêu chi tiết ý nghĩa từng dòng lệnh cấu hình (CLI) cho Router</p>
+                        </div>
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
+                        <div class="terminal-block relative">
+                            <div class="absolute top-2 right-4 text-xs font-sans text-gray-400 bg-gray-800 px-2 py-1 rounded">CLI: Router0</div>
+                            <div class="term-row"><div><span class="term-prompt">Router&gt;</span> <span class="term-cmd">enable</span></div><div class="term-comment">! Bật chế độ Đặc quyền (#)</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router#</span> <span class="term-cmd">configure terminal</span></div><div class="term-comment">! Vào chế độ Cấu hình toàn cục</div></div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface g0/0/0</span></div><div class="term-comment">! LAN 1 (Net 1)</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip address <span class="term-ip">175.25.37.97 255.255.255.224</span></span></div><div class="term-comment">! Gán IP Gateway Net 1</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no shutdown</span></div><div class="term-comment">! Mở cổng</div></div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface s0/1/0</span></div><div class="term-comment">! Cáp Serial (WAN)</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip address <span class="term-ip">175.25.37.161 255.255.255.252</span></span></div><div class="term-comment">! IP liên kết P2P (/30)</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no shutdown</span></div></div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config)#</span> <span class="term-cmd text-yellow-300">ip route 175.25.37.192 255.255.255.192 175.25.37.162</span></div><div class="term-comment text-yellow-300">! Tới Net 3 qua .162</div></div>
+                        </div>
+                        <div class="terminal-block relative">
+                            <div class="absolute top-2 right-4 text-xs font-sans text-gray-400 bg-gray-800 px-2 py-1 rounded">CLI: Router1</div>
+                            <div class="term-row"><div><span class="term-prompt">Router&gt;</span> <span class="term-cmd">enable</span></div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router#</span> <span class="term-cmd">configure terminal</span></div></div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface g0/0/0</span></div><div class="term-comment">! LAN 3 (Net 3)</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip address <span class="term-ip">175.25.37.193 255.255.255.192</span></span></div><div class="term-comment">! Gán IP Gateway Net 3</div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no shutdown</span></div></div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config)#</span> <span class="term-cmd">interface s0/1/0</span></div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">ip address <span class="term-ip">175.25.37.162 255.255.255.252</span></span></div></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config-if)#</span> <span class="term-cmd">no shutdown</span></div></div>
+                            <div class="term-spacer"></div>
+                            <div class="term-row"><div><span class="term-prompt">Router(config)#</span> <span class="term-cmd text-yellow-300">ip route 175.25.37.96 255.255.255.224 175.25.37.161</span></div><div class="term-comment text-yellow-300">! Về Net 1 qua .161</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÀN HÌNH 7: SLIDE 3.3 DHCP & PING -->
+            <div id="part3_dhcp_ping" class="presentation-slide flex flex-col items-center justify-center p-4">
+                <div class="w-full max-w-[1200px] h-[92vh] flex flex-col gap-4 font-sans text-gray-800">
+                    <div class="shrink-0 flex flex-col md:flex-row items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h1 class="text-3xl font-bold text-orange-600">Phần 3.3: Cấu hình DHCP Server & Kiểm tra kết nối</h1>
+                        </div>
+                    </div>
+                    <!-- Top Boxes Grid -->
+                    <div class="grid grid-cols-3 gap-6 shrink-0">
+                        <!-- Server IP -->
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                            <div class="text-lg font-bold text-gray-600 mb-3 border-b pb-2 uppercase">1. Server IP (Static)</div>
+                            <div class="space-y-3 font-code text-[1.1rem]">
+                                <div class="flex justify-between"><span class="text-gray-500">IPv4 Address</span> <span class="font-bold text-blue-700">175.25.37.194</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">Subnet Mask</span> <span class="font-bold text-gray-700">255.255.255.192</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">Default GW</span> <span class="font-bold text-green-700">175.25.37.193</span></div>
+                            </div>
+                        </div>
+                        <!-- DHCP Pool -->
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-orange-300 relative overflow-hidden">
+                            <div class="text-lg font-bold text-orange-700 mb-3 border-b border-orange-100 pb-2 uppercase">2. DHCP Pool Setup</div>
+                            <div class="space-y-2.5 font-code text-[1.1rem]">
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Service:</span> <span class="font-bold bg-green-100 text-green-700 px-3 rounded">ON</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Start IP:</span> <span class="font-bold text-orange-600">175.25.37.195</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500 font-sans">Max Users:</span> <span class="font-bold">50</span></div>
+                            </div>
+                        </div>
+                        <!-- Result -->
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-green-300 relative">
+                            <div class="text-lg font-bold text-green-700 mb-3 border-b border-green-100 pb-2 uppercase">3. Result (PC4)</div>
+                            <div class="flex flex-col gap-3 font-code text-[1.1rem] bg-gray-50 p-4 rounded border border-gray-200">
+                                <div class="flex justify-between border-b border-gray-200 pb-2"><span class="text-gray-500">IP Addr:</span> <span class="font-bold text-gray-800">175.25.37.195</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">Status:</span> <span class="text-green-600 font-bold">Success</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Command Prompt (Ping) - Reduced Height, Increased Font -->
+                    <div class="h-[30vh] bg-black rounded-xl p-6 font-code text-gray-300 shadow-2xl flex flex-col relative justify-center overflow-hidden border-2 border-gray-800">
+                        <div class="absolute top-0 left-0 w-full bg-gray-800 text-gray-400 text-xs px-4 py-1 flex justify-between items-center border-b border-gray-700">
+                            <span>Command Prompt - PC0</span>
+                            <div class="flex gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-600"></span><span class="w-2 h-2 rounded-full bg-gray-600"></span><span class="w-2 h-2 rounded-full bg-gray-600"></span></div>
+                        </div>
+                        <div class="mt-4 text-[1.2rem] leading-relaxed">
+                            <div><span class="text-white">C:\></span>ping 175.25.37.194</div>
+                            <div class="mt-1 text-gray-400">Pinging 175.25.37.194 with 32 bytes of data:</div>
+                            <div class="text-green-400 font-bold">Reply from 175.25.37.194: bytes=32 time&lt;1ms TTL=126</div>
+                            <div class="text-green-400 font-bold">Reply from 175.25.37.194: bytes=32 time&lt;1ms TTL=126</div>
+                            <div class="mt-1 text-gray-400">Ping statistics: Sent = 4, Received = 4, Lost = 0 (0% loss)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS VẼ TAY -->
+            <canvas id="drawCanvas"></canvas>
+
+            <!-- THÔNG BÁO CHẾ ĐỘ VẼ -->
+            <div id="drawingIndicator" class="drawing-indicator hidden">🖌️ Chế độ Vẽ: BẬT (Ctrl+Z: Hoàn tác, Ctrl+1: Tắt)</div>
+
+            <!-- NÚT ĐIỀU KHIỂN -->
+            <div class="controls" id="controlsPanel">
+                <button class="btn-reset" onclick="prevSlide()">⬅️ Trước</button>
+                <button class="btn-reset" onclick="nextSlide()">Tiếp ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const instructionOverlay = document.getElementById('instructionOverlay');
+        const btnStart = document.getElementById('btnStart');
+        let isStarted = false;
+
+        function startPresentation() {
+            if (isStarted) return;
+            isStarted = true;
+
+            // Ẩn popup
+            instructionOverlay.style.opacity = '0';
+            setTimeout(() => {
+                instructionOverlay.style.display = 'none';
+            }, 500);
+
+            // Bật Fullscreen
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Lỗi fullscreen: ${err.message}`);
+                });
+            }
+            calculateSubnets();
+            focusNode('part2_net1');
+        }
+
+        btnStart.addEventListener('click', startPresentation);
+
+        // Cho phép bấm Enter/Space để bắt đầu
+        document.addEventListener('keydown', (e) => {
+            if (!isStarted && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                startPresentation();
+            }
+        });
+
+        // --- IP CALCULATION LOGIC ---
+        function ip2long(ip) {
+            let parts = ip.split('.');
+            if (parts.length !== 4) return null;
+            return parts.reduce((acc, octet) => {
+                let val = parseInt(octet, 10);
+                if (isNaN(val) || val < 0 || val > 255) return null;
+                return (acc << 8) + val;
+            }, 0) >>> 0;
+        }
+
+        function long2ip(long) {
+            return [(long >>> 24) & 255, (long >>> 16) & 255, (long >>> 8) & 255, long & 255].join('.');
+        }
+
+        function getMaskLong(prefix) { return prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0; }
+
+        function toFormattedBinaryString(long, prefix, isWildcard = false, isAnimDrop = false) {
+            let binStr = (long >>> 0).toString(2).padStart(32, '0');
+            let htmlStr = '';
+            for (let i = 0; i < 32; i++) {
+                let isNetworkBit = i < prefix;
+                let colorClass = isNetworkBit ? 'text-blue-400' : 'text-[#f48771] host-bit-highlight';
+                if (isWildcard) colorClass = isNetworkBit ? 'text-gray-500' : 'text-[#c586c0] font-extrabold';
+                
+                if (isAnimDrop) {
+                    let delay = i * 0.03;
+                    htmlStr += `<span class="bit-drop ${colorClass}" style="animation-delay: ${delay}s">${binStr[i]}</span>`;
+                } else {
+                    htmlStr += `<span class="${colorClass}">${binStr[i]}</span>`;
+                }
+                if ((i + 1) % 8 === 0 && i !== 31) {
+                    htmlStr += `<span class="text-gray-500 mx-[2px]">.</span>`;
+                }
+            }
+            return htmlStr;
+        }
+
+        function updateDOM(id, text) {
+            const el = document.getElementById(id);
+            if (el) { el.innerText = text; el.parentElement.classList.remove('flash-update'); void el.offsetWidth; el.parentElement.classList.add('flash-update'); }
+        }
+
+        function updateHTML(id, html) {
+            const el = document.getElementById(id);
+            if (el) { el.innerHTML = html; }
+        }
+
+        function replayAnimation(containerId) {
+            const el = document.getElementById(containerId);
+            if (el) {
+                const oldHtml = el.innerHTML; el.innerHTML = ''; void el.offsetWidth; el.innerHTML = oldHtml;
+            }
+        }
+
+        function calculateSubnets() {
+            const ipStr = document.getElementById('ipInput').value.trim();
+            const prefixStr = document.getElementById('prefixInput').value.trim();
+            const prefix = parseInt(prefixStr, 10);
+
+            const ipLong = ip2long(ipStr);
+            if (ipLong === null || isNaN(prefix) || prefix < 8 || prefix > 30) return;
+
+            const hostBits = 32 - prefix;
+            const maskLong = getMaskLong(prefix);
+            const maskStr = long2ip(maskLong);
+            const wildcardLong = (~maskLong) >>> 0;
+            const wildcardStr = long2ip(wildcardLong);
+
+            const net1IdLong = (ipLong & maskLong) >>> 0;
+            const net1BroadcastLong = (net1IdLong | wildcardLong) >>> 0;
+            const net1FirstLong = net1IdLong + 1;
+            const net1LastLong = net1BroadcastLong - 1;
+            const routerA = net1FirstLong;
+            const pc0 = net1IdLong + 2;
+
+            const net2IdLong = net1BroadcastLong + 1;
+            const net2BroadcastLong = (net2IdLong | wildcardLong) >>> 0;
+            const net2FirstLong = net2IdLong + 1;
+            const net2LastLong = net2BroadcastLong - 1;
+            const routerB = net2FirstLong;
+            const pc3 = net2IdLong + 2;
+            const pc4 = net2IdLong + 3;
+
+            // ----- CẬP NHẬT GIAO DIỆN (DOM) -----
+
+            // Slide 1: NET 1
+            updateDOM('tut-prefix-calc', prefix);
+            updateDOM('tut-host-bits', hostBits);
+
+            updateDOM('tut-mask-dec', maskStr);
+            updateHTML('tut-mask-bin', toFormattedBinaryString(maskLong, prefix));
+            updateDOM('tut-wildcard-dec-step1', wildcardStr);
+
+            updateDOM('tut-ip-dec', ipStr);
+            updateHTML('tut-ip-bin', toFormattedBinaryString(ipLong, prefix));
+
+            updateDOM('tut-mask-dec-table', maskStr);
+            updateHTML('tut-mask-bin-table', toFormattedBinaryString(maskLong, prefix));
+
+            updateDOM('tut-net-dec', long2ip(net1IdLong));
+            updateHTML('anim-net1', toFormattedBinaryString(net1IdLong, prefix, false, true)); // Anim drop
+
+            updateDOM('tut-br-net-dec', long2ip(net1IdLong));
+            updateHTML('tut-br-net-bin', toFormattedBinaryString(net1IdLong, prefix));
+
+            updateDOM('tut-wildcard-dec', wildcardStr);
+            updateHTML('tut-wildcard-bin', toFormattedBinaryString(wildcardLong, prefix, true));
+
+            updateDOM('tut-br-dec', long2ip(net1BroadcastLong));
+            updateHTML('anim-br1', toFormattedBinaryString(net1BroadcastLong, prefix, false, true)); // Anim drop
+
+            updateDOM('tut-net1-first', long2ip(net1FirstLong));
+            updateDOM('tut-net1-last', long2ip(net1LastLong));
+            updateDOM('tut-a-res', long2ip(routerA));
+            updateDOM('tut-pc0-res', long2ip(pc0));
+            updateDOM('tut-pc1-res', ipStr);
+
+            // Slide 2: NET 2
+            updateDOM('tut-br-dec-2', long2ip(net1BroadcastLong));
+            updateDOM('tut-net2-dec', long2ip(net2IdLong));
+
+            updateDOM('tut-net2-id-dec', long2ip(net2IdLong));
+            updateHTML('tut-net2-id-bin', toFormattedBinaryString(net2IdLong, prefix));
+
+            updateDOM('tut-wildcard-dec-3', wildcardStr);
+            updateHTML('tut-wildcard-bin-3', toFormattedBinaryString(wildcardLong, prefix, true));
+
+            updateDOM('tut-net2-br-dec-final', long2ip(net2BroadcastLong));
+            updateHTML('anim-br2', toFormattedBinaryString(net2BroadcastLong, prefix, false, true)); // Anim drop
+
+            updateDOM('tut-net2-first', long2ip(net2FirstLong));
+            updateDOM('tut-net2-last', long2ip(net2LastLong));
+            updateDOM('tut-b-res', long2ip(routerB));
+            updateDOM('tut-pc3-res', long2ip(pc3));
+            updateDOM('tut-pc4-res', long2ip(pc4));
+
+            // Slide 3: TOPO MAP
+            updateDOM('topo-int-a', long2ip(routerA));
+            updateDOM('topo-int-b', long2ip(routerB));
+            updateDOM('topo-net1', `${long2ip(net1IdLong)}/${prefix}`);
+            updateDOM('topo-pc0', long2ip(pc0));
+            updateDOM('topo-pc1', ipStr);
+            updateDOM('topo-net2', `${long2ip(net2IdLong)}/${prefix}`);
+            updateDOM('topo-pc3', long2ip(pc3));
+            updateDOM('topo-pc4', long2ip(pc4));
+
+            updateDOM('table-net1', long2ip(net1IdLong));
+            updateDOM('table-net2', long2ip(net2IdLong));
+            updateDOM('table-a', long2ip(routerA));
+            updateDOM('table-b', long2ip(routerB));
+            updateDOM('table-pc0', long2ip(pc0));
+            updateDOM('table-pc3', long2ip(pc3));
+            updateDOM('table-pc4', long2ip(pc4));
+        }
+
+        // --- NAVIGATION ---
+        const presentationSequence = ['part2_net1', 'part2_net2', 'part2_topo', 'part3_topo_ip', 'part3_router_config', 'part3_dhcp_ping'];
+        let currentStepIndex = 0;
+
+        function focusNode(id) {
+            document.querySelectorAll('.presentation-slide').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) {
+                target.classList.add('active');
+                if (id === 'part2_net1') {
+                    setTimeout(() => { replayAnimation('anim-net1'); setTimeout(() => replayAnimation('anim-br1'), 1500); }, 500);
+                } else if (id === 'part2_net2') {
+                    setTimeout(() => replayAnimation('anim-br2'), 500);
+                }
+            }
+            currentStepIndex = presentationSequence.indexOf(id);
+        }
+
+        function nextSlide() { if (currentStepIndex < presentationSequence.length - 1) focusNode(presentationSequence[++currentStepIndex]); }
+        function prevSlide() { if (currentStepIndex > 0) focusNode(presentationSequence[--currentStepIndex]); }
+
+        document.addEventListener('keydown', (e) => {
+            if (!isStarted) return;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') nextSlide();
+            else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') prevSlide();
+            else if (e.ctrlKey && e.key === '1') {
+                isDrawingMode = !isDrawingMode;
+                document.body.classList.toggle('drawing-mode-active', isDrawingMode);
+                document.getElementById('drawingIndicator').classList.toggle('hidden', !isDrawingMode);
+            }
+        });
+
+        // --- DRAWING LOGIC ---
+        const drawCanvas = document.getElementById('drawCanvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        let isDrawingMode = false;
+        let isDrawing = false;
+        function resizeCanvas() { drawCanvas.width = window.innerWidth; drawCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        drawCanvas.addEventListener('mousedown', (e) => {
+            if (!isDrawingMode) return;
+            isDrawing = true;
+            drawCtx.beginPath();
+            drawCtx.strokeStyle = '#e74c3c';
+            drawCtx.lineWidth = 4;
+            drawCtx.lineCap = 'round';
+            drawCtx.moveTo(e.clientX, e.clientY);
+        });
+        drawCanvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || !isDrawingMode) return;
+            drawCtx.lineTo(e.clientX, e.clientY);
+            drawCtx.stroke();
+        });
+        window.addEventListener('mouseup', () => isDrawing = false);
+    </script>
+</body>
+
+</html>

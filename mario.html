@@ -4,614 +4,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mô Phỏng Xóa Phần Tử Trong Linked List (Python)</title>
+    <title>Minh hoạ Subnetting Trực Quan</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <style>
-        /* Custom Styles for smooth transitions */
-        .node-container {
-            transition: all 0.5s ease;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
         }
 
-        .pointer-label {
-            transition: left 0.5s ease, opacity 0.3s ease;
+        .font-code {
+            font-family: 'Fira Code', monospace;
         }
 
-        .code-line {
-            transition: background-color 0.2s ease;
-            padding: 2px 8px;
+        /* Hiệu ứng chuyển động cho các bit */
+        .bit-box {
+            transition: all 0.3s ease;
+        }
+
+        .bit-network {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* Xanh dương */
+        .bit-borrowed {
+            background-color: #f59e0b;
+            color: white;
+            border-color: #d97706;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Cam gạch */
+        .bit-host {
+            background-color: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        /* Xanh lá */
+
+        /* Hiệu ứng thanh trượt */
+        input[type=range] {
+            accent-color: #f59e0b;
+        }
+
+        /* Khối IP */
+        .subnet-block {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 2px solid white;
+        }
+
+        .subnet-block:last-child {
+            border-right: none;
+        }
+
+        .subnet-block:hover {
+            filter: brightness(1.1);
+            z-index: 10;
+            transform: scaleY(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Màu cho các khối chia mạng */
+        .bg-color-0 {
+            background-color: #6366f1;
+        }
+
+        .bg-color-1 {
+            background-color: #8b5cf6;
+        }
+
+        .bg-color-2 {
+            background-color: #ec4899;
+        }
+
+        .bg-color-3 {
+            background-color: #f43f5e;
+        }
+
+        .bg-color-4 {
+            background-color: #f97316;
+        }
+
+        .bg-color-5 {
+            background-color: #eab308;
+        }
+
+        .bg-color-6 {
+            background-color: #84cc16;
+        }
+
+        .bg-color-7 {
+            background-color: #14b8a6;
+        }
+
+        /* Tùy chỉnh Scrollbar cho bảng */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
             border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
         }
 
-        .code-line.active {
-            background-color: #fef08a;
-            /* yellow-200 */
-            font-weight: bold;
-            color: #b45309;
-            /* yellow-700 */
-            border-left: 4px solid #eab308;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
 
-        svg path {
-            transition: d 0.5s ease, stroke 0.3s ease;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen flex flex-col font-sans">
+<body class="p-6 md:p-10 flex flex-col items-center">
 
-    <!-- Header -->
-    <header class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
-        <h1 class="text-xl font-bold"><i class="fa-solid fa-link mr-2"></i>Mô Phỏng Xóa Node - Singly Linked List</h1>
-        <div class="text-sm bg-blue-700 px-3 py-1 rounded-full">Ngôn ngữ mô phỏng: Python</div>
-    </header>
+    <div class="max-w-5xl w-full space-y-6">
 
-    <!-- Main Content -->
-    <main class="flex-1 flex overflow-hidden">
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800">Cỗ Máy "Băm Nhỏ" IP</h1>
+            <p class="text-slate-500">Kéo thanh trượt để hiểu bản chất của việc mượn bit trong Subnetting.</p>
+        </div>
 
-        <!-- Left Panel: Visualization -->
-        <section class="w-3/5 flex flex-col border-r border-gray-300 bg-white">
+        <!-- Bảng Điều Khiển -->
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
 
-            <!-- Controls -->
-            <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 items-end shadow-sm z-10">
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-600 mb-1">Dữ liệu cần xóa (Key):</label>
-                    <input type="number" id="keyInput" value="30"
-                        class="border border-gray-300 rounded px-3 py-1.5 w-24 focus:outline-none focus:border-blue-500">
+                <div class="w-full md:w-1/2 space-y-4">
+                    <label class="block text-lg font-bold text-slate-700">
+                        Số bit muốn mượn: <span id="borrowedVal" class="text-amber-500 font-extrabold text-2xl">0</span>
+                    </label>
+                    <input type="range" id="borrowSlider" min="0" max="6" value="0"
+                        class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-xs font-bold text-slate-400 px-1">
+                        <span>0 (Gốc /24)</span>
+                        <span>1 (/25)</span>
+                        <span>2 (/26)</span>
+                        <span>3 (/27)</span>
+                        <span>4 (/28)</span>
+                        <span>5 (/29)</span>
+                        <span>6 (/30)</span>
+                    </div>
                 </div>
 
-                <div class="flex gap-2">
-                    <button id="btnStart"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded shadow flex items-center transition">
-                        <i class="fa-solid fa-play mr-2"></i> Bắt đầu xóa
-                    </button>
-                    <button id="btnReset"
-                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded shadow flex items-center transition">
-                        <i class="fa-solid fa-rotate-right mr-2"></i> Làm mới List
-                    </button>
+                <div class="w-full md:w-1/2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="block text-slate-500 mb-1">Prefix hiện tại:</span>
+                            <span class="font-code text-2xl font-bold text-slate-800" id="prefixDisplay">/24</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-500 mb-1">Số lượng Mạng con:</span>
+                            <span class="font-code text-2xl font-bold text-amber-500" id="subnetsDisplay">1</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-500 mb-1">Tổng IP mỗi mạng:</span>
+                            <span class="font-code text-xl font-bold text-emerald-600" id="totalHostsDisplay">256</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-500 mb-1">IP Khả dụng (Cắm được PC):</span>
+                            <span class="font-code text-xl font-bold text-emerald-600"
+                                id="usableHostsDisplay">254</span>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="flex-1"></div> <!-- Spacer -->
+        <!-- Trực quan hóa 32 BIT -->
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                1. Trực quan hóa 32 Bit của IP (192.168.1.x)
+            </h2>
 
-                <div class="flex flex-col items-center">
-                    <label class="text-xs font-semibold text-gray-600 mb-1">Tốc độ mô phỏng</label>
-                    <input type="range" id="speedSlider" min="100" max="2000" value="800" class="w-32 cursor-pointer"
-                        style="direction: rtl;">
+            <div class="flex flex-wrap gap-x-2 gap-y-3 justify-center md:justify-start" id="bitContainer">
+                <!-- Javascript sẽ render 32 bit vào đây -->
+            </div>
+
+            <div class="flex flex-wrap gap-6 mt-6 justify-center text-sm font-semibold">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded"></div> <span class="text-slate-600">Bit Mạng gốc (Không
+                        đổi)</span>
                 </div>
-
-                <div class="flex gap-2">
-                    <button id="btnPauseResume"
-                        class="bg-amber-500 hover:bg-amber-600 text-white w-10 h-10 rounded-full shadow flex items-center justify-center transition disabled:opacity-50"
-                        disabled>
-                        <i class="fa-solid fa-pause"></i>
-                    </button>
-                    <button id="btnStep"
-                        class="bg-indigo-500 hover:bg-indigo-600 text-white w-10 h-10 rounded-full shadow flex items-center justify-center transition disabled:opacity-50"
-                        disabled title="Chạy từng bước">
-                        <i class="fa-solid fa-forward-step"></i>
-                    </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-amber-500 rounded"></div> <span class="text-slate-600">Bit Mượn (Cắt
+                        bánh)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-emerald-500 rounded"></div> <span class="text-slate-600">Bit Máy tính (Đánh
+                        số PC)</span>
                 </div>
             </div>
 
-            <!-- Canvas Area -->
-            <div id="canvasContainer" class="flex-1 relative overflow-auto p-8 bg-slate-50 min-h-[400px]">
-                <!-- Trạng thái hiện tại -->
-                <div id="statusText"
-                    class="absolute top-4 left-8 text-lg font-semibold text-gray-700 bg-white px-4 py-2 rounded shadow-sm border-l-4 border-blue-500 z-20">
-                    Sẵn sàng. Hãy nhấn "Bắt đầu xóa".
-                </div>
+            <!-- Khung giải thích động -->
+            <div class="mt-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl text-sm leading-relaxed"
+                id="dynamicExplanation">
+                Hiện tại là mạng <b>/24</b> gốc. Có 8 bit xanh lá dành cho máy tính. Tính ra được 2<sup>8</sup> = 256
+                địa chỉ IP trong mạng này. Chưa hề bị chia cắt.
+            </div>
+        </div>
 
-                <!-- SVG Layer cho các mũi tên -->
-                <svg id="arrowLayer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></svg>
+        <!-- Trực quan hóa khối cắt IP -->
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                2. Miếng Bánh 256 IP Bị Cắt Như Thế Nào?
+            </h2>
 
-                <!-- Vùng chứa Nodes (Tạo động bằng JS) -->
-                <div id="nodesLayer" class="absolute top-[200px] left-0 w-full h-24 z-10"></div>
-
-                <!-- Labels con trỏ (Head, Temp, Prev) -->
-                <div id="headPointer"
-                    class="pointer-label absolute top-[140px] text-center font-bold text-blue-600 opacity-0">
-                    <div class="text-sm">head</div>
-                    <i class="fa-solid fa-arrow-down"></i>
-                </div>
-                <div id="tempPointer"
-                    class="pointer-label absolute top-[280px] text-center font-bold text-purple-600 opacity-0">
-                    <i class="fa-solid fa-arrow-up"></i>
-                    <div class="text-sm">temp</div>
-                </div>
-                <div id="prevPointer"
-                    class="pointer-label absolute top-[280px] text-center font-bold text-teal-600 opacity-0">
-                    <i class="fa-solid fa-arrow-up"></i>
-                    <div class="text-sm">prev</div>
-                </div>
+            <!-- Thanh hiển thị khối -->
+            <div class="w-full h-24 bg-slate-200 rounded-xl overflow-hidden flex shadow-inner relative"
+                id="blockContainer">
+                <!-- Javascript sẽ render khối vào đây -->
             </div>
 
-            <!-- Legend -->
-            <div class="p-3 bg-gray-100 flex justify-center gap-6 text-sm text-gray-600">
-                <span class="flex items-center">
-                    <div class="w-3 h-3 bg-white border-2 border-gray-400 mr-2 rounded"></div> Bình thường
-                </span>
-                <span class="flex items-center">
-                    <div class="w-3 h-3 bg-yellow-100 border-2 border-yellow-500 mr-2 rounded"></div> Đang kiểm tra
-                </span>
-                <span class="flex items-center">
-                    <div class="w-3 h-3 bg-red-100 border-2 border-red-500 mr-2 rounded"></div> Bị xóa
-                </span>
-                <span class="flex items-center">
-                    <div class="w-3 h-3 bg-green-100 border-2 border-green-500 mr-2 rounded"></div> Hoàn thành
-                </span>
+            <!-- Bảng chi tiết -->
+            <div class="mt-6 overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 text-sm">
+                            <th class="p-3 border-b-2 border-slate-200 rounded-tl-lg">Tên Mạng con (Subnet)</th>
+                            <th class="p-3 border-b-2 border-slate-200">Địa chỉ Mạng (Network ID)</th>
+                            <th class="p-3 border-b-2 border-slate-200">Dải IP dùng được (Host Range)</th>
+                            <th class="p-3 border-b-2 border-slate-200 rounded-tr-lg">Broadcast</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="font-code text-sm">
+                        <!-- JS Render -->
+                    </tbody>
+                </table>
             </div>
-        </section>
+        </div>
 
-        <!-- Right Panel: Code Display -->
-        <section class="w-2/5 bg-[#1e1e1e] text-gray-300 flex flex-col">
-            <div class="bg-[#2d2d2d] text-gray-400 px-4 py-2 text-sm border-b border-black font-semibold">
-                delete_node.py
-            </div>
-            <div class="p-4 overflow-auto flex-1 text-sm leading-relaxed" id="codeContainer">
-                <!-- Mã code sẽ được generate ở đây bằng JS -->
-            </div>
-        </section>
-    </main>
+    </div>
 
     <script>
-        // --- 1. PYTHON CODE TEMPLATE ---
-        const pythonCode = [
-            "def delete_node(head, key):",
-            "    temp = head",
-            "    prev = None",
-            "",
-            "    # Trường hợp 1: Xóa ngay nút đầu",
-            "    if temp is not None and temp.data == key:",
-            "        head = temp.next",
-            "        temp = None",
-            "        return head",
-            "",
-            "    # Trường hợp 2: Tìm nút cần xóa",
-            "    while temp is not None:",
-            "        if temp.data == key:",
-            "            break",
-            "        prev = temp",
-            "        temp = temp.next",
-            "",
-            "    # Trường hợp 3: Không tìm thấy",
-            "    if temp is None:",
-            "        return head",
-            "",
-            "    # Ngắt liên kết nút khỏi danh sách",
-            "    prev.next = temp.next",
-            "    temp = None",
-            "    return head"
-        ];
+        const borrowSlider = document.getElementById('borrowSlider');
+        const borrowedVal = document.getElementById('borrowedVal');
+        const prefixDisplay = document.getElementById('prefixDisplay');
+        const subnetsDisplay = document.getElementById('subnetsDisplay');
+        const totalHostsDisplay = document.getElementById('totalHostsDisplay');
+        const usableHostsDisplay = document.getElementById('usableHostsDisplay');
+        const bitContainer = document.getElementById('bitContainer');
+        const blockContainer = document.getElementById('blockContainer');
+        const tableBody = document.getElementById('tableBody');
+        const dynamicExplanation = document.getElementById('dynamicExplanation');
 
-        // --- 2. BIẾN TOÀN CỤC & TRẠNG THÁI ---
-        let initialList = [10, 20, 30, 40, 50];
-        let nodes = []; // Lưu trữ DOM element và data của các node
+        const baseNetwork = '192.168.1.';
 
-        let simulationSteps = [];
-        let currentStepIdx = 0;
-        let isPlaying = false;
-        let timeoutId = null;
-        let speed = 800; // ms
+        function updateVisuals() {
+            const borrowed = parseInt(borrowSlider.value);
+            const prefix = 24 + borrowed;
+            const subnets = Math.pow(2, borrowed);
+            const hostsPerSubnet = Math.pow(2, 8 - borrowed);
+            const usableHosts = hostsPerSubnet - 2;
 
-        const X_START = 80;
-        const NODE_SPACING = 140;
-        const NODE_WIDTH = 60;
+            // 1. Update text stats
+            borrowedVal.innerText = borrowed;
+            prefixDisplay.innerText = '/' + prefix;
+            subnetsDisplay.innerText = subnets;
+            totalHostsDisplay.innerText = hostsPerSubnet;
+            usableHostsDisplay.innerText = usableHosts;
 
-        // Elements
-        const canvasContainer = document.getElementById('canvasContainer');
-        const nodesLayer = document.getElementById('nodesLayer');
-        const arrowLayer = document.getElementById('arrowLayer');
-        const codeContainer = document.getElementById('codeContainer');
-        const statusText = document.getElementById('statusText');
-
-        const headPointer = document.getElementById('headPointer');
-        const tempPointer = document.getElementById('tempPointer');
-        const prevPointer = document.getElementById('prevPointer');
-
-        const btnStart = document.getElementById('btnStart');
-        const btnReset = document.getElementById('btnReset');
-        const btnPauseResume = document.getElementById('btnPauseResume');
-        const btnStep = document.getElementById('btnStep');
-        const speedSlider = document.getElementById('speedSlider');
-        const keyInput = document.getElementById('keyInput');
-
-        // --- 3. KHỞI TẠO GIAO DIỆN ---
-        function initCodeViewer() {
-            codeContainer.innerHTML = '';
-            pythonCode.forEach((line, index) => {
-                const lineDiv = document.createElement('div');
-                lineDiv.className = 'code-line whitespace-pre';
-                lineDiv.id = `code-line-${index + 1}`;
-
-                // Format simple syntax highlighting
-                let formattedLine = line;
-                formattedLine = formattedLine.replace(/def |if |while |return |and |is |not |break |None/g, match => `<span class="text-pink-400">${match}</span>`);
-                formattedLine = formattedLine.replace(/#.*/g, match => `<span class="text-green-500">${match}</span>`);
-
-                lineDiv.innerHTML = `<span class="inline-block w-6 text-gray-500 select-none">${index + 1}</span> ${formattedLine}`;
-                codeContainer.appendChild(lineDiv);
-            });
-        }
-
-        function resetSimulation() {
-            clearTimeout(timeoutId);
-            isPlaying = false;
-            currentStepIdx = 0;
-            simulationSteps = [];
-
-            // Cập nhật UI controls
-            btnPauseResume.disabled = true;
-            btnStep.disabled = true;
-            btnPauseResume.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            btnStart.disabled = false;
-            keyInput.disabled = false;
-
-            highlightCodeLine(0); // Bỏ highlight
-            statusText.innerHTML = 'Sẵn sàng. Hãy nhập Key và nhấn "Bắt đầu xóa".';
-            statusText.className = 'absolute top-4 left-8 text-lg font-semibold text-gray-700 bg-white px-4 py-2 rounded shadow-sm border-l-4 border-blue-500 z-20';
-
-            // Khởi tạo lại cấu trúc danh sách
-            nodesLayer.innerHTML = '';
-            arrowLayer.innerHTML = '';
-            nodes = initialList.map((data, index) => {
-                const isLast = index === initialList.length - 1;
-
-                // DOM Node
-                const nodeEl = document.createElement('div');
-                nodeEl.className = 'node-container absolute w-[60px] h-[60px] flex items-center justify-center bg-white border-2 border-gray-400 rounded-lg shadow font-bold text-lg text-gray-700 z-10';
-                nodeEl.style.left = `${X_START + index * NODE_SPACING}px`;
-                nodeEl.innerHTML = data;
-                nodesLayer.appendChild(nodeEl);
-
-                return {
-                    id: index,
-                    data: data,
-                    element: nodeEl,
-                    nextId: isLast ? null : index + 1,
-                    x: X_START + index * NODE_SPACING
-                };
-            });
-
-            // Reset Pointers
-            headPointer.style.opacity = 1;
-            movePointer(headPointer, nodes[0].x);
-
-            tempPointer.style.opacity = 0;
-            prevPointer.style.opacity = 0;
-
-            drawArrows();
-        }
-
-        // --- 4. HÀM VẼ (SVG ARROWS) ---
-        function drawArrows() {
-            arrowLayer.innerHTML = '';
-            nodes.forEach(node => {
-                if (node.nextId !== null) {
-                    const nextNode = nodes.find(n => n.id === node.nextId);
-                    if (nextNode) {
-                        drawArrowBetween(node, nextNode);
-                    }
-                } else if (node.element.style.opacity !== "0") {
-                    // Trỏ tới Null
-                    drawNullArrow(node);
-                }
-            });
-        }
-
-        function drawArrowBetween(node1, node2) {
-            const x1 = node1.x + NODE_WIDTH;
-            const y1 = 200 + 30; // 200 is nodesLayer top offset, 30 is half height
-            const x2 = node2.x;
-            const y2 = y1;
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
-            // Vẽ đường cong nếu bypass (bỏ qua một node bị xóa)
-            if (node2.id > node1.id + 1) {
-                const midX = (x1 + x2) / 2;
-                path.setAttribute('d', `M ${x1} ${y1} Q ${midX} ${y1 - 60} ${x2} ${y2}`);
-                path.setAttribute('stroke', '#14b8a6'); // teal-500 (chỉ định liên kết mới)
-                path.setAttribute('stroke-dasharray', '5,5');
+            // 2. Cập nhật giải thích động
+            if (borrowed === 0) {
+                dynamicExplanation.innerHTML = `Mạng gốc <b>/24</b>. Toàn bộ 8 bit cuối dùng để đánh số máy tính. 2<sup>8</sup> = 256 IP. Không bị chia cắt.`;
             } else {
-                path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-                path.setAttribute('stroke', '#64748b'); // slate-500
+                dynamicExplanation.innerHTML = `Bạn mượn <b>${borrowed} bit</b> từ phần máy tính mang sang phần mạng.<br> 
+                ➤ Phép tính: 24 (cũ) + ${borrowed} = <b>/${prefix}</b>.<br>
+                ➤ Với ${borrowed} bit mượn, bạn tạo ra được 2<sup>${borrowed}</sup> = <b>${subnets} mạng con</b>.<br>
+                ➤ Số bit máy tính còn lại là ${8 - borrowed}, nên mỗi mạng con nhỏ giờ chỉ chứa được 2<sup>${8 - borrowed}</sup> = <b>${hostsPerSubnet} IP</b>.`;
             }
 
-            path.setAttribute('stroke-width', '3');
-            path.setAttribute('fill', 'transparent');
-            path.setAttribute('marker-end', 'url(#arrowhead)');
-            arrowLayer.appendChild(path);
-        }
+            // 3. Render 32 Bits
+            let bitHtml = '';
+            for (let i = 0; i < 32; i++) {
+                let typeClass = '';
+                let bitValue = i < 24 ? 'N' : 'H';
+                let tooltip = '';
 
-        function drawNullArrow(node) {
-            const x1 = node.x + NODE_WIDTH;
-            const y1 = 200 + 30;
-            const x2 = x1 + 40;
-            const y2 = y1;
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-            path.setAttribute('stroke', '#94a3b8');
-            path.setAttribute('stroke-width', '2');
-            path.setAttribute('stroke-dasharray', '4,4');
-            arrowLayer.appendChild(path);
-
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', x2 + 5);
-            text.setAttribute('y', y2 + 5);
-            text.setAttribute('fill', '#94a3b8');
-            text.setAttribute('font-size', '14');
-            text.setAttribute('font-weight', 'bold');
-            text.textContent = 'Null';
-            arrowLayer.appendChild(text);
-        }
-
-        // Tạo arrowhead marker
-        function setupSvgDefs() {
-            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-            marker.setAttribute('id', 'arrowhead');
-            marker.setAttribute('markerWidth', '10');
-            marker.setAttribute('markerHeight', '7');
-            marker.setAttribute('refX', '9');
-            marker.setAttribute('refY', '3.5');
-            marker.setAttribute('orient', 'auto');
-
-            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
-            polygon.setAttribute('fill', '#64748b'); // Sẽ cập nhật màu động nếu cần
-
-            marker.appendChild(polygon);
-            defs.appendChild(marker);
-            arrowLayer.appendChild(defs);
-        }
-
-        // --- 5. LOGIC TẠO BƯỚC MÔ PHỎNG (ENGINE) ---
-        function generateSteps(keyToFind) {
-            let steps = [];
-            let tempIdx = 0; // index trỏ tới head ban đầu
-            let prevIdx = null;
-
-            steps.push({ line: 1, msg: `Bắt đầu hàm xóa phần tử có giá trị <b>${keyToFind}</b>.` });
-
-            // temp = head
-            steps.push({ line: 2, action: 'setTemp', targetId: tempIdx, msg: `Gán <code>temp = head</code>. Bắt đầu duyệt từ đầu danh sách.` });
-
-            // prev = None
-            steps.push({ line: 3, action: 'setPrev', targetId: prevIdx, msg: `Khởi tạo <code>prev = None</code>.` });
-
-            // if temp is not None and temp.data == key:
-            steps.push({ line: 6, action: 'checkNode', targetId: tempIdx, msg: `Kiểm tra xem phần tử đầu tiên (Head) có chứa giá trị cần xóa không.` });
-
-            if (nodes[tempIdx].data === keyToFind) {
-                // Xóa ở Head
-                steps.push({ line: 7, action: 'moveHead', targetId: nodes[tempIdx].nextId, msg: `Giá trị khớp! Cập nhật <code>head</code> trỏ sang phần tử tiếp theo.` });
-                steps.push({ line: 8, action: 'deleteNode', targetId: tempIdx, msg: `Hủy bỏ liên kết của nút cũ (Xóa khỏi bộ nhớ).` });
-                steps.push({ line: 9, action: 'finish', msg: `Trả về danh sách mới. Quá trình hoàn tất!`, status: 'success' });
-                return steps;
-            }
-
-            // Loop
-            while (tempIdx !== null) {
-                steps.push({ line: 12, action: 'checkLoop', msg: `Vòng lặp: Duyệt qua danh sách để tìm giá trị.` });
-                steps.push({ line: 13, action: 'checkNode', targetId: tempIdx, msg: `Kiểm tra giá trị nút hiện tại: <code>${nodes[tempIdx].data} == ${keyToFind} ?</code>` });
-
-                if (nodes[tempIdx].data === keyToFind) {
-                    steps.push({ line: 14, msg: `Giá trị khớp! Thoát khỏi vòng lặp.` });
-                    break;
-                }
-
-                prevIdx = tempIdx;
-                steps.push({ line: 15, action: 'setPrev', targetId: prevIdx, msg: `Không khớp. Cập nhật <code>prev</code> tiến lên một bước.` });
-
-                tempIdx = nodes[tempIdx].nextId;
-                steps.push({ line: 16, action: 'setTemp', targetId: tempIdx, msg: `Cập nhật <code>temp = temp.next</code> để kiểm tra phần tử tiếp theo.` });
-            }
-
-            // if temp is None:
-            steps.push({ line: 19, msg: `Kiểm tra xem vòng lặp có duyệt hết danh sách mà không tìm thấy không.` });
-            if (tempIdx === null) {
-                steps.push({ line: 20, action: 'finish', msg: `Không tìm thấy giá trị <b>${keyToFind}</b> trong danh sách. Giữ nguyên danh sách.`, status: 'error' });
-                return steps;
-            }
-
-            // prev.next = temp.next
-            steps.push({ line: 23, action: 'relink', prevId: prevIdx, tempId: tempIdx, msg: `Ngắt liên kết! Cho <code>prev.next</code> trỏ vòng qua <code>temp</code> tới thẳng phần tử phía sau.` });
-
-            // temp = None
-            steps.push({ line: 24, action: 'deleteNode', targetId: tempIdx, msg: `Giải phóng bộ nhớ của phần tử bị xóa.` });
-
-            // return head
-            steps.push({ line: 25, action: 'finish', msg: `Cập nhật thành công. Trả về head.`, status: 'success' });
-
-            return steps;
-        }
-
-        // --- 6. HỆ THỐNG THỰC THI (EXECUTION) ---
-        function executeStep(step) {
-            // Highlight Code
-            if (step.line) highlightCodeLine(step.line);
-
-            // Update Message
-            if (step.msg) {
-                statusText.innerHTML = step.msg;
-                if (step.status === 'success') {
-                    statusText.className = 'absolute top-4 left-8 text-lg font-semibold text-green-800 bg-green-100 px-4 py-2 rounded shadow border-l-4 border-green-500 z-20';
-                } else if (step.status === 'error') {
-                    statusText.className = 'absolute top-4 left-8 text-lg font-semibold text-red-800 bg-red-100 px-4 py-2 rounded shadow border-l-4 border-red-500 z-20';
+                if (i < 24) {
+                    typeClass = 'bit-network';
+                    tooltip = 'Bit Mạng gốc';
+                } else if (i < 24 + borrowed) {
+                    typeClass = 'bit-borrowed font-bold';
+                    bitValue = 'S'; // Subnet bit
+                    tooltip = 'Bit đã mượn';
                 } else {
-                    statusText.className = 'absolute top-4 left-8 text-lg font-semibold text-gray-700 bg-white px-4 py-2 rounded shadow border-l-4 border-blue-500 z-20';
+                    typeClass = 'bit-host';
+                    tooltip = 'Bit Máy tính';
                 }
+
+                // Add dot every 8 bits
+                let dot = ((i + 1) % 8 === 0 && i !== 31) ? '<span class="text-2xl font-bold text-slate-300 ml-1 mr-1 mt-auto leading-none">.</span>' : '';
+
+                bitHtml += `
+                    <div class="flex items-center">
+                        <div class="bit-box w-6 h-8 md:w-8 md:h-10 border-2 rounded flex justify-center items-center font-code text-xs md:text-sm font-bold ${typeClass}" title="${tooltip}">
+                            ${bitValue}
+                        </div>
+                        ${dot}
+                    </div>
+                `;
+            }
+            bitContainer.innerHTML = bitHtml;
+
+            // 4. Render Blocks
+            let blockHtml = '';
+            const blockWidth = 100 / subnets;
+            // Chỉ render tối đa 16 khối trên UI để tránh bị quá tải nhãn
+            const maxBlocksToRender = subnets > 16 ? 16 : subnets;
+
+            for (let i = 0; i < maxBlocksToRender; i++) {
+                const startIp = i * hostsPerSubnet;
+                const endIp = startIp + hostsPerSubnet - 1;
+                const bgColor = `bg-color-${i % 8}`; // Luân phiên 8 màu
+
+                // Ẩn text nếu khối quá nhỏ
+                const showText = subnets <= 16;
+                const textHtml = showText ? `
+                    <div class="text-white font-bold text-xs md:text-sm whitespace-nowrap overflow-hidden text-ellipsis px-1">Subnet ${i + 1}</div>
+                    <div class="text-white/80 font-code text-[10px] md:text-xs whitespace-nowrap overflow-hidden text-ellipsis px-1">.${startIp} - .${endIp}</div>
+                ` : '';
+
+                blockHtml += `
+                    <div class="subnet-block h-full ${bgColor} flex flex-col justify-center items-center relative" style="width: ${blockWidth}%" title="Subnet ${i + 1}: ${baseNetwork}${startIp} - ${baseNetwork}${endIp}">
+                        ${textHtml}
+                    </div>
+                `;
             }
 
-            // Xóa highlight cũ
-            nodes.forEach(n => {
-                if (n.element.classList.contains('bg-yellow-100')) {
-                    n.element.classList.remove('bg-yellow-100', 'border-yellow-500');
-                    n.element.classList.add('bg-white', 'border-gray-400');
-                }
-            });
-
-            // Xử lý Logic Hành động
-            switch (step.action) {
-                case 'setTemp':
-                    if (step.targetId !== null) {
-                        tempPointer.style.opacity = 1;
-                        movePointer(tempPointer, nodes[step.targetId].x);
-                    } else {
-                        tempPointer.style.opacity = 0; // temp reaches end (null)
-                    }
-                    break;
-
-                case 'setPrev':
-                    if (step.targetId !== null) {
-                        prevPointer.style.opacity = 1;
-                        movePointer(prevPointer, nodes[step.targetId].x);
-                    } else {
-                        prevPointer.style.opacity = 0;
-                    }
-                    break;
-
-                case 'checkNode':
-                    if (step.targetId !== null) {
-                        const el = nodes[step.targetId].element;
-                        el.classList.remove('bg-white', 'border-gray-400');
-                        el.classList.add('bg-yellow-100', 'border-yellow-500', 'scale-110');
-                        setTimeout(() => el.classList.remove('scale-110'), 300);
-                    }
-                    break;
-
-                case 'moveHead':
-                    if (step.targetId !== null) {
-                        movePointer(headPointer, nodes[step.targetId].x);
-                    } else {
-                        headPointer.style.opacity = 0; // Danh sách rỗng
-                    }
-                    break;
-
-                case 'relink':
-                    // Đổi nextId của prev thành nextId của temp
-                    const prevNode = nodes.find(n => n.id === step.prevId);
-                    const tempNode = nodes.find(n => n.id === step.tempId);
-                    prevNode.nextId = tempNode.nextId;
-
-                    // Style lại node bị ngắt kết nối
-                    tempNode.element.classList.remove('bg-yellow-100', 'border-yellow-500');
-                    tempNode.element.classList.add('bg-red-100', 'border-red-500');
-
-                    drawArrows(); // Vẽ lại đường ngắt
-                    break;
-
-                case 'deleteNode':
-                    const nodeToDelete = nodes.find(n => n.id === step.targetId);
-                    // Hiệu ứng rơi xuống và biến mất
-                    nodeToDelete.element.style.transform = 'translateY(50px) scale(0.5)';
-                    nodeToDelete.element.style.opacity = '0';
-                    tempPointer.style.opacity = 0; // Xóa con trỏ
-                    drawArrows();
-                    break;
-
-                case 'finish':
-                    isPlaying = false;
-                    btnPauseResume.disabled = true;
-                    btnStep.disabled = true;
-                    btnStart.disabled = false;
-                    keyInput.disabled = false;
-                    break;
+            if (subnets > 16) {
+                blockHtml += `<div class="absolute inset-0 flex items-center justify-center pointer-events-none text-white font-bold text-xl drop-shadow-md bg-black/20">... Và ${subnets - 16} Subnet nữa ...</div>`;
             }
+            blockContainer.innerHTML = blockHtml;
+
+            // 5. Render Table (Hiển thị tối đa 8 dòng để không trôi trang)
+            let tableHtml = '';
+            const rowsToShow = subnets > 8 ? 8 : subnets;
+            for (let i = 0; i < rowsToShow; i++) {
+                const startIp = i * hostsPerSubnet;
+                const endIp = startIp + hostsPerSubnet - 1;
+
+                tableHtml += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="p-3 font-semibold text-slate-700">Subnet ${i + 1}</td>
+                        <td class="p-3 text-blue-600 font-bold">${baseNetwork}${startIp}/${prefix}</td>
+                        <td class="p-3 text-emerald-600">${baseNetwork}${startIp + 1} &rarr; ${baseNetwork}${endIp - 1}</td>
+                        <td class="p-3 text-amber-600">${baseNetwork}${endIp}</td>
+                    </tr>
+                `;
+            }
+            if (subnets > 8) {
+                tableHtml += `
+                    <tr>
+                        <td colspan="4" class="p-3 text-center text-slate-400 italic">... Còn ${subnets - 8} mạng con nữa không hiển thị hết ...</td>
+                    </tr>
+                `;
+            }
+            tableBody.innerHTML = tableHtml;
         }
 
-        function playLoop() {
-            if (!isPlaying) return;
+        // Event Listener
+        borrowSlider.addEventListener('input', updateVisuals);
 
-            if (currentStepIdx < simulationSteps.length) {
-                executeStep(simulationSteps[currentStepIdx]);
-                currentStepIdx++;
-                timeoutId = setTimeout(playLoop, speed);
-            } else {
-                isPlaying = false;
-            }
-        }
-
-        // --- 7. TIỆN ÍCH UI ---
-        function highlightCodeLine(lineNumber) {
-            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
-            if (lineNumber > 0) {
-                const line = document.getElementById(`code-line-${lineNumber}`);
-                if (line) {
-                    line.classList.add('active');
-                    // Scroll vào vùng nhìn thấy
-                    line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }
-        }
-
-        function movePointer(pointerEl, xTarget) {
-            // Canh giữa text (width khoảng 40px) với node (width 60px)
-            pointerEl.style.left = `${xTarget + 10}px`;
-        }
-
-        // --- 8. SỰ KIỆN NÚT BẤM ---
-        btnStart.addEventListener('click', () => {
-            const keyToFind = parseInt(keyInput.value);
-            if (isNaN(keyToFind)) {
-                alert("Vui lòng nhập một số hợp lệ!");
-                return;
-            }
-
-            resetSimulation();
-            setupSvgDefs();
-
-            simulationSteps = generateSteps(keyToFind);
-
-            isPlaying = true;
-            btnStart.disabled = true;
-            keyInput.disabled = true;
-            btnPauseResume.disabled = false;
-            btnStep.disabled = true;
-
-            playLoop();
-        });
-
-        btnPauseResume.addEventListener('click', () => {
-            if (isPlaying) {
-                // Đang chạy -> Tạm dừng
-                isPlaying = false;
-                clearTimeout(timeoutId);
-                btnPauseResume.innerHTML = '<i class="fa-solid fa-play"></i>';
-                btnStep.disabled = false; // Cho phép chạy từng bước
-            } else {
-                // Đang dừng -> Chạy tiếp
-                isPlaying = true;
-                btnPauseResume.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                btnStep.disabled = true;
-                playLoop();
-            }
-        });
-
-        btnStep.addEventListener('click', () => {
-            if (currentStepIdx < simulationSteps.length) {
-                executeStep(simulationSteps[currentStepIdx]);
-                currentStepIdx++;
-            }
-        });
-
-        btnReset.addEventListener('click', () => {
-            resetSimulation();
-            setupSvgDefs();
-        });
-
-        speedSlider.addEventListener('input', (e) => {
-            // Đảo ngược logic thanh trượt: Kéo qua phải = giá trị nhỏ (nhanh hơn)
-            speed = parseInt(e.target.value);
-        });
-
-        // --- KHỞI CHẠY LẦN ĐẦU ---
-        initCodeViewer();
-        resetSimulation();
-        setupSvgDefs();
-
+        // Init
+        updateVisuals();
     </script>
 </body>
 
