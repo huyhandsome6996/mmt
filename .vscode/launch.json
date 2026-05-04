@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "purpose": ["debug-in-terminal"]
+        },
+
+
+        {
             "name": "Chạy file HTML này (Edge)",
             "request": "launch",
             "type": "msedge",
