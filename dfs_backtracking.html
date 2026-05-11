@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thuyết trình: Thuật toán Quay lui (Backtracking)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --primary: #3b82f6;
+            --node-unvisited: #e2e8f0;
+            --node-visited: #86efac;
+            --node-current: #fde047;
+            --node-stack: #cbd5e1;
+            /* Màu cho stack */
+            --line-color: #94a3b8;
+            --line-active: #a855f7;
+            /* Đường đi hiện tại màu tím */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .left-panel {
+            flex: 6;
+            position: relative;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-right: 2px solid #e2e8f0;
+        }
+
+        .right-panel {
+            flex: 4;
+            padding: 25px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #ffffff;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        /* Map & Nodes */
+        #svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: var(--node-unvisited);
+            border: 3px solid #94a3b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            transition: all 0.5s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .node-label {
+            position: absolute;
+            top: -30px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .node.visited {
+            background-color: var(--node-visited);
+            border-color: #22c55e;
+        }
+
+        .node.current {
+            background-color: var(--node-current);
+            border-color: #eab308;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .node.stack {
+            background-color: var(--node-stack);
+            border-color: #a855f7;
+        }
+
+        .node.target {
+            border-color: #ef4444;
+            border-width: 4px;
+        }
+
+        line {
+            transition: all 0.5s ease;
+        }
+
+        /* Thực tập sinh (Stickman) */
+        #stickman {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            z-index: 10;
+            transition: left 0.5s ease, top 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .bouncing {
+            animation: bounce 1s infinite alternate ease-in-out;
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0px 4px 2px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Sidebar Content */
+        .step-counter {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .title {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .description-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .description {
+            font-size: 15px;
+            line-height: 1.5;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .en-translation {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 10px;
+            font-style: italic;
+            border-left: 3px solid #cbd5e1;
+            padding-left: 15px;
+        }
+
+        /* Stack Data Structure Visualizer */
+        .data-structure {
+            background: #faf5ff;
+            /* Màu nền tím nhạt cho Stack */
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #a855f7;
+            /* Viền tím */
+            overflow-x: auto;
+            min-height: auto;
+        }
+
+        .stack-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0f172a;
+            font-size: 15px;
+        }
+
+        .stack-container {
+            display: flex;
+            gap: 10px;
+            min-height: 50px;
+            align-items: center;
+            padding-bottom: 5px;
+            flex-direction: row;
+            /* Biểu diễn đỉnh stack ở bên trái */
+        }
+
+        .stack-item {
+            padding: 0 14px;
+            height: 40px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+            white-space: nowrap;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hiệu ứng phần tử ĐỈNH STACK (Top) */
+        .stack-item.active {
+            border-color: #a855f7;
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .stack-item.active::before {
+            content: "TOP ➔ ";
+            font-size: 10px;
+            color: #a855f7;
+            margin-right: 5px;
+        }
+
+        .controls-hint {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            line-height: 1.8;
+        }
+
+        .kbd {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #0f172a;
+            font-weight: bold;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Bản đồ mô phỏng -->
+    <div class="left-panel" id="map-container">
+        <svg id="svg-canvas"></svg>
+
+        <!-- Cậu thực tập sinh (Stickman) -->
+        <div id="stickman">
+            <svg class="bouncing" viewBox="0 0 100 100">
+                <!-- Đầu -->
+                <circle cx="50" cy="25" r="14" fill="#fef08a" stroke="#1e293b" stroke-width="3" />
+                <!-- Mắt -->
+                <circle cx="45" cy="22" r="2.5" fill="#1e293b" />
+                <circle cx="56" cy="22" r="2.5" fill="#1e293b" />
+                <!-- Miệng hoang mang -->
+                <circle cx="50" cy="30" r="3" fill="#1e293b" />
+                <!-- Giọt mồ hôi lo lắng -->
+                <path d="M 64 15 Q 67 20 64 25 Q 61 20 64 15" fill="#3b82f6" />
+                <!-- Balo đỏ -->
+                <rect x="25" y="42" width="18" height="22" rx="4" fill="#ef4444" stroke="#1e293b" stroke-width="2" />
+                <!-- Thân -->
+                <line x1="50" y1="39" x2="50" y2="68" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
+                <!-- Tay trái gãi đầu -->
+                <polyline points="50,45 32,40 45,15" fill="none" stroke="#1e293b" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Tay phải vung vẩy -->
+                <polyline points="50,45 65,55 72,70" fill="none" stroke="#1e293b" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Chân trái -->
+                <polyline points="50,68 40,82 32,96" fill="none" stroke="#1e293b" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Chân phải -->
+                <polyline points="50,68 62,82 68,96" fill="none" stroke="#1e293b" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+
+        <!-- Các Node trên bản đồ (Không còn Heuristic) -->
+        <div class="node" id="node-A" style="left: 10%; top: 50%;">🚇<div class="node-label">Bến xe A/(Bus Station A)</div>
+        </div>
+
+        <div class="node" id="node-1" style="left: 38%; top: 20%;">🏢<div class="node-label">Ngã 4 lạ/(Strange Intersection)</div>
+        </div>
+        <div class="node" id="node-2" style="left: 38%; top: 50%;">🥖<div class="node-label">Tiệm bánh/(Bakery)</div>
+        </div>
+        <div class="node" id="node-3" style="left: 38%; top: 80%;">🏢<div class="node-label">Ngã rẽ lạ/(Strange Turn)</div>
+        </div>
+
+        <div class="node" id="node-4" style="left: 65%; top: 10%;">🏠<div class="node-label">Hẻm cụt/(Dead End)</div>
+        </div>
+        <div class="node" id="node-5" style="left: 65%; top: 35%;">🌳<div class="node-label">Công viên/(Park)</div>
+        </div>
+        <div class="node" id="node-6" style="left: 65%; top: 65%;">🏭<div class="node-label">Nhà máy/(Factory)</div>
+        </div>
+        <div class="node" id="node-7" style="left: 65%; top: 90%;">🏢<div class="node-label">Ngã 4 lạ/(Strange Intersection)</div>
+        </div>
+
+        <div class="node target" id="node-Home" style="left: 90%; top: 35%;">🏡<div class="node-label">Nhà Trọ/(Boarding House)</div>
+        </div>
+    </div>
+
+    <!-- Panel Thuyết trình -->
+    <div class="right-panel">
+        <div>
+            <div class="step-counter" id="step-counter">Bước 0 / 8</div>
+            <h1 class="title" id="step-title">Lạc lối ở Paris</h1>
+        </div>
+
+        <div class="description-container" id="step-desc">
+            <!-- Nội dung sẽ được cập nhật bằng Javascript -->
+        </div>
+
+        <div class="data-structure">
+            <div class="stack-title">Cấu trúc dữ liệu: Ngăn xếp (Stack) - LIFO</div>
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">*LIFO: Vào sau ra trước. Luôn ưu tiên ngã
+                rẽ vừa mới nhìn thấy.*</div>
+            <div class="stack-container" id="stack-container">
+                <!-- Javascript will populate this -->
+            </div>
+        </div>
+
+        <div class="controls-hint">
+            Bấm phím <span class="kbd">↓</span> để xem bước tiếp theo &nbsp;|&nbsp; Bấm phím <span class="kbd">↑</span>
+            để quay lại<br>
+            Bấm phím <span class="kbd">K</span> để bật/tắt Toàn màn hình
+        </div>
+    </div>
+
+    <script>
+        // Định nghĩa tên hiển thị cho Stack
+        const nodeNames = {
+            'A': 'Bến xe A/(Bus Station A)',
+            '1': 'Ngã 4 (1)/(Intersection 1)',
+            '2': 'Tiệm bánh (2)/(Bakery 2)',
+            '3': 'Ngã rẽ (3)/(Turn 3)',
+            '4': 'Hẻm cụt (4)/(Dead End 4)',
+            '5': 'Công viên (5)/(Park 5)',
+            '6': 'Nhà máy (6)/(Factory 6)',
+            '7': 'Ngã 4 (7)/(Intersection 7)',
+            'Home': 'Nhà Trọ/(Boarding House)'
+        };
+
+        // Định nghĩa các cạnh (Edges) để vẽ đường nối
+        const edges = [
+            ['node-A', 'node-1'],
+            ['node-A', 'node-2'],
+            ['node-A', 'node-3'],
+            ['node-1', 'node-4'],
+            ['node-2', 'node-5'],
+            ['node-2', 'node-6'],
+            ['node-3', 'node-7'],
+            ['node-5', 'node-Home']
+        ];
+
+        // Kịch bản thuyết trình: Thuật toán Quay lui (Backtracking / DFS)
+        const steps = [
+            {
+                title: "Thuật toán Quay lui (Backtracking / DFS)",
+                desc: "<div class='description'>Bỏ qua sự cẩn thận của BFS hay sự khôn lỏi của Greedy, anh ta chọn <b>Thuật toán Quay lui (DFS)</b>. <br><br><b>Luật chơi:</b> Cứ ở ngã tư, chọn bừa 1 đường rồi đi sâu mãi, sâu mãi. Nếu đụng ngõ cụt? <b>Quay lui</b> lại ngã rẽ gần nhất và thử nhánh khác. Phương pháp này dùng bộ nhớ <b>Ngăn xếp (Stack - LIFO)</b> để nhớ các ngã rẽ chưa đi.</div><div class='en-translation'>🇬🇧 <b>Backtracking (DFS):</b> He picks a path and goes as deep as possible. Hit a dead end? <b>Backtrack</b> to the nearest intersection and try another branch. This method uses a <b>Stack (LIFO)</b> to remember unexplored branches.</div>",
+                current: null, visited: [], stack: [],
+                activeEdges: []
+            },
+            {
+                title: "Bước 1: Khởi tạo điểm bắt đầu",
+                desc: "<div class='description'>Đang đứng tại Bến xe A/(Bus Station A). Não bộ anh đưa A vào Đỉnh Ngăn Xếp (Top Stack). Sẵn sàng xuất phát!</div><div class='en-translation'>🇬🇧 Standing at Station A. His brain pushes A to the Top of the Stack. Ready to go!</div>",
+                current: 'node-A', visited: [], stack: ['A'],
+                activeEdges: []
+            },
+            {
+                title: "Bước 2: 'Nhắm mắt' đi sâu vào nhánh đầu tiên",
+                desc: "<div class='description'>Đứng ở A có 3 ngã rẽ (1, 2, 3). Anh đẩy tất cả vào Stack để ghi nhớ. Vì là Stack (Vào sau ra trước), anh chọn ngay nhánh 1 vừa nằm trên đỉnh Stack để đi sâu vào. Tới Ngã 4 lạ (1)/(Intersection 1)!</div><div class='en-translation'>🇬🇧 At A, there are 3 paths (1, 2, 3). He pushes them all to the Stack. Due to LIFO, he immediately picks branch 1 at the Top. Arrives at unfamiliar Intersection 1!</div>",
+                current: 'node-1', visited: ['node-A', 'node-1'], stack: ['4', '2', '3'], // Pushed 3, 2, 1. Popped 1. Pushed 4.
+                activeEdges: [['node-A', 'node-1']]
+            },
+            {
+                title: "Bước 3: Tiếp tục đâm lao phải theo lao",
+                desc: "<div class='description'>Nguyên tắc của DFS là đi sâu nhất có thể. Tại điểm (1), thấy nhánh Hẻm cụt (4)/(Dead End 4), anh tiếp tục đẩy vào Stack và lao tới theo bản năng.</div><div class='en-translation'>🇬🇧 The rule of DFS is to go as deep as possible. At (1), seeing Alley (4), he pushes it and rushes in instinctively.</div>",
+                current: 'node-4', visited: ['node-A', 'node-1', 'node-4'], stack: ['2', '3'], // Popped 4. Dead end.
+                activeEdges: [['node-A', 'node-1'], ['node-1', 'node-4']]
+            },
+            {
+                title: "Bước 4: Bế tắc! Bắt đầu Quay lui (Backtrack)",
+                desc: "<div class='description'>Đến điểm 4. Chết dở, ngõ cụt! Khác với Greedy bị bối rối, DFS cực kỳ máy móc: Anh ta <b>Quay lui</b> về ngã rẽ cũ (A) và lấy phần tử tiếp theo trên đỉnh Stack: Tiệm bánh (2)/(Bakery 2)! Lộ trình 1-4 coi như bị loại bỏ khỏi đường đi hiện tại.</div><div class='en-translation'>🇬🇧 Dead end at 4! He mechanically <b>Backtracks</b> and pops the next element from the Top of the Stack: Bakery (2)! Path 1-4 is discarded from the active route.</div>",
+                current: 'node-2', visited: ['node-A', 'node-1', 'node-4', 'node-2'], stack: ['6', '5', '3'], // Pushed 5, 6 (6 is top).
+                activeEdges: [['node-A', 'node-2']] // Active path is now just A -> 2
+            },
+            {
+                title: "Bước 5: Đi sâu vào nhánh Tiệm bánh",
+                desc: "<div class='description'>Đến Tiệm bánh (2)/(Bakery 2), cảnh vật quen thuộc hiện ra. Có 2 lối đi: Nhà máy (6)/(Factory 6) và Công viên (5)/(Park 5). Đưa cả 2 vào Stack. Do tính chất đâm đầu đi sâu, anh lấy đỉnh Stack và rẽ bừa vào Nhà máy (6)/(Factory 6).</div><div class='en-translation'>🇬🇧 At the Bakery (2). Two paths ahead: Factory (6) and Park (5). Pushed to Stack. He pops the Top and blindly turns into the Factory (6).</div>",
+                current: 'node-6', visited: ['node-A', 'node-1', 'node-4', 'node-2', 'node-6'], stack: ['5', '3'], // Popped 6. Dead end.
+                activeEdges: [['node-A', 'node-2'], ['node-2', 'node-6']]
+            },
+            {
+                title: "Bước 6: Lại ngõ cụt! Quay lui lần 2",
+                desc: "<div class='description'>Tới Nhà máy (6)/(Factory 6). Đường bị khóa chặn! Anh thở dài, <b>Quay lui</b> lại điểm rẽ Tiệm bánh (2)/(Bakery 2), và lấy sự lựa chọn còn dang dở trên đỉnh Stack: Nhánh Công viên (5)/(Park 5).</div><div class='en-translation'>🇬🇧 At Factory (6). Path blocked! He sighs, <b>Backtracks</b> to the Bakery (2), and takes the remaining choice from the Stack: Park (5).</div>",
+                current: 'node-5', visited: ['node-A', 'node-1', 'node-4', 'node-2', 'node-6', 'node-5'], stack: ['Home', '3'], // Pushed Home
+                activeEdges: [['node-A', 'node-2'], ['node-2', 'node-5']]
+            },
+            {
+                title: "Bước 7: Tìm thấy tia hy vọng",
+                desc: "<div class='description'>Đi tới Công viên (5)/(Park 5). May quá, từ đây anh nhìn thấy Nhà Trọ/(Boarding House). Anh lập tức nạp đường về Nhà vào đỉnh Stack. Chiến thắng đang ở rất gần!</div><div class='en-translation'>🇬🇧 Arrives at the Park (5). Luckily, he sees Home from here. He immediately pushes Home to the Top of the Stack. Victory is near!</div>",
+                current: 'node-Home', visited: ['node-A', 'node-1', 'node-4', 'node-2', 'node-6', 'node-5', 'node-Home'], stack: ['3'], // Popped Home.
+                activeEdges: [['node-A', 'node-2'], ['node-2', 'node-5'], ['node-5', 'node-Home']]
+            },
+            {
+                title: "Bước 8: Về đến nhà (Bài học rút ra)",
+                desc: "<div class='description'>Rút 'Nhà Trọ/(Boarding House)' khỏi Stack, anh cuối cùng cũng ngả lưng lên giường. <br><br><b>Kết luận:</b> Thuật toán Quay lui (DFS/Backtracking) tốn ít bộ nhớ vì chỉ cần nhớ một nhánh dài, nhưng nó có thể đi lạc cực kỳ sâu và tốn rất nhiều bước lùi mới tìm được đích so với BFS!</div><div class='en-translation'>🇬🇧 <b>Conclusion:</b> Backtracking (DFS) saves memory by only remembering one deep branch, but it can wander extremely deep and require many tedious backtracking steps to find the goal compared to BFS!</div>",
+                current: 'node-Home', visited: ['node-A', 'node-1', 'node-4', 'node-2', 'node-6', 'node-5', 'node-Home'], stack: ['3'], // Remains 3
+                activeEdges: [['node-A', 'node-2'], ['node-2', 'node-5'], ['node-5', 'node-Home']]
+            }
+        ];
+
+        let currentStep = 0;
+
+        // Hàm vẽ đường nối giữa các Node
+        function drawEdges() {
+            const svg = document.getElementById('svg-canvas');
+            svg.innerHTML = '';
+
+            edges.forEach(edge => {
+                const node1 = document.getElementById(edge[0]);
+                const node2 = document.getElementById(edge[1]);
+
+                if (!node1 || !node2) return;
+
+                const rect1 = node1.getBoundingClientRect();
+                const rect2 = node2.getBoundingClientRect();
+                const containerRect = document.getElementById('map-container').getBoundingClientRect();
+
+                const x1 = rect1.left - containerRect.left + rect1.width / 2;
+                const y1 = rect1.top - containerRect.top + rect1.height / 2;
+                const x2 = rect2.left - containerRect.left + rect2.width / 2;
+                const y2 = rect2.top - containerRect.top + rect2.height / 2;
+
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", x1);
+                line.setAttribute("y1", y1);
+                line.setAttribute("x2", x2);
+                line.setAttribute("y2", y2);
+                line.setAttribute("stroke", "var(--line-color)");
+                line.setAttribute("stroke-width", "3");
+                line.setAttribute("stroke-dasharray", "5,5");
+                line.id = `line-${edge[0]}-${edge[1]}`;
+
+                svg.appendChild(line);
+            });
+        }
+
+        // Hàm cập nhật giao diện theo Step
+        function updateUI() {
+            const stepData = steps[currentStep];
+
+            document.getElementById('step-counter').innerText = `Bước ${currentStep} / ${steps.length - 1}`;
+            document.getElementById('step-title').innerHTML = stepData.title;
+            document.getElementById('step-desc').innerHTML = stepData.desc;
+
+            // Reset tất cả Nodes
+            document.querySelectorAll('.node').forEach(node => {
+                node.className = 'node';
+                if (node.id === 'node-Home') node.classList.add('target');
+            });
+
+            // Set màu cho Nodes
+            stepData.visited.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('visited');
+            });
+
+            stepData.stack.forEach(item => {
+                const el = document.getElementById(`node-${item}`);
+                if (el && !el.classList.contains('visited')) el.classList.add('stack');
+            });
+
+            if (stepData.current) {
+                const el = document.getElementById(stepData.current);
+                if (el) el.classList.add('current');
+            }
+
+            // --- Di chuyển ông thực tập sinh (Stickman) ---
+            const stickman = document.getElementById('stickman');
+            const targetNodeId = stepData.current ? stepData.current : 'node-A';
+            const targetNode = document.getElementById(targetNodeId);
+
+            if (targetNode) {
+                stickman.style.left = targetNode.style.left;
+                stickman.style.top = targetNode.style.top;
+
+                if (!stepData.current) {
+                    stickman.style.transform = "translate(-85px, -20px)";
+                } else {
+                    stickman.style.transform = "translate(-25px, -85px)";
+                }
+            }
+
+            // Cập nhật Edges (Đường nối)
+            document.querySelectorAll('line').forEach(line => {
+                line.setAttribute("stroke", "var(--line-color)");
+                line.setAttribute("stroke-width", "3");
+            });
+
+            // Highlight đường đi "hiện tại" (Màu tím) để diễn tả Quá trình Quay lui rõ hơn
+            stepData.activeEdges.forEach(edge => {
+                const line = document.getElementById(`line-${edge[0]}-${edge[1]}`);
+                if (line) {
+                    line.setAttribute("stroke", "var(--line-active)");
+                    line.setAttribute("stroke-width", "5");
+                }
+            });
+
+            // Cập nhật giao diện Stack (LIFO)
+            const stackContainer = document.getElementById('stack-container');
+            stackContainer.innerHTML = '';
+
+            if (stepData.stack.length === 0) {
+                stackContainer.innerHTML = '<span style="color:#a855f7; font-style:italic;">[ Ngăn xếp trống ]</span>';
+            } else {
+                stepData.stack.forEach((item, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'stack-item';
+
+                    // Phần tử đỉnh Stack (index 0) là ưu tiên nhất sẽ được Pop ra đầu tiên
+                    if (index === 0 && currentStep >= 1) el.classList.add('active');
+
+                    el.innerText = nodeNames[item] || item;
+                    stackContainer.appendChild(el);
+                });
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentStep < steps.length - 1) {
+                    currentStep++;
+                    updateUI();
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentStep > 0) {
+                    currentStep--;
+                    updateUI();
+                }
+            } else if (e.key === 'k' || e.key === 'K') {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Lỗi khi bật toàn màn hình: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('resize', drawEdges);
+
+        window.onload = () => {
+            drawEdges();
+            updateUI();
+        };
+
+    </script>
+</body>
+
+</html>
